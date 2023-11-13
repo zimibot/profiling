@@ -1,0 +1,1 @@
+function n(n,t=166){let e;function u(...u){clearTimeout(e),e=setTimeout((()=>{n.apply(null,u)}),t)}return u.clear=()=>{clearTimeout(e)},u}function t(n){return n&&n.ownerDocument||document}function e(n){return t(n).defaultView||window}function u(n){return"string"==typeof n}export{t as a,n as d,u as i,e as o};

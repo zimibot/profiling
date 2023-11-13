@@ -1,0 +1,1 @@
+import{b as o,h as t,l as n}from"./index-d44b4c22.js";function r(r){const e=void 0!==r.controlled(),[l,s]=o(r.default()),a=t((()=>e?r.controlled():l()));e&&n((()=>{s((()=>a()))}));return[a,o=>{e||s(o)}]}export{r as u};

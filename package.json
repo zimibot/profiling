@@ -1,0 +1,100 @@
+{
+  "name": "aplikasi_profiling",
+  "private": true,
+  "version": "1.1.0",
+  "main": "public/electron/index.js",
+  "description": "This is the base project for the CIC.Bas.Web project also called CIC One - New Technologies",
+  "author": "Maxima Integra",
+  "build": {
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "https://aray.ma/wp-content/uploads/update/"
+      }
+    ],
+    "compression": "maximum",
+    "files": [
+      "build/**/*",
+      "node_modules/**/*",
+      "./public/**/*"
+    ],
+    "appId": "com.profiling.stream",
+    "productName": "profiling",
+    "copyright": "Copyright © 2018 Trinity InfoSystem",
+    "win": {
+      "icon": "./public/icon.png",
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "packElevateHelper": false,
+      "oneClick": true,
+      "perMachine": false,
+      "artifactName": "profiling-${version}-win-installer-${arch}.${ext}",
+      "allowElevation": true,
+      "warningsAsErrors": true,
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": true,
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": true,
+      "allowToChangeInstallationDirectory": false,
+      "publish": [
+        {
+          "provider": "generic",
+          "url": "https://aray.ma/wp-content/uploads/update/profiling"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "dev_electron": "concurrently -k \"npm run dev\" \"npm:electron\"",
+    "electron": "wait-on tcp:5173 && electron .",
+    "build_electron": "npm run build && electron-builder  --win  -c.extraMetadata.main=build/electron/index.js --publish never"
+  },
+  "dependencies": {
+    "@fontsource/rajdhani": "^5.0.8",
+    "@modular-forms/solid": "^0.19.2",
+    "@solid-primitives/masonry": "^0.0.4",
+    "@solidjs/router": "^0.8.3",
+    "@suid/icons-material": "^0.6.9",
+    "@suid/material": "^0.14.2",
+    "@suid/vite-plugin": "^0.1.4",
+    "axios": "^1.5.1",
+    "electron-is-dev": "^2.0.0",
+    "electron-log": "^5.0.0",
+    "electron-progressbar": "^2.1.0",
+    "electron-updater": "^6.1.4",
+    "leaflet": "^1.9.4",
+    "moment": "^2.29.4",
+    "solform": "^1.0.7",
+    "solid-collapse": "^1.1.0",
+    "solid-forms": "^0.4.8",
+    "solid-js": "^1.7.8",
+    "solid-mason": "^0.1.5",
+    "solid-paginate": "^0.0.1",
+    "solid-slider": "^1.3.15",
+    "solid-styled-components": "^0.28.5",
+    "solid-tippy": "^0.2.1",
+    "solid-transition-group": "^0.2.3",
+    "sweetalert2": "^11.7.32",
+    "tippy.js": "^6.3.7",
+    "url": "^0.11.2"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.15",
+    "concurrently": "^8.2.1",
+    "electron": "^26.1.0",
+    "electron-builder": "^24.6.4",
+    "electron-reloader": "^1.2.3",
+    "postcss": "^8.4.29",
+    "tailwindcss": "^3.3.3",
+    "vite": "^4.4.5",
+    "vite-plugin-compression": "^0.5.1",
+    "vite-plugin-solid": "^2.7.0",
+    "wait-on": "^7.0.1"
+  }
+}
