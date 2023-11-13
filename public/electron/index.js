@@ -33,8 +33,10 @@ async function createWindow() {
         win.loadURL(url.format({
           pathname: path.join(__dirname, "../index.html"),
           hash: "/",
+          protocol: 'file:',
           slashes: true,
         }))
+        // win.webContents.openDevTools({ mode: 'detach' });
 
 
         win.webContents.executeJavaScript(`
