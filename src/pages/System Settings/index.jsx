@@ -15,9 +15,9 @@ const SystemSettings = () => {
     const [previewImages, setpreviewImages] = createSignal(null)
     let data = [
         {
-            label: "PHONE NUMBER",
+            label: "MSISDN",
             type: "number",
-            value: "phone_number"
+            value: "MSISDN"
         },
         {
             label: "ID NUMBER",

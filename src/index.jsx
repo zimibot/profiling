@@ -14,6 +14,7 @@ import "@fontsource/rajdhani/500.css"
 import "@fontsource/rajdhani/600.css"
 import "@fontsource/rajdhani/700.css"
 
+
 const root = document.getElementById('pages-root')
 
 render(() => <ErrorBoundary

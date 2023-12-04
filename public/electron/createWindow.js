@@ -21,7 +21,7 @@ module.exports = (config, webPreferences) => {
         // transparent: true,
 
         webPreferences: {
-            zoomFactor: width > 1440 && width <= 1707 ? -1  : width > 1280 && width <= 1440 ? -1.3 : width > 1024 && width <= 1280 ? 1.8 : width > 800 && width <= 1024 ? -3 : 0,
+            zoomFactor: width > 1440 && width <= 1707 ? -1 : width > 1280 && width <= 1440 ? -1.3 : width > 1024 && width <= 1280 ? 1.8 : width > 800 && width <= 1024 ? -3 : 0,
             preload: path.join(__dirname, "./preload.js"),
             nodeIntegration: false,
             contextIsolation: true,
@@ -31,8 +31,8 @@ module.exports = (config, webPreferences) => {
         ...config
     });
 
-    const zoomFactor= () => {
-        if (width > 1440 && width <= 2000) {
+    const zoomFactor = () => {
+        if (width > 1440 && width <= 1800) {
             win.webContents.setZoomLevel(-1.1);
         } else if (width > 1280 && width <= 1440) {
             win.webContents.setZoomLevel(-1.5);
@@ -43,13 +43,12 @@ module.exports = (config, webPreferences) => {
         }
     }
     win.webContents.on("did-finish-load", () => {
-        console.log(win.isMaximized())
         if (win.isMaximized()) {
             zoomFactor()
         } else {
             zoomFactor()
         }
-        
+
     })
 
 

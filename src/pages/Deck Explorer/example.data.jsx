@@ -41,8 +41,8 @@ export const resultData = {
             name: "id",
         },
         {
-            label: "PHONE NUMBER",
-            name: "phone_number",
+            label: "MSISDN",
+            name: "MSISDN",
         },
         {
             label: "ID NUMBER",
@@ -208,7 +208,7 @@ export const historyData = {
         },
     ],
     data: new Array(50).fill({
-        category: "PHONE NUMBER",
+        category: "MSISDN",
         phone_number: "+6172837918299",
         date: "08/05/2023",
         time: "09:14 PM",

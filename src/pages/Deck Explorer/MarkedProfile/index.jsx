@@ -1,13 +1,13 @@
-import { Button, CircularProgress, Paper } from "@suid/material"
+import { Button, Paper } from "@suid/material"
 import ContainerPages from "../.."
 import { CardBox } from "../../../component/cardBox"
 import { Tags } from "../../../component/tags"
 import { mode } from "../../../helper/_helper.theme"
-import { createEffect, createSignal } from "solid-js"
+import { createEffect } from "solid-js"
 import { api } from "../../../helper/_helper.api"
 import { useAppState } from "../../../helper/_helper.context"
 import moment from "moment"
-import { useLocation, useNavigate } from "@solidjs/router"
+import { useLocation } from "@solidjs/router"
 import avatar from "../../../assets/images/avatar.svg"
 
 
@@ -25,7 +25,10 @@ export const LayoutMarkedProfile = ({ children, title }) => {
 
         api().get(`/deck-explorer/marked_profile?keyword=${id}`).then((d) => {
             const itemsData = d.data.items;
-            const { type, family, family_member, alias, phone_list, kendaraan } = itemsData;
+            const additional = d.data.additional
+            const { type, family, family_member, alias, phone_list, kendaraan, data } = itemsData;
+            const keyProfile = data.length !== 0 ? "personal_identitas" : null
+
             const keyFamily = family.length !== 0 ? "family-connection" : null;
             const keyMember = family_member.length !== 0 ? "family-member-detail" : null;
             const keyAlias = alias.length !== 0 ? "alias" : null;
@@ -36,7 +39,7 @@ export const LayoutMarkedProfile = ({ children, title }) => {
                 {
                     title: "PERSONAL IDENTIFICATION",
                     key: "personal_identitas",
-                    display: true,
+                    display: !!keyProfile,
                     path: `/deck-explorer/marked-profile/${id}/identification`,
                 },
                 {
@@ -44,35 +47,35 @@ export const LayoutMarkedProfile = ({ children, title }) => {
                     key: "family-member",
                     display: !!keyFamily,
                     path: `/deck-explorer/marked-profile/${id}/family-member`,
-                    dinamis:true
+                    dinamis: true
                 },
                 {
                     title: "FAMILY MEMBER DETAIL",
                     key: "family-member-detail",
                     display: !!keyMember,
                     path: `/deck-explorer/marked-profile/${id}/family-member-detail`,
-                    dinamis:true
+                    dinamis: true
                 },
                 {
                     title: "ALIAS PROFILE",
                     key: "alias",
                     display: !!keyAlias,
                     path: `/deck-explorer/marked-profile/${id}/alias-profile`,
-                    dinamis:true
+                    dinamis: true
                 },
                 {
                     title: "PHONE LIST",
                     key: "phone-list",
                     display: !!keyPhone,
                     path: `/deck-explorer/marked-profile/${id}/phone-list`,
-                    dinamis:true
+                    dinamis: true
                 },
                 {
                     title: "VEHICLE",
                     key: "vehicle",
                     display: !!keyKendaraan,
                     path: `/deck-explorer/marked-profile/${id}/vehicle`,
-                    dinamis:true
+                    dinamis: true
                 },
                 {
                     title: "MAP TRACKING",
@@ -101,8 +104,8 @@ export const LayoutMarkedProfile = ({ children, title }) => {
             ];
 
             const updatedTabsWithConditions = updatedTabs.map((tab) => {
-                if (tab.key === "personal_identitas" && type === "NKK") {
-                    tab.title = "PERSONAL FAMILY";
+                if (tab.key === "personal_identitas" && !keyProfile) {
+                    tab.display = false;
                 }
                 if (tab.key === "family-member" && (type === "NKK" || !keyFamily)) {
                     tab.display = false;
@@ -124,6 +127,7 @@ export const LayoutMarkedProfile = ({ children, title }) => {
 
             update((a) => ({
                 ...a,
+                additional,
                 getProfile: itemsData,
 
                 getFamily: {

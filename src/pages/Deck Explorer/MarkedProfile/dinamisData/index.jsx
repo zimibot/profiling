@@ -1,18 +1,30 @@
-import { FormControlLabel } from "@suid/material"
+import { Button, FormControlLabel } from "@suid/material"
 import { mode } from "../../../../helper/_helper.theme";
 import { LayoutMarkedProfile } from "..";
 import { Tags } from "../../../../component/tags";
 import { useAppState } from "../../../../helper/_helper.context";
+import { Edit } from "@suid/icons-material";
+import lightbox from "lightbox2";
+import { createEffect } from "solid-js";
+import "lightbox2/dist/css/lightbox.min.css"
 
 
-
-
-const DinamisPage = ({ key }) => {
+const DinamisPage = ({ key, name }) => {
   const [dataItems] = useAppState()
-  console.log(key)
-  return <LayoutMarkedProfile title={"IDENTIFICATION"}>
 
-    <div className="flex-1 flex flex-col min-h-[600px]">
+  createEffect(() => {
+    lightbox.option({
+      'resizeDuration': 200,
+      'wrapAround': true
+    })
+  })
+
+
+  return <LayoutMarkedProfile title={"IDENTIFICATION"}>
+    <div className="flex-1 flex flex-col min-h-[600px] gap-4">
+      <div className="w-full gap-2 h-8">
+        <Button href={`#/deck-explorer/marked-profile/${dataItems()?.getProfile?.keyword}/${name}/edit?id=${key}`} fullWidth variant="contained" color="secondary" startIcon={<Edit></Edit>}>EDIT {name}</Button>
+      </div>
       <div className="relative flex-1">
         <div className="absolute left-0 w-full top-0 overflow-auto h-full flex flex-col pr-2">
           {dataItems()[key]?.data?.map((b) => {
@@ -32,9 +44,9 @@ const DinamisPage = ({ key }) => {
                               class={`pl-4 !m-0 border-[#454545] bg-[#2C2C2C] pr-2 py-1 flex gap-4 border-[0] max-w-sm`}
                               label={<div className="whitespace-nowrap max-w-xs relative">
                                 <div className="text-ellipsis overflow-hidden relative">
-                                  {x.label !== "FOTO" ? d.label : <div>
+                                  {x.label !== "ID CARD PHOTO" ? d.label : <a href={d.label} data-lightbox="image-1" >
                                     <img className="w-20" src={d.label} />
-                                  </div>}
+                                  </a>}
                                 </div>
                               </div>} />
                           </div>

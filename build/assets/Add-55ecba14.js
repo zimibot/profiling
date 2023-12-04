@@ -1,0 +1,1 @@
+import{f as v,t as s}from"./index-60ffdcbe.js";const h=s('<svg><path d="M0 0h24v24H0z" fill="none"></svg>',!1,!0),t=s('<svg><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></svg>',!1,!0),a=v((()=>[h(),t()]),"Add");export{a as A};

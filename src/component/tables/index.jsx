@@ -26,8 +26,8 @@ export const Tables = (props) => {
             name: "category",
         },
         {
-            label: "Phone Number",
-            name: "phone_number",
+            label: "MSISDN",
+            name: "MSISDN",
         },
         {
             label: "Time",
@@ -71,36 +71,34 @@ export const Tables = (props) => {
                         <TableBody>
                             {!data() ? <div className="absolute w-full h-full top-0 p-4 flex items-center justify-center">LOADING</div> : data()?.items?.length === 0 ? <Empty /> : data()?.items?.map((d, k) => {
 
-                                return <Grow in={true} timeout={100 * k} style={{ transformOrigin: "0 0 0" }}>
-                                    <TableRow
-                                        sx={{ "td,th": { borderTop: mode() === "dark" ? "3px solid #171717" : "3px solid #eee", borderBottom: mode() === "dark" ? "3px solid #171717" : "3px solid #eee" }, "td:last-child": { borderRight: mode() === "dark" ? "3px solid #171717" : "3px solid #eee" }, "td:first-child": { borderLeft: mode() === "dark" ? "3px solid #171717" : "3px solid #eee" } }}
-                                    >
-                                        {columns?.map((w, index) => {
-                                            if (columns[index]['function']) {
-                                                let obj = typeof d[w.name] === 'object' && d[w.name] !== null
-                                                if (obj) {
-                                                    return <TableCell key={index} class={`${mode() === "dark" ? "!bg-[#222] !text-white" : "bg-gray-200 !text-gray-900"} !px-6 !py-2 ${w.className ? w.className : ""}`} scope="row">
-                                                        <div className="text-[14px]">
-                                                            {columns[index]['function'](d, d[w.name])}
-                                                        </div>
-                                                    </TableCell>
-                                                } else {
-                                                    return <TableCell key={index} class={`${mode() === "dark" ? "!bg-[#222] !text-white" : "bg-gray-200 !text-gray-900"} !pl-6 !py-2 ${w.className ? w.className : ""}`} scope="row">
-                                                        <div className="text-[14px]">
-                                                            {columns[index]['function'](d, d[w.name])}
-                                                        </div>
-                                                    </TableCell>
-                                                }
-                                            }
-                                            return <TableCell key={index} class={`${mode() === "dark" ? "!bg-[#222] !text-white" : "bg-gray-200 !text-gray-900"}  !px-6 !py-2 ${w.className ? w.className : ""}`} scope="row">
+                                return <TableRow
+                                sx={{ "td,th": { borderTop: mode() === "dark" ? "3px solid #171717" : "3px solid #eee", borderBottom: mode() === "dark" ? "3px solid #171717" : "3px solid #eee" }, "td:last-child": { borderRight: mode() === "dark" ? "3px solid #171717" : "3px solid #eee" }, "td:first-child": { borderLeft: mode() === "dark" ? "3px solid #171717" : "3px solid #eee" } }}
+                            >
+                                {columns?.map((w, index) => {
+                                    if (columns[index]['function']) {
+                                        let obj = typeof d[w.name] === 'object' && d[w.name] !== null
+                                        if (obj) {
+                                            return <TableCell key={index} class={`${mode() === "dark" ? "!bg-[#222] !text-white" : "bg-gray-200 !text-gray-900"} !px-6 !py-2 ${w.className ? w.className : ""}`} scope="row">
                                                 <div className="text-[14px]">
-                                                    {d[w.name]}
+                                                    {columns[index]['function'](d, d[w.name])}
                                                 </div>
                                             </TableCell>
+                                        } else {
+                                            return <TableCell key={index} class={`${mode() === "dark" ? "!bg-[#222] !text-white" : "bg-gray-200 !text-gray-900"} !pl-6 !py-2 ${w.className ? w.className : ""}`} scope="row">
+                                                <div className="text-[14px]">
+                                                    {columns[index]['function'](d, d[w.name])}
+                                                </div>
+                                            </TableCell>
+                                        }
+                                    }
+                                    return <TableCell key={index} class={`${mode() === "dark" ? "!bg-[#222] !text-white" : "bg-gray-200 !text-gray-900"}  !px-6 !py-2 ${w.className ? w.className : ""}`} scope="row">
+                                        <div className="text-[14px]">
+                                            {d[w.name]}
+                                        </div>
+                                    </TableCell>
 
-                                        })}
-                                    </TableRow>
-                                </Grow>
+                                })}
+                            </TableRow>
                             })}
 
                         </TableBody>

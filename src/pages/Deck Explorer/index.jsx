@@ -45,16 +45,18 @@ const DeckExplorer = () => {
                 return moment(d).format("DD MMMM YYYY HH:mm")
             }
         },
+
+
         {
             name: "path",
             function: (d, p) => {
-                console.log(d.marked)
                 return <div className=" text-center">
                     <IconButton onClick={async () => {
                         setLoading(true)
                         try {
-                            if (d.marked || d.relate) {
-                                navi(p)
+                            if (d.marked) {
+                                let type = d.type === "person" ? "phone-list" : d.type === "family_data" ? 'family-member' : d.type === "vehicle" ? "vehicle" : "identification"
+                                navi(`/deck-explorer/marked-profile/${d.path}/${type}`)
                             } else {
                                 let data = { search: d.keyword, type: d.type, path: `/deck-explorer/search-result/database-information/${d.keyword}` }
                                 let postLogin = await OnSearch(data)
@@ -70,20 +72,25 @@ const DeckExplorer = () => {
                             }
 
                         } catch (error) {
-                            console.log(error)
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Oops...',
-                                text: `${d.keyword} can not be found`,
-                            })
+                            if (error.code === "ERR_BAD_RESPONSE") {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Oops...',
+                                    text: `Error Time Out, Please Try Again`,
+                                })
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Oops...',
+                                    text: `${d.keyword} CAN NOT BE FOUND`,
+                                })
+                            }
                             setLoading(false)
                         }
 
 
                     }} disabled={loading()} color="primary" size="small">
-
                         {d.relate ? <LinkOutlined fontSize="small"></LinkOutlined> : !d.marked ? <Search fontSize="small" /> : <Visibility fontSize="small"></Visibility>}
-
                     </IconButton>
                 </div>
             }
@@ -127,8 +134,10 @@ const DeckExplorer = () => {
                 <CardFrame className={"flex flex-col flex-1 relative"}>
                     <div className="absolute w-full h-full overflow-auto left-0 px-6 pb-6 flex gap-4">
                         {!marked() ? "" : marked().length === 0 ? <Empty className="h-full justify-center items-center" /> : marked().map((d, i) => {
+                            let type = d.type === "MSISDN" ? "phone-list" : d.type === "FAMILY ID" ? 'family-member' : d.type === "VEHICLE" ? "vehicle" : "identification"
+                            let path = d.type !== "PERSONAL ID" ? `/deck-explorer/marked-profile/${d.keyword}/${type}` : `/deck-explorer/marked-profile/${d.keyword}/${type}`
 
-                            let path = d.type === "NKK" ? `/deck-explorer/marked-profile/${d.keyword}/identification` : `/deck-explorer/marked-profile/${d.keyword}/identification`
+
                             return <Grow {...({ timeout: i * 200 })} in={true} style={{ transformOrigin: "0 0 0" }}>
                                 <Paper class="w-[25%] h-[350px]">
                                     <Link href={path} className={`${mode() === "dark" ? "bg-[#2a2a2a]" : "bg-gray-200"}  h-full flex flex-col`}>

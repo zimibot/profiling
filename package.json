@@ -1,7 +1,7 @@
 {
   "name": "aplikasi_profiling",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.1.2",
   "main": "public/electron/index.js",
   "description": "This is the base project for the CIC.Bas.Web project also called CIC One - New Technologies",
   "author": "Maxima Integra",
@@ -28,7 +28,9 @@
       ]
     },
     "mac": {
-      "target": ["dmg"],
+      "target": [
+        "dmg"
+      ],
       "identity": null,
       "category": "public.app-category.board-games"
     },
@@ -74,7 +76,6 @@
     "dev_electron": "concurrently -k \"npm run dev\" \"npm:electron\"",
     "build_electron": "npm run build && electron-builder  --win  -c.extraMetadata.main=build/electron/index.js --publish never",
     "build_electron_mac": "npm run build && electron-builder  --mac  -c.extraMetadata.main=build/electron/index.js --publish never"
-
   },
   "dependencies": {
     "@fontsource/rajdhani": "^5.0.8",
@@ -89,7 +90,9 @@
     "electron-log": "^5.0.0",
     "electron-progressbar": "^2.1.0",
     "electron-updater": "^6.1.4",
+    "jquery": "^3.7.1",
     "leaflet": "^1.9.4",
+    "lightbox2": "^2.11.4",
     "moment": "^2.29.4",
     "solform": "^1.0.7",
     "solid-collapse": "^1.1.0",
@@ -116,6 +119,6 @@
     "vite": "^4.4.5",
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-solid": "^2.7.0",
-    "wait-on": "^4.0.2"
+    "wait-on": "^7.2.0"
   }
 }

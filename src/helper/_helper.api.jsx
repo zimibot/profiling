@@ -5,7 +5,7 @@ export const api = () => {
 
 
     const instance = axios.create({
-        baseURL: process.env.NODE_ENV === 'production' ? 'https://k17tech.com/users'  : "http://localhost:3000/users",
+        baseURL: process.env.NODE_ENV === 'production' ? 'https://k17tech.com/users' : "http://localhost:3000/users",
         timeout: 30000
     });
 
@@ -17,7 +17,7 @@ export const api = () => {
         // Do something before request is sent
         return config;
     }, function (error) {
-
+        console.log(error)
         // Do something with request error
         return Promise.reject(error);
     });
@@ -28,8 +28,8 @@ export const api = () => {
         // Do something with response data
         return response;
     }, function (error) {
-        if (error?.code === "ERR_NETWORK") {
-          
+        if (error?.code !== "ERR_BAD_REQUEST") {
+
             Swal.fire({
                 icon: 'error',
                 title: 'Oops...',

@@ -3,6 +3,7 @@ import { Router, useRoutes, hashIntegration, Outlet } from "@solidjs/router";
 import { Loading } from "../component/loading";
 import { Menu } from "../component/headers/_menu";
 
+import jQuery from "jquery";
 export const route = [
 
     {
@@ -20,7 +21,7 @@ export const route = [
         ]
     },
     {
-        path: "/deck-explorer",
+        path: "deck-explorer",
         component: () => {
             return <>
                 <Menu></Menu>
@@ -75,23 +76,68 @@ export const route = [
                     },
                     {
                         path: "/alias-profile",
-                        component: lazy(() => import("../pages/Deck Explorer/MarkedProfile/dinamisData/alias"))
+                        children: [
+                            {
+                                path: "/",
+                                component: lazy(() => import("../pages/Deck Explorer/MarkedProfile/dinamisData/alias"))
+                            },
+                            {
+                                path: "/edit",
+                                component: lazy(() => import("../pages/Deck Explorer/MarkedProfile/dinamisData/edit"))
+                            },
+                        ]
                     },
                     {
                         path: "/family-member",
-                        component: lazy(() => import("../pages/Deck Explorer/MarkedProfile/dinamisData/family"))
+                        children: [
+                            {
+                                path: "/",
+                                component: lazy(() => import("../pages/Deck Explorer/MarkedProfile/dinamisData/family"))
+                            },
+                            {
+                                path: "/edit",
+                                component: lazy(() => import("../pages/Deck Explorer/MarkedProfile/dinamisData/edit"))
+                            },
+                        ]
                     },
                     {
                         path: "/family-member-detail",
-                        component: lazy(() => import("../pages/Deck Explorer/MarkedProfile/dinamisData/family_detail"))
+                        children: [
+                            {
+                                path: "/",
+                                component: lazy(() => import("../pages/Deck Explorer/MarkedProfile/dinamisData/family_detail"))
+                            },
+                            {
+                                path: "/edit",
+                                component: lazy(() => import("../pages/Deck Explorer/MarkedProfile/dinamisData/edit"))
+                            },
+                        ]
                     },
                     {
                         path: "/phone-list",
-                        component: lazy(() => import("../pages/Deck Explorer/MarkedProfile/dinamisData/phone_list"))
+                        children: [
+                            {
+                                path: "/",
+                                component: lazy(() => import("../pages/Deck Explorer/MarkedProfile/dinamisData/phone_list"))
+                            },
+                            {
+                                path: "/edit",
+                                component: lazy(() => import("../pages/Deck Explorer/MarkedProfile/dinamisData/edit"))
+                            },
+                        ]
                     },
                     {
                         path: "/vehicle",
-                        component: lazy(() => import("../pages/Deck Explorer/MarkedProfile/dinamisData/vehicle"))
+                        children: [
+                            {
+                                path: "/",
+                                component: lazy(() => import("../pages/Deck Explorer/MarkedProfile/dinamisData/vehicle"))
+                            },
+                            {
+                                path: "/edit",
+                                component: lazy(() => import("../pages/Deck Explorer/MarkedProfile/dinamisData/edit"))
+                            },
+                        ]
                     },
                     {
                         path: "/identification",
@@ -202,7 +248,9 @@ export const route = [
 
 const RoutersComponent = () => {
 
-
+    createEffect(()=> {
+        window.$ = window.jQuery = jQuery;
+    })
 
     const Routes = useRoutes(route);
     return (

@@ -17,7 +17,8 @@ export const RadioField = ({
     id = "demo-radio-buttons-group-label",
     label = null,
     className,
-    onChange
+    onChange,
+    disabled
 }) => {
     return <div className="relative px-4">
         <div className="absolute w-full h-full left-0 top-0 flex justify-between items-center">
@@ -43,7 +44,7 @@ export const RadioField = ({
             >
                 {data.map(d => {
                     return <FormControlLabel
-                        disabled={d?.disabled}
+                        disabled={d?.disabled || disabled}
                         value={d.value}
                         sx={{
                             color: mode() === "dark" ? '#eee' : '#222'
@@ -53,6 +54,7 @@ export const RadioField = ({
                                 "aria-label": d.label,
                                 "aria-level": d.type,
                             }}
+                           
                             icon={
                                 <svg width="25" height="25" viewBox="0 0 27 27" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <rect x="2" y="2" width="23" height="23" fill="white" fill-opacity="0.2" stroke="#757575" stroke-width="2" />

@@ -97,7 +97,7 @@ const AdditionalInfo = () => {
     }
 
     createEffect(() => {
-        api().get("/deck-explorer/addtional_info").then(d => {
+        api().get(`/deck-explorer/addtional_info?keyword=${path}`).then(d => {
             setData(d.data.items)
         })
 

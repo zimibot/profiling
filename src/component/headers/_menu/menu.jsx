@@ -13,7 +13,7 @@ export default function MenuTabs() {
 
     createEffect(() => {
 
-        let d = setInterval(() => {
+        setInterval(() => {
             if (appStore().token) {
                 api().get("/deck-explorer/refreshToken").then(d => {
                     localStorage.setItem("token", d.data.token_user)
@@ -21,11 +21,8 @@ export default function MenuTabs() {
             } else {
                 navi("/")
             }
-        }, 300 * 1000);
+        }, 900 * 1000);
 
-        return () => {
-            clearInterval(d)
-        }
     })
 
     return (
@@ -44,11 +41,9 @@ export default function MenuTabs() {
                 </li>
                 <ul className="flex flex-1 whitespace-nowrap ">
                     <li className={`${mode() === "dark" ? " bg-primarry-1" : "bg-gray-200"} flex items-center`}>
-                        <Link href="/deck-explorer" activeClass="border-b-2 border-gray-300" className="inline-block px-8 no-underline py-5 my-[-8px] font-bold">
+                        <Link href="/deck-explorer" activeClass="border-b-2 border-gray-300 text-white" className="inline-block px-8 no-underline py-5 my-[-8px]  rounded-t-lg text-gray-400 hover:text-white ">
                             DECK EXPLORER
                         </Link>
-
-                        
                     </li>
                     <li className={`${mode() === "dark" ? " bg-primarry-1" : "bg-gray-200"} flex items-center`}>
                         <Link href="/deck-explorer/direct-tracking" activeClass="border-b-2 border-gray-300 text-white" className="inline-block px-8 no-underline py-5 my-[-8px]  rounded-t-lg text-gray-400 hover:text-white ">

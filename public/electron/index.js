@@ -39,14 +39,22 @@ async function createWindow() {
         // win.webContents.openDevTools({ mode: 'detach' });
 
 
-        win.webContents.executeJavaScript(`
-          localStorage.setItem("mode", "dark")
-          localStorage.removeItem("token")
-        `)
+    
 
       }
 
+      win.webContents.executeJavaScript(`
+      localStorage.setItem("mode", "dark")
+      localStorage.removeItem("token")
+      let token = localStorage.getItem("token")
 
+      if(!token) {
+        setTimeout(() => {
+          window.location.reload()
+        },100)
+      }
+
+    `)
       win.maximize()
       win.on("close", () => {
         app.quit()

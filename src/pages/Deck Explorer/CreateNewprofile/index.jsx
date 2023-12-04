@@ -30,6 +30,8 @@ const CreateNewProfile = () => {
         }),
     });
 
+    let typeSearch = localStorage.getItem("typeSearch")
+    let typePath = typeSearch === "MSISDN" ? "phone-list" : typeSearch === "FAMILY ID" ? 'family-member' : typeSearch === "VEHICLE" ? "vehicle" : "identification"
 
     const [someArray] = createSignal(items()?.hasilSearch || [])
 
@@ -39,13 +41,14 @@ const CreateNewProfile = () => {
         e.preventDefault()
         let type = localStorage.getItem("typeSearch")
         let keyword = location.state?.keyword
-        let redirectPath = `/deck-explorer/marked-profile/${keyword}/identification`
+
+        let redirectPath = `/deck-explorer/marked-profile/${keyword}/${typePath}`
         let data = {
             ...group.value,
             keyword,
             data: someArray(),
             type,
-            path: redirectPath
+            path: keyword
         }
 
         setLoading(true)
@@ -57,7 +60,6 @@ const CreateNewProfile = () => {
                 title: "INFO",
                 didClose: () => {
                     navi(redirectPath)
-
                 }
             })
             setLoading(false)
@@ -136,7 +138,7 @@ const CreateNewProfile = () => {
                         {someArray()?.map(datas => {
                             return <div className="space-y-3">
                                 <div className="border border-primarry-2 px-4">
-                                    <Tags label={<span>DATA DARI : <b>{datas.label}</b></span>} />
+                                    <Tags label={<span>DATA FROM : <b>{datas.label}</b></span>} />
                                 </div>
                                 <Mason
                                     as="div"

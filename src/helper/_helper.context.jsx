@@ -3,7 +3,7 @@ import { createSignal, createContext, useContext, } from "solid-js";
 
 const DefaultProps = {
     chois: {
-        label: "NIK",
+        label: "PERSONAL ID",
         type: "number",
         value: "id_data"
     },

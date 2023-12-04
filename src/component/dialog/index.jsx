@@ -8,6 +8,7 @@ import {
 } from "@suid/material";
 import { useAppState } from "../../helper/_helper.context";
 import { mode } from "../../helper/_helper.theme";
+import Swal from "sweetalert2"
 
 export default function AlertDialog({ title = "INFORMATION", description, name = "open", handleClick }) {
     const [appStore, { update }] = useAppState();
@@ -51,4 +52,23 @@ export default function AlertDialog({ title = "INFORMATION", description, name =
             </DialogActions>
         </Dialog>
     );
+}
+
+
+export const DialogPopup = ({ icon = "info", title = "", text = "", classConfirm, classCancel, cancelButtonText, confirmButtonText, showCancelButton, ...props }) => {
+    let data = Swal.fire({
+        icon,
+        title,
+        text,
+        cancelButtonText,
+        confirmButtonText,
+        showCancelButton,
+        customClass: {
+            confirmButton: classConfirm,
+            denyButton: classCancel
+        },
+        ...props
+    })
+
+    return data
 }

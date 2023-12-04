@@ -27,8 +27,6 @@ const Videos = () => {
         type: "add"
     })
 
-
-
     const itemData = ({ index }) => {
 
 

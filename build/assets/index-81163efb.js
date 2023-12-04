@@ -1,0 +1,1 @@
+import{S as e}from"./index-60ffdcbe.js";const t=({title:t="Success",text:s="Success",icon:i="success",position:o="top-end",...n})=>{e.mixin({toast:!0,position:o,showConfirmButton:!1,timer:3e3,timerProgressBar:!0,didOpen:t=>{t.addEventListener("mouseenter",e.stopTimer),t.addEventListener("mouseleave",e.resumeTimer)},...n}).fire({icon:i,text:s,title:t})};export{t as n};

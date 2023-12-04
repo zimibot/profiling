@@ -143,22 +143,36 @@ textarea::placeholder {
 .Mui-disabled {
   background: transparent !important;
   color: #494949 !important;
+  -webkit-text-fill-color: darkgray !important;
+  cursor: not-allowed;
 }
 
 div:where(.swal2-container) div:where(.swal2-popup) {
-  background: #222!important;
-  color: white!important;
-  border-radius: 0!important;
+  background: #222 !important;
+  color: white !important;
+  border-radius: 0 !important;
 }
 
 div:where(.swal2-container) button:where(.swal2-styled).swal2-confirm {
-  background: #444!important;
-  min-width: 110px!important;
+  background: #444 !important;
+  min-width: 110px !important;
+}
+
+div:where(.swal2-container) button:where(.swal2-styled).swal2-cancel {
+  background: #444 !important;
+  min-width: 110px !important;
+}
+
+div:where(.swal2-container) button:where(.swal2-styled).warning {
+  color: #f8bb86 !important;
+  min-width: 110px !important;
+  background: transparent !important;
+  border: 1px solid #f8bb86 !important;
 }
 
 
 .leaflet-bottom.leaflet-right {
-  display: none!important;
+  display: none !important;
 }
 
 .transition {
@@ -169,6 +183,16 @@ div:where(.swal2-container) button:where(.swal2-styled).swal2-confirm {
   z-index: 9999999999;
 }
 
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
 /* .keen-slider {
   height: 100%;
 } */
@@ -176,14 +200,14 @@ div:where(.swal2-container) button:where(.swal2-styled).swal2-confirm {
 @media (prefers-color-scheme: light) {
 
   div:where(.swal2-container) div:where(.swal2-popup) {
-    background: #fff!important;
-    color: #444!important;
-    border-radius: 0!important;
+    background: #fff !important;
+    color: #444 !important;
+    border-radius: 0 !important;
   }
 
   div:where(.swal2-container) button:where(.swal2-styled).swal2-confirm {
-    background: #444!important;
-    min-width: 110px!important;
+    background: #444 !important;
+    min-width: 110px !important;
   }
 
   :root {

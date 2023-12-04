@@ -13,22 +13,22 @@ import { notify } from "../../component/notify";
 let dataSearch = [
 
     {
-        label: "NIK",
+        label: "PERSONAL ID",
         type: "number",
         value: "id_data"
     },
     {
-        label: "PHONE",
+        label: "MSISDN",
         type: "number",
         value: "person"
     },
     {
-        label: "NKK",
+        label: "FAMILY ID",
         type: "number",
         value: "family_data"
     },
     {
-        label: "NO POL",
+        label: "VEHICLE",
         type: "teks",
         value: "vehicle"
     },
@@ -38,12 +38,12 @@ let dataSearch = [
         value: "marked_profile",
         disabled: true
     },
-    {
-        label: "PROFILE",
-        type: "teks",
-        value: "marked_profile",
-        disabled: true
-    },
+    // {
+    //     label: "PROFILE",
+    //     type: "teks",
+    //     value: "marked_profile",
+    //     disabled: true
+    // },
 
 ]
 
@@ -68,7 +68,7 @@ export const SearchForm = () => {
         } else if (number.startsWith(62)) {
             return number;
         } else {
-            console.error('Invalid phone number format');
+            console.error('Invalid MSISDN format');
             return null;
         }
     }
@@ -118,7 +118,7 @@ export const SearchForm = () => {
 
     return <form onSubmit={onSubmit}>
         <CardBox className="space-y-4" title={"PROFILE EXPLORER"}>
-            <DefaultInput loading={loading} type={items} update={update} defaultSearch={items()?.search} control={group.controls.search} placeholder={`SEARCH WITH `} chois={items} />
+            <DefaultInput loading={loading} type={items} update={update} control={group.controls.search} placeholder={`SEARCH WITH `} chois={items} />
             <RadioField onChange={(d) => {
                 let type = d.target.ariaLevel
                 let label = d.target.ariaLabel

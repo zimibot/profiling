@@ -3,7 +3,7 @@ import { CircularProgress, IconButton, InputAdornment, TextField } from "@suid/m
 
 import { createSignal } from "solid-js";
 import { mode } from "../../helper/_helper.theme";
-
+    
 function uppercaseFirst(text) {
   if (!text) return text;
   return text.charAt(0).toUpperCase() + text.slice(1);
@@ -35,7 +35,6 @@ export const InputField = ({ control, label, ...props }) => {
         </div>
         <div className="p-3 px-4">
           <TextField
-            {...props}
             id="outlined-start-adornment"
             color="primary"
             variant="standard"
@@ -44,9 +43,10 @@ export const InputField = ({ control, label, ...props }) => {
             onChange={(d) => control.setValue(d.target.value)}
             required={control.isRequired}
             disabled={control.isDisabled}
+
             sx={{
               m: 0,
-              minWidth: "40ch",
+              // minWidth: "40ch",
               width: "100%"
             }}
             autoComplete={false}
@@ -63,6 +63,7 @@ export const InputField = ({ control, label, ...props }) => {
               </InputAdornment>),
               style: mode() === "dark" ? { color: '#fff', } : { color: '#444', },
             }}
+            {...props}
           />
         </div>
       </div>
@@ -84,10 +85,8 @@ export const DefaultInput = ({ placeholder, control, defaultSearch, update, remo
       placeholder={chois ? placeholder + chois()?.chois?.label : placeholder}
       required={control.isRequired}
       disabled={loading && loading()}
-      value={control?.value || ""}
-      defaultValue={defaultSearch}
+      value={control.value}
       error={control.errors}
-
       onChange={(d) => {
         if (update) {
           if (d.target.value.length === 0) {

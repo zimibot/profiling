@@ -6,14 +6,12 @@ import { Tags } from "../../../component/tags"
 import { mode } from "../../../helper/_helper.theme"
 import { createSignal, createEffect } from "solid-js"
 import { CheckboxItems } from "../../../component/form/checkbox"
-import { TypographyItems } from "../../../component/typography";
-import AlertDialog from "../../../component/dialog"
+import AlertDialog, { DialogPopup } from "../../../component/dialog"
 import { useAppState } from "../../../helper/_helper.context"
 import { useLocation, useNavigate } from "@solidjs/router"
 import { Check, Close, CoPresent } from "@suid/icons-material"
 import { Drawer } from "@suid/material"
 import { api } from "../../../helper/_helper.api"
-import Swal from "sweetalert2"
 
 
 
@@ -25,7 +23,6 @@ const DatabaseInformation = () => {
 
     const navi = useNavigate()
     const query = location.pathname.split("/").pop()
-    const [isNewProfile, setisNewProfile] = createSignal(false);
     const [ischeck, setisCheck] = createSignal(null);
     const [pilihan, setpilihan] = createSignal(null);
     const [isExisting, setisExisting] = createSignal(false);
@@ -33,6 +30,9 @@ const DatabaseInformation = () => {
         name: null,
         value: ""
     });
+    let typeSearch = localStorage.getItem("typeSearch")
+    let typePath = typeSearch === "MSISDN" ? "phone-list" : typeSearch === "FAMILY ID" ? 'family-member' : typeSearch === "VEHICLE" ? "vehicle" : "identification"
+
     const [dataExisting, setdataExisting] = createSignal(null);
     const [saved, setSaved] = createSignal({
         isError: true,
@@ -54,7 +54,6 @@ const DatabaseInformation = () => {
 
 
     createEffect(() => {
-        console.log(checkData())
         var regexp = /^[\s()+-]*([0-9][\s()+-]*){6,20}$/
         var no = query;
 
@@ -99,7 +98,7 @@ const DatabaseInformation = () => {
 
             if (totalCounts.true >= 0 && totalCounts.total !== totalCounts.true) {
                 setisCheck(false)
-              
+
             } else {
                 setisCheck(true)
             }
@@ -187,23 +186,27 @@ const DatabaseInformation = () => {
             keyword: query,
             terkait: existingValue().value,
             type: localStorage.getItem("typeSearch").toUpperCase(),
-            path: `/deck-explorer/marked-profile/${existingValue().value}/identification`,
             typeTerkait: pilihan()
 
         }
 
-        api().post("/deck-explorer/marked-profile", data).then(d => {
+        api().post("/deck-explorer/marked-profile", data).then(sa => {
             update(d => ({ ...d, hasilSearch: a, open: false }))
-            Swal.fire({
+
+          
+            DialogPopup({
                 icon: "success",
                 title: "INFO",
                 text: "Data Has Been Added",
+                confirmButtonText: "OK",
                 didClose: () => {
-                    navi(`/deck-explorer/marked-profile/${existingValue().value}/identification`)
+                    
+                    navi(`/deck-explorer/marked-profile/${sa.data.items.terkait}/${typePath}`)
                 }
             })
+
         }).catch((d) => {
-            Swal.fire({
+            DialogPopup({
                 icon: "error",
                 title: "OOPS",
                 text: d.response.data.message,
@@ -216,7 +219,6 @@ const DatabaseInformation = () => {
     function setCheckAll(parentId, checked) {
         setCheck(prevData => {
             return prevData.map(parent => {
-                console.log(parent.id, parentId)
                 if (parent.id === parentId) {
                     // Update all children's active state to true
                     const updatedChildren = parent.data.map(child => ({
@@ -309,7 +311,7 @@ const DatabaseInformation = () => {
                     }} />}
                 />
                 <div className="flex gap-4 items-center">
-                    {!existingValue().name && <>
+                    {/* {!existingValue().name && <>
                         <TypographyItems>SAVE LOCATION:</TypographyItems>
                         <FormControlLabel
                             disabled={saved().isError}
@@ -326,7 +328,7 @@ const DatabaseInformation = () => {
                                 borderRadius: 0
                             }} />}
                         />
-                    </>}
+                    </>} */}
 
                     <div>
                         <Button
@@ -380,26 +382,71 @@ const DatabaseInformation = () => {
                                                 name="radio-buttons-group"
                                                 value={existingValue()?.value || ""}
                                                 onClick={(d) => {
-                                                    console.log(d)
-                                                    setexistingValue(s => ({
-                                                        ...s,
-                                                        name: d.target.attributes.name.value,
-                                                        value: d.target.value
-                                                    }))
+
+                                                    let id = d?.target?.value
+
+                                                    if (id) {
+                                                        setexistingValue(s => ({
+                                                            ...s,
+                                                            name: d?.target?.attributes?.name?.value || "-",
+                                                            value: id
+                                                        }))
+
+                                                        api().get(`/deck-explorer/marked_profile?keyword=${id}`).then(a => {
+                                                            let data2 = a.data.items.data
+
+                                                            setCheck(data1 =>
+                                                                data1.map((item1) => {
+                                                                    const item2 = data2.find((item) => {
+                                                                        return item.id === item1.id
+                                                                    });
+                                                                    if (item2) {
+                                                                        item1.checkAll = item2.checkAll;
+                                                                        item1.marked = item2.marked;
+                                                                        item1.relate = item2.relate;
+
+                                                                        item1.data = item1.data.map((subItem1) => {
+                                                                            const subItem2 = item2.data.find((subItem) => subItem.id === subItem1.id);
+
+                                                                            if (subItem2) {
+                                                                                subItem1.active = subItem2.active;
+                                                                                subItem1.type = subItem2.type;
+                                                                                subItem1.data = subItem1.data.map(subItem3 => {
+                                                                                    const subItem4 = subItem2.data.find((subItem) => subItem.id === subItem3.id);
+                                                                                    if (subItem4) {
+                                                                                        subItem3.active = subItem4.active
+                                                                                    }
+
+                                                                                    return subItem3
+                                                                                })
+                                                                                // Anda dapat menambahkan pembaruan lain yang diperlukan di sini
+                                                                            }
+
+                                                                            return subItem1;
+                                                                        });
+                                                                    }
+
+                                                                    return item1;
+                                                                })
+                                                            )
+                                                        })
+                                                    }
+
                                                 }}
 
                                                 class="w-full space-y-2 flex flex-col"
                                             >
                                                 {dataExisting()?.length === 0 ? "NO DATA" : dataExisting()?.map(d => {
-                                                    return <div className="border border-primarry-2 flex justify-between flex-1" onClick={() => {
-                                                        setexistingValue(a => ({
-                                                            ...a,
-                                                            type: d.type
-                                                        }))
-                                                    }}>
+                                                    return <div className="border border-primarry-2 flex justify-between flex-1"
+                                                        onClick={() => {
+                                                            setexistingValue(a => ({
+                                                                ...a,
+                                                                type: d.type
+                                                            }))
+                                                        }}>
                                                         <FormControlLabel
                                                             value={d.keyword}
-                                                            name={d.profile_name}
+                                                            name={d?.profile_name || "-"}
                                                             class="w-full flex-1 !m-0"
                                                             sx={{
                                                                 ".MuiFormControlLabel-label": {
@@ -447,7 +494,7 @@ const DatabaseInformation = () => {
                         </Drawer>
                     </div>
                     <div className="space-x-4">
-                        {existingValue().name ? <Button disabled={saved().isError} variant="contained" onClick={onSubmit} color="secondary"
+                        {existingValue().name ? <Button disabled={saved().isError} variant="contained" onClick={onSubmit} color="success"
                             sx={{
                                 "&.Mui-disabled": {
                                     background: "#000",
@@ -455,14 +502,14 @@ const DatabaseInformation = () => {
                                 }
                             }}>
                             Add Database
-                        </Button> : <Button disabled={!isNewProfile()} variant="contained" onClick={onSubmit} color="secondary"
+                        </Button> : <Button disabled={saved().isError} variant="contained" onClick={onSubmit} color="secondary"
                             sx={{
                                 "&.Mui-disabled": {
                                     background: "#000",
                                     color: "#c0c0c0"
                                 }
                             }}>
-                            SAVE
+                            SAVE to New Profile
                         </Button>}
                         <Button variant="outlined" color="error" onClick={() => navi(-1)}>
                             CANCEL
@@ -478,12 +525,11 @@ const DatabaseInformation = () => {
                                 {checkData()?.map((b, k) => {
                                     return <div className={`bg-[#1e1e1e] p-2 ${k === 0 ? " col-span-full" : checkData().length === 2 ? "col-span-full" : ""}`}>
                                         <div className="border border-primarry-2 px-4 bg-primarry-1 sticky top-[5px] z-50 flex justify-between items-center">
-                                            <Tags label={<span>DATA DARI <b>{b.label}</b></span>}></Tags>
+                                            <Tags label={<span>DATA FROM <b>{b.label}</b></span>}></Tags>
                                             <div>
                                                 <CheckboxItems
                                                     title="Checked All ITEMS"
                                                     checked={b.checkAll} onChange={(a) => {
-                                                        console.log(a.target.checked)
                                                         setCheckAll(b.id, !a.target.checked)
                                                     }}
                                                 />
@@ -501,10 +547,10 @@ const DatabaseInformation = () => {
                                                                         class={`pl-4 !m-0 ${mode() === "dark" ? ` ${saved().isErrorMsg ? "border-red-500 text-red-500" : "border-[#454545] bg-[#2C2C2C]"}` : saved().isErrorMsg ? "border-red-500 text-red-500" : "bg-gray-200 text-[#444] border-[#aaa]"} pr-2 py-1 flex gap-4 border-[0] max-w-sm`}
                                                                         checked={d.active}
                                                                         onChange={(c) => checkItems(b.id, d.id, c.target.checked)}
-                                                            
-                                                                        label={<div className="whitespace-nowrap max-w-xs relative">
-                                                                            <div className="text-ellipsis overflow-hidden relative">
-                                                                                {x.label !== "FOTO" ? d.label : <div>
+
+                                                                        label={<div className={`whitespace-nowrap max-w-xs relative ${x.label === "ID CARD PHOTO" ? "hover:z-50  hover:scale-[2.5] transition-all" : ""}`}>
+                                                                            <div className={x.label !== "ID CARD PHOTO" ? "text-ellipsis overflow-hidden relative" : "z-50"}>
+                                                                                {x.label !== "ID CARD PHOTO" ? d.label : <div>
                                                                                     <img className="w-20" src={d.label} />
                                                                                 </div>}
                                                                             </div>
@@ -518,7 +564,6 @@ const DatabaseInformation = () => {
                                                             title="Checked All"
                                                             checked={x.active} onChange={() => {
                                                                 setCheck(prev => prev.map(z => {
-                                                                    console.log(z)
                                                                     return {
                                                                         ...z,
                                                                         data: z.data.map(s => {
@@ -552,7 +597,6 @@ const DatabaseInformation = () => {
                                             </div>
 
                                         })}
-
                                     </div>
                                 })}
                             </div>
@@ -575,36 +619,45 @@ const DatabaseInformation = () => {
                         }}
                     >
 
-                        <FormControlLabel
+
+                        {typeSearch === "PERSONAL ID" && <>
+                            <FormControlLabel
+                                value="family_member"
+                                control={() => <Radio />}
+                                label="Family Member Detail (NIK)"
+                            />
+                            <FormControlLabel
+                                value="alias_profile"
+                                control={() => <Radio />}
+                                label="Alias Profile (NIK)"
+                            />
+                            <FormControlLabel
+                                value="replace_personal"
+                                control={() => <Radio />}
+                                label="Update Marked Data"
+                            />
+                        </>}
+                        {typeSearch === "FAMILY ID" && <FormControlLabel
                             value="family"
                             control={() => <Radio />}
+                            checked
                             label="Family Member (NKK)"
-                        />
-                        <FormControlLabel
-                            value="family_member"
-                            control={() => <Radio />}
-                            label="Family Member Detail (NIK)"
-                        />
-                        <FormControlLabel
-                            value="alias_profile"
-                            control={() => <Radio />}
-                            label="Alias Profile (NIK)"
-                        />
-                        <FormControlLabel
+                        />}
+                        {typeSearch === "VEHICLE" && <FormControlLabel
                             value="no_pol"
                             control={() => <Radio />}
+                            checked
                             label="Vehicle"
-                        />
-                        <FormControlLabel
+                        />}
+
+                        {typeSearch === "MSISDN" && <FormControlLabel
                             value="phone_number_list"
                             control={() => <Radio />}
-                            label="Phone Number List"
-                        />
-                        {/* <FormControlLabel
-                            value="replace_personal"
-                            control={() => <Radio />}
-                            label="Profile"
-                        /> */}
+                            checked
+                            label="MSISDN List"
+                        />}
+
+
                     </RadioGroup>
                 </FormControl>
             </div>

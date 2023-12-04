@@ -46,7 +46,7 @@ const DirectTracking = () => {
 
     let mapDiv
 
-    onMount(() => buildMap(mapDiv), [items()]);
+    onMount(() => buildMap(mapDiv));
 
     const group = createFormGroup({
         search: createFormControl("", {
@@ -111,7 +111,6 @@ const DirectTracking = () => {
             const as = await api().post("/checkpos/search", data)
             let keyword = as.data.data.keyword
             let res = as.data.data.response[0]
-            console.log(as.data.data.keyword)
             L.marker([res.lat, res.long], { icon: greenIcon }).addTo(maps)
                 .bindPopup(html(keyword, res))
                 .openPopup();
@@ -137,7 +136,7 @@ const DirectTracking = () => {
                 Swal.fire({
                     icon: "error",
                     title: "OOPS",
-                    text: "Invalid phone number. Please use the Indonesian country code (e.g., 6287654321)."
+                    text: "Invalid MSISDN. Please use the Indonesian country code (e.g., 6287654321)."
                 })
             }
 
@@ -203,8 +202,8 @@ const DirectTracking = () => {
         <div className="flex flex-1 flex-col py-4">
             <CardBox className="grid grid-cols-9 flex-1 gap-4">
                 <form onSubmit={onSubmit} className="col-span-3 border-r-2 pr-4 border-primarry-2 flex flex-1 flex-col">
-                    <Tags label="CHECK POS PHONE NUMBER"></Tags>
-                    <DefaultInput loading={load} type={"number"} placeholder={"PHONE NUMBER"} control={group.controls.search}></DefaultInput>
+                    <Tags label="CHECK POS MSISDN"></Tags>
+                    <DefaultInput loading={load} type={"number"} placeholder={"MSISDN"} control={group.controls.search}></DefaultInput>
                     <div className="relative flex flex-col flex-1">
                         <Tags label="HISTORY CHECK POST "></Tags>
                         <div className='flex flex-col relative flex-1'>

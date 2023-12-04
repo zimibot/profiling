@@ -1,8 +1,7 @@
 import { createEffect, createSignal } from "solid-js"
 import ContainerPages from "../.."
 import { CardTables } from "../cardTables"
-import { resultData } from "../example.data"
-import { OnSearch, SearchForm } from "../searchFrom"
+import { OnSearch } from "../searchFrom"
 import { SubContainer } from "../subContainer"
 import { api } from "../../../helper/_helper.api"
 import { IconButton } from "@suid/material"
@@ -16,6 +15,7 @@ import { CardBox } from "../../../component/cardBox"
 import { DefaultInput } from "../../../component/form/input"
 import { createFormControl, createFormGroup } from "solid-forms"
 import { RadioField } from "../../../component/form/radio"
+
 
 const SearchResult = () => {
     const [history, setHistory] = createSignal()
@@ -32,24 +32,24 @@ const SearchResult = () => {
     let dataSearch = [
 
         {
-            label: "NIK",
+            label: "PERSONAL ID",
             type: "number",
             value: "NIK"
         },
         {
-            label: "PHONE",
+            label: "MSISDN",
             type: "number",
-            value: "PHONE NUMBER"
+            value: "MSISDN"
         },
         {
-            label: "NKK",
+            label: "FAMILY ID",
             type: "number",
             value: "NKK"
         },
         {
-            label: "NO POL",
+            label: "VEHICLE",
             type: "teks",
-            value: "PLAT NOMOR"
+            value: "vehicle"
         },
         {
             label: "ALL",
