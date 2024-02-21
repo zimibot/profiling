@@ -7,7 +7,6 @@ const ContainerPages = (props) => {
     const [appStore, { update }] = useAppState()
 
     let location = useLocation()
-    console.log(location)
 
 
     createEffect(() => {
