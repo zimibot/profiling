@@ -1,7 +1,9 @@
-import { Card, CardContent, CardHeader } from "@suid/material"
+import { Card, CardContent, CardHeader, CircularProgress } from "@suid/material"
 import { mode } from "../../helper/_helper.theme"
 
-export const CardFrame = ({ children, className, title, count }) => {
+import { Loading } from "../loading"
+
+export const CardFrame = ({ children, className, title, count, isLoading }) => {
 
 
     return <Card sx={{
@@ -24,7 +26,9 @@ export const CardFrame = ({ children, className, title, count }) => {
         <CardContent class={className || ""} sx={{
             fontSize: "16px"
         }}>
-            {children}
+            {isLoading && isLoading() ? children : <div className="absolute w-full h-full top-0 left-0 flex justify-center items-center">
+                {<Loading></Loading>}
+            </div>}
         </CardContent>
     </Card>
 }

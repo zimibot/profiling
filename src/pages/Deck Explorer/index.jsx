@@ -24,6 +24,7 @@ const DeckExplorer = () => {
     const [items, { update }] = useAppState()
 
     const [loading, setLoading] = createSignal(false)
+    const [markedLoading, setMarkedLoading] = createSignal(false)
     const [choosen] = createSignal("personal")
     let columns = [
         {
@@ -110,8 +111,10 @@ const DeckExplorer = () => {
 
     createEffect(() => {
         if (choosen() === "personal") {
+            setMarkedLoading(false)
             api().get("/deck-explorer/marked_profile").then(d => {
                 setmarked(d.data.items)
+                setMarkedLoading(true)
             })
         } else {
             api().get("/deck-explorer/profile_family").then(d => {
@@ -131,7 +134,7 @@ const DeckExplorer = () => {
         </>}
             contenRight={<CardBox className={"flex flex-1 flex-col min-h-[600px]"} title={<span>MARKED PROFILE</span>}>
                 <Tags label="RECENTLY VIEW MARKED PROFILE" />
-                <CardFrame className={"flex flex-col flex-1 relative"}>
+                <CardFrame isLoading={markedLoading} className={"flex flex-col flex-1 relative"}>
                     <div className="absolute w-full h-full overflow-auto left-0 px-6 pb-6 flex gap-4">
                         {!marked() ? "" : marked().length === 0 ? <Empty className="h-full justify-center items-center" /> : marked().map((d, i) => {
                             let type = d.type === "MSISDN" ? "phone-list" : d.type === "FAMILY ID" ? 'family-member' : d.type === "VEHICLE" ? "vehicle" : "identification"

@@ -1,29 +1,29 @@
-import { Button, Chip, FormControl, FormControlLabel, FormLabel, IconButton, Radio, RadioGroup } from "@suid/material"
+import { Button, Chip, CircularProgress, FormControl, FormControlLabel, IconButton, Radio, RadioGroup } from "@suid/material"
 import ContainerPages from "../.."
 import { CardBox } from "../../../component/cardBox"
 import { CardFrame } from "../../../component/cardFrame"
 import { Tags } from "../../../component/tags"
 import { mode } from "../../../helper/_helper.theme"
-import { createSignal, createEffect } from "solid-js"
+import { createSignal, createEffect, onCleanup } from "solid-js"
 import { CheckboxItems } from "../../../component/form/checkbox"
 import AlertDialog, { DialogPopup } from "../../../component/dialog"
 import { useAppState } from "../../../helper/_helper.context"
 import { useLocation, useNavigate } from "@solidjs/router"
-import { Check, Close, CoPresent } from "@suid/icons-material"
+import { Check, Close, CoPresent, ContentCopy, CopyAll } from "@suid/icons-material"
 import { Drawer } from "@suid/material"
 import { api } from "../../../helper/_helper.api"
 
 
-
 const DatabaseInformation = () => {
-    const [items, { update }] = useAppState()
-    const [checkData, setCheck] = createSignal(items()?.dataSearch?.data || items()?.dataSearch || [])
+    const [__, { update }] = useAppState()
+    const [checkData, setCheck] = createSignal([])
     const location = useLocation()
 
 
     const navi = useNavigate()
     const query = location.pathname.split("/").pop()
     const [ischeck, setisCheck] = createSignal(null);
+    const [isLoading, setisLoading] = createSignal(false);
     const [pilihan, setpilihan] = createSignal(null);
     const [isExisting, setisExisting] = createSignal(false);
     const [existingValue, setexistingValue] = createSignal({
@@ -46,7 +46,7 @@ const DatabaseInformation = () => {
     }
 
     createEffect(() => {
-        if (checkData().length > 0) {
+        if (checkData()?.length > 0) {
             localStorage.setItem("dataSearch", JSON.stringify(checkData()))
             update(d => ({ ...d, dataSearch: checkData() }))
         }
@@ -74,7 +74,7 @@ const DatabaseInformation = () => {
         }
 
 
-        checkData().forEach((items) => {
+        checkData()?.forEach((items) => {
             let totalCounts = items.data.reduce((acc, current) => {
                 // Menghitung jumlah true dan false dalam current.data
                 let counts = current.data.reduce(
@@ -164,6 +164,56 @@ const DatabaseInformation = () => {
         }
     })
 
+
+
+    createEffect(() => {
+
+        api().get(`/deck-explorer/database_result?keyword=${query}`).then(a => {
+            console.log(a.data.items.data)
+            setCheck(a.data.items.data)
+            setisLoading(true)
+        })
+
+        onCleanup(() => {
+            setisLoading(false)
+            setCheck()
+            setdataExisting()
+            setisCheck(false)
+            setpilihan()
+            setSaved({
+                isError: true,
+                isErrorMsg: false
+            })
+        })
+    })
+
+
+
+    const onCopy = (text) => {
+        // Buat sebuah area teks sementara
+        const tempElement = document.createElement("div");
+        tempElement.textContent = text;
+        document.body.appendChild(tempElement);
+
+        // Seleksi teks dalam area teks sementara
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(tempElement);
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        // Salin teks ke clipboard
+        document.execCommand("copy");
+
+        // Hapus area teks sementara
+        document.body.removeChild(tempElement);
+
+        // Beri pesan pemberitahuan
+        alert("The text has been copied successfully");
+
+    }
+
+
     const onAdd = () => {
 
 
@@ -193,14 +243,14 @@ const DatabaseInformation = () => {
         api().post("/deck-explorer/marked-profile", data).then(sa => {
             update(d => ({ ...d, hasilSearch: a, open: false }))
 
-          
+
             DialogPopup({
                 icon: "success",
                 title: "INFO",
                 text: "Data Has Been Added",
                 confirmButtonText: "OK",
                 didClose: () => {
-                    
+
                     navi(`/deck-explorer/marked-profile/${sa.data.items.terkait}/${typePath}`)
                 }
             })
@@ -520,86 +570,96 @@ const DatabaseInformation = () => {
                 <div className="grid  flex-1 m-[-18px]">
                     <div className="xl:col-span-6 flex-1 px-4 py-2 flex flex-col">
                         <Tags label={"MULTI SOURCE DATABASE INFORMATION"}></Tags>
-                        <CardFrame count={checkData} title={`INFORMATION category`} className="flex flex-col flex-1 relative">
-                            <div className="absolute top-0  h-full w-full left-0 px-4 overflow-auto grid grid-cols-2 py-4 gap-2">
-                                {checkData()?.map((b, k) => {
-                                    return <div className={`bg-[#1e1e1e] p-2 ${k === 0 ? " col-span-full" : checkData().length === 2 ? "col-span-full" : ""}`}>
-                                        <div className="border border-primarry-2 px-4 bg-primarry-1 sticky top-[5px] z-50 flex justify-between items-center">
-                                            <Tags label={<span>DATA FROM <b>{b.label}</b></span>}></Tags>
-                                            <div>
-                                                <CheckboxItems
-                                                    title="Checked All ITEMS"
-                                                    checked={b.checkAll} onChange={(a) => {
-                                                        setCheckAll(b.id, !a.target.checked)
-                                                    }}
-                                                />
-                                            </div>
-                                        </div>
-                                        {b.data.map((x) => {
-                                            return <div className={`flex gap-4 relative border-b  ${mode() === "dark" ? "border-[#333]" : "border-[#aaa]"}  py-2 `}>
-                                                <div className="flex gap-4 items-start flex-1 relative">
-                                                    <div className={`${mode() === "dark" ? "text-[#aaa]" : "text-[#444]"} sticky top-[10px] whitespace-nowrap w-[200px] z-10 px-4 pt-2`}> {x.total_data === 1 ? "" : `[${x.total_data}]`} {x.label}</div>
-                                                    <div className="flex-1 ">
-                                                        <div className="gap-2 flex flex-wrap px-4">
-                                                            {x.data.map((d) => {
-                                                                return <div title={d.label}>
-                                                                    <FormControlLabel
-                                                                        class={`pl-4 !m-0 ${mode() === "dark" ? ` ${saved().isErrorMsg ? "border-red-500 text-red-500" : "border-[#454545] bg-[#2C2C2C]"}` : saved().isErrorMsg ? "border-red-500 text-red-500" : "bg-gray-200 text-[#444] border-[#aaa]"} pr-2 py-1 flex gap-4 border-[0] max-w-sm`}
-                                                                        checked={d.active}
-                                                                        onChange={(c) => checkItems(b.id, d.id, c.target.checked)}
 
-                                                                        label={<div className={`whitespace-nowrap max-w-xs relative ${x.label === "ID CARD PHOTO" ? "hover:z-50  hover:scale-[2.5] transition-all" : ""}`}>
-                                                                            <div className={x.label !== "ID CARD PHOTO" ? "text-ellipsis overflow-hidden relative" : "z-50"}>
-                                                                                {x.label !== "ID CARD PHOTO" ? d.label : <div>
-                                                                                    <img className="w-20" src={d.label} />
-                                                                                </div>}
-                                                                            </div>
-                                                                        </div>} labelPlacement="end" control={<CheckboxItems />} />
-                                                                </div>
-                                                            })}
+                        <CardFrame isLoading={isLoading} count={checkData} title={`INFORMATION category`} className="flex flex-col flex-1 relative">
+                            {<div className="absolute top-0 h-full   w-full left-0 px-4 overflow-auto py-4 gap-2">
+                                <div className="flex gap-4">
+                                    {checkData()?.map((b, k) => {
+                                        return <div className={` bg-[#1e1e1e] p-2 ${k === 0 ? " col-span-full" : checkData().length === 2 ? "col-span-full" : ""}`}>
+                                            <div className="border border-primarry-2 px-4 bg-primarry-1  z-50 flex justify-between items-center">
+                                                <Tags label={<span>DATA FROM <b>{b.label}</b></span>}></Tags>
+                                                <div>
+                                                    <CheckboxItems
+                                                        title="Checked All ITEMS"
+                                                        checked={b.checkAll} onChange={(a) => {
+                                                            setCheckAll(b.id, !a.target.checked)
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+                                            {b.data.map((x) => {
+                                                return <div className={`flex gap-4 relative border-b  ${mode() === "dark" ? "border-[#333]" : "border-[#aaa]"}  py-2 `}>
+                                                    <div className="flex gap-4 items-start flex-1 relative">
+                                                        <div className={`${mode() === "dark" ? "text-[#aaa]" : "text-[#444]"} sticky top-[10px] whitespace-nowrap w-[200px] z-10 px-4 pt-2`}> {x.total_data === 1 ? "" : `[${x.total_data}]`} {x.label}</div>
+                                                        <div className="flex-1 ">
+                                                            <div className="gap-2 flex  px-4 items-center">
+                                                                {x.data.map((d) => {
+                                                                    return <div title={d.label} className="flex items-center gap-2">
+                                                                        <FormControlLabel
+                                                                            class={`pl-4 !m-0 ${mode() === "dark" ? ` ${saved().isErrorMsg ? "border-red-500 text-red-500" : "border-[#454545] bg-[#2C2C2C]"}` : saved().isErrorMsg ? "border-red-500 text-red-500" : "bg-gray-200 text-[#444] border-[#aaa]"} pr-2 py-1 flex gap-4 border-[0] max-w-sm`}
+                                                                            checked={d.active}
+                                                                            onChange={(c) => checkItems(b.id, d.id, c.target.checked)}
+
+                                                                            label={<div className={`whitespace-nowrap max-w-xs relative ${x.label === "ID CARD PHOTO" ? "hover:z-50  hover:scale-[2.5] transition-all" : ""}`}>
+                                                                                <div className={x.label !== "ID CARD PHOTO" ? "text-ellipsis overflow-hidden relative" : "z-50"}>
+                                                                                    {x.label !== "ID CARD PHOTO" ? d.label : <div>
+                                                                                        <img className="w-20" src={d.label} />
+                                                                                    </div>}
+                                                                                </div>
+                                                                            </div>} labelPlacement="end" control={<CheckboxItems />} />
+
+                                                                        {x.label !== "ID CARD PHOTO" && <IconButton onClick={() => onCopy(d.label)} color="primary" size="small">
+                                                                            <ContentCopy fontSize="small"></ContentCopy>
+                                                                        </IconButton>}
+                                                                    </div>
+                                                                })}
+
+
+                                                            </div>
+                                                        </div>
+                                                        <div className="sticky top-[10px] pr-4">
+                                                            {x.data.length !== 1 && <CheckboxItems
+                                                                title="Checked All"
+                                                                checked={x.active} onChange={() => {
+                                                                    setCheck(prev => prev.map(z => {
+                                                                        return {
+                                                                            ...z,
+                                                                            data: z.data.map(s => {
+                                                                                if (x.id === s.id) {
+                                                                                    const shouldBeActive = !x.active;
+                                                                                    return {
+                                                                                        ...s,
+                                                                                        active: shouldBeActive,
+                                                                                        data: s.data.map(o => ({
+                                                                                            ...o,
+                                                                                            active: shouldBeActive
+                                                                                        }))
+                                                                                    }
+                                                                                }
+
+                                                                                return s
+                                                                            })
+                                                                        }
+                                                                    }))
+
+
+                                                                }}
+                                                            />}
+
                                                         </div>
                                                     </div>
-                                                    <div className="sticky top-[10px] pr-4">
-                                                        {x.data.length !== 1 && <CheckboxItems
-                                                            title="Checked All"
-                                                            checked={x.active} onChange={() => {
-                                                                setCheck(prev => prev.map(z => {
-                                                                    return {
-                                                                        ...z,
-                                                                        data: z.data.map(s => {
-                                                                            if (x.id === s.id) {
-                                                                                const shouldBeActive = !x.active;
-                                                                                return {
-                                                                                    ...s,
-                                                                                    active: shouldBeActive,
-                                                                                    data: s.data.map(o => ({
-                                                                                        ...o,
-                                                                                        active: shouldBeActive
-                                                                                    }))
-                                                                                }
-                                                                            }
-
-                                                                            return s
-                                                                        })
-                                                                    }
-                                                                }))
-
-
-                                                            }}
-                                                        />}
-
+                                                    <div className="w-full flex justify-between items-center absolute bottom-[-5px] left-0">
+                                                        <div className={`h-2 w-2 ${mode() === "dark" ? "bg-[#222222]" : "bg-[#aaa]"} left-0`}></div>
+                                                        <div className={`h-2 w-2 ${mode() === "dark" ? "bg-[#222222]" : "bg-[#aaa]"} right-0`}></div>
                                                     </div>
                                                 </div>
-                                                <div className="w-full flex justify-between items-center absolute bottom-[-5px] left-0">
-                                                    <div className={`h-2 w-2 ${mode() === "dark" ? "bg-[#222222]" : "bg-[#aaa]"} left-0`}></div>
-                                                    <div className={`h-2 w-2 ${mode() === "dark" ? "bg-[#222222]" : "bg-[#aaa]"} right-0`}></div>
-                                                </div>
-                                            </div>
 
-                                        })}
-                                    </div>
-                                })}
-                            </div>
+                                            })}
+                                        </div>
+                                    })}
+                                </div>
+                            </div>}
+
                         </CardFrame>
                     </div>
                 </div>
