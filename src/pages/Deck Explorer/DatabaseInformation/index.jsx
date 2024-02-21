@@ -572,8 +572,8 @@ const DatabaseInformation = () => {
                         <Tags label={"MULTI SOURCE DATABASE INFORMATION"}></Tags>
 
                         <CardFrame isLoading={isLoading} count={checkData} title={`INFORMATION category`} className="flex flex-col flex-1 relative">
-                            {<div className="absolute top-0 h-full   w-full left-0 px-4 overflow-auto py-4 gap-2">
-                                <div className="flex gap-4">
+                            {<div className="absolute top-0 h-full  flex flex-1 flex-col w-full left-0 px-4 overflow-auto py-4 gap-2">
+                                <div className="flex gap-4 flex-1">
                                     {checkData()?.map((b, k) => {
                                         return <div className={` bg-[#1e1e1e] p-2 ${k === 0 ? " col-span-full" : checkData().length === 2 ? "col-span-full" : ""}`}>
                                             <div className="border border-primarry-2 px-4 bg-primarry-1  z-50 flex justify-between items-center">
