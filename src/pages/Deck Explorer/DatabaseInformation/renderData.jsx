@@ -1,10 +1,10 @@
 
 // Definisikan fungsi komponen di luar fungsi utama
-const RenderData = ({ checkData, checkItems, setCheckAll, setCheck, onCopy, mode, saved, CheckboxItems, FormControlLabel, ContentCopy, IconButton, Tags, b, k }) => {
+const RenderData = ({refData, checkData, checkItems, setCheckAll, setCheck, onCopy, mode, saved, CheckboxItems, FormControlLabel, ContentCopy, IconButton, Tags, b, k }) => {
   // Kembalikan hasil pemetaan data ke elemen yang diperlukan
 
 
-  return <div className={`bg-[#1e1e1e] p-2 ${k === 0 ? " col-span-full" : checkData().length === 2 ? "col-span-full" : ""}`}>
+  return <div ref={refData} className={`bg-[#1e1e1e] p-2 ${k === 0 ? " col-span-full" : checkData().length === 2 ? "col-span-full" : ""}`}>
     <div className="border border-primarry-2 px-4 bg-primarry-1  z-50 flex justify-between items-center">
       <Tags label={<span>DATA FROM <b>{b.label}</b></span>}></Tags>
       <div>

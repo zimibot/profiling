@@ -79,6 +79,7 @@
   },
   "dependencies": {
     "@fontsource/rajdhani": "^5.0.8",
+    "@minht11/solid-virtual-container": "^0.2.1",
     "@modular-forms/solid": "^0.19.2",
     "@solid-primitives/masonry": "^0.0.4",
     "@solidjs/router": "^0.8.3",
@@ -93,6 +94,7 @@
     "jquery": "^3.7.1",
     "leaflet": "^1.9.4",
     "lightbox2": "^2.11.4",
+    "lodash": "^4.17.21",
     "moment": "^2.29.4",
     "solform": "^1.0.7",
     "solid-collapse": "^1.1.0",

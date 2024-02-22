@@ -13,7 +13,7 @@ import { Check, Close, CoPresent, ContentCopy, CopyAll } from "@suid/icons-mater
 import { Drawer } from "@suid/material"
 import { api } from "../../../helper/_helper.api"
 import RenderData from "./renderData"
-import { Loading } from "../../../component/loading"
+import { VirtualContainer } from "@minht11/solid-virtual-container"
 
 const DatabaseInformation = () => {
     const [__, { update }] = useAppState()
@@ -332,81 +332,51 @@ const DatabaseInformation = () => {
 
     const CardFrameData = () => {
         const [limit, setLimit] = createSignal(4);
-        const [startLimit, setStartLimit] = createSignal(0)
-        const [isLoadingData, setIsLoadingData] = createSignal(false);
+        const [startLimit, setStartLimit] = createSignal(0);
+        const [data, setData] = createSignal([]); // Simulasikan data Anda di sini
         let containerRef = null;
 
+        // Fungsi untuk memperbarui data berdasarkan limit dan startLimit
+        const updateDataView = () => {
+            // Ambil data berdasarkan startLimit dan limit, contoh menggunakan slice
+            const newData = checkData().slice(startLimit(), startLimit() + limit());
+            setData(newData);
+        };
+
+        // Event listener untuk scroll, memperbarui startLimit
         const handleScroll = () => {
+            // Logika untuk memperbarui startLimit berdasarkan posisi scroll
+            // Ini hanya simulasi, Anda perlu menyesuaikan dengan kasus penggunaan Anda
             const container = containerRef;
-
-            setLimit(prevLimit => {
-
-                // if (checkData().length > 0) {
-                    // let start = ((prevLimit - checkData().length) + (checkData().length - 4))
-
-                    // let data_start = Math.max(0, start)
-
-                    // if (data_start >= 0) {
-                    //     setStartLimit(data_start)
-                    // } else {
-                    //     setStartLimit(0)
-                    // }
-
-                    // setIsLoadingData(false)
-
-                if (container.scrollLeft <= 0) {
-                    setIsLoadingData(false);
-                } else if ((container.scrollLeft + container.clientWidth + 2) >= container.scrollWidth) {
-                    // Jika scroll ke kanan dan mencapai akhir
-
-                    if (prevLimit === checkData().length) {
-                        setIsLoadingData(false)
-                        
-                    } else {
-                        setIsLoadingData(true);
-                        if (prevLimit < checkData().length) {
-                            // Tambah limit jika data masih tersedia
-                            prevLimit = prevLimit + 1
-                            setIsLoadingData(false)
-
-                            
-                        } 
-                    }
-
-                } else {
-                    
+            if (container.scrollLeft + container.offsetWidth >= container.scrollWidth) {
+                if (startLimit() + limit() < checkData().length) { // Pastikan tidak melebihi jumlah data
+                    setStartLimit(startLimit() + limit()); // Pindah ke data set berikutnya
+                    updateDataView();
                 }
-                return prevLimit
-            });
-
+            }
         };
 
         createEffect(() => {
             const container = containerRef;
             if (container) {
                 container.addEventListener('scroll', handleScroll);
-            }
+                updateDataView(); // Inisialisasi tampilan data
 
-            onCleanup(() => {
-                if (container) {
+                // Cleanup function
+                return () => {
                     container.removeEventListener('scroll', handleScroll);
-                }
-            });
+                };
+            }
         });
 
-        createEffect(() => {
-
-
-            if (checkData().length < limit() && checkData().length > limit()) {
-                setLimit(checkData().length)
-            }
-        })
         return (
             <CardFrame isLoading={isLoading} count={checkData} title={`INFORMATION category`} className="flex flex-col flex-1 relative">
-                <div id="container" ref={container => containerRef = container} className="absolute top-0 h-full  flex flex-1 flex-col w-full left-0 px-4 overflow-auto py-4 gap-2">
+                <div id="container" ref={container => containerRef = container} className="absolute top-0 h-full flex flex-1 flex-col w-full left-0 px-4 overflow-auto py-4 gap-2">
                     <div className="flex gap-4 flex-1">
-                        {checkData().slice(startLimit(), limit()).map((d, i) => (
-                            <RenderData key={i} b={d} k={i} checkItems={checkItems} Tags={Tags} IconButton={IconButton} ContentCopy={ContentCopy} CheckboxItems={CheckboxItems} FormControlLabel={FormControlLabel} checkData={checkData} setCheck={setCheck} setCheckAll={setCheckAll} onCopy={onCopy} mode={mode} saved={saved} />
+                        {data().map((d, i) => (
+                            <div className="grid">
+                                {/* Render komponen data Anda di sini */}
+                            </div>
                         ))}
                     </div>
                 </div>
@@ -414,16 +384,13 @@ const DatabaseInformation = () => {
                 <div className="absolute right-[20px] bottom-[20px] flex items-center justify-center">
                     <div className="relative flex items-center gap-2 justify-center bg-primarry-2 px-4 py-2">
                         <span>
-
-                            {limit()}  / {checkData().length} TOTAL
+                            {startLimit()} - {startLimit() + limit()} / {checkData().length} TOTAL
                         </span>
-                        <CircularProgress sx={{ display: isLoadingData() ? "flex" : "none" }} size="16px"></CircularProgress>
                     </div>
                 </div>
             </CardFrame>
         );
     };
-
 
     return <ContainerPages>
         <div className="py-6 flex flex-col flex-1">
