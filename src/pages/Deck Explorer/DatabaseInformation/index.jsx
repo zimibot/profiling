@@ -4,16 +4,15 @@ import { CardBox } from "../../../component/cardBox"
 import { CardFrame } from "../../../component/cardFrame"
 import { Tags } from "../../../component/tags"
 import { mode } from "../../../helper/_helper.theme"
-import { createSignal, createEffect, onCleanup } from "solid-js"
+import { createSignal, createEffect, onCleanup, For } from "solid-js"
 import { CheckboxItems } from "../../../component/form/checkbox"
 import AlertDialog, { DialogPopup } from "../../../component/dialog"
 import { useAppState } from "../../../helper/_helper.context"
 import { useLocation, useNavigate } from "@solidjs/router"
-import { Check, Close, CoPresent, ContentCopy, CopyAll } from "@suid/icons-material"
+import { Check, Close, CoPresent, ContentCopy } from "@suid/icons-material"
 import { Drawer } from "@suid/material"
 import { api } from "../../../helper/_helper.api"
 import RenderData from "./renderData"
-import { VirtualContainer } from "@minht11/solid-virtual-container"
 
 const DatabaseInformation = () => {
     const [__, { update }] = useAppState()
@@ -330,67 +329,93 @@ const DatabaseInformation = () => {
         ));
     }
 
-    const CardFrameData = () => {
-        const [limit, setLimit] = createSignal(4);
-        const [startLimit, setStartLimit] = createSignal(0);
-        const [data, setData] = createSignal([]); // Simulasikan data Anda di sini
-        let containerRef = null;
-
-        // Fungsi untuk memperbarui data berdasarkan limit dan startLimit
-        const updateDataView = () => {
-            // Ambil data berdasarkan startLimit dan limit, contoh menggunakan slice
-            const newData = checkData().slice(startLimit(), startLimit() + limit());
-            setData(newData);
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
         };
+    }
 
-        // Event listener untuk scroll, memperbarui startLimit
-        const handleScroll = () => {
-            // Logika untuk memperbarui startLimit berdasarkan posisi scroll
-            // Ini hanya simulasi, Anda perlu menyesuaikan dengan kasus penggunaan Anda
-            const container = containerRef;
-            if (container.scrollLeft + container.offsetWidth >= container.scrollWidth) {
-                if (startLimit() + limit() < checkData().length) { // Pastikan tidak melebihi jumlah data
-                    setStartLimit(startLimit() + limit()); // Pindah ke data set berikutnya
-                    updateDataView();
-                }
-            }
+    const CardFrameData = () => {
+        const itemsPerScroll = 3;
+        const [visibleItems, setVisibleItems] = createSignal([0, itemsPerScroll]);
+        const [dataItems, setDataItems] = createSignal([]);
+        const [estimatedItemWidth, setEstimatedItemWidth] = createSignal(0);
+        const [translateX, setTranslateX] = createSignal(0); // Added to control translateX
+        let containerRef = null;
+        let mainRef = null;
+
+        const updateVisibleItems = () => {
+
+
+
+            let main = mainRef.querySelector('#content')
+            let contentW = main.querySelectorAll('.grid')
+
+
+            const scrollLeft = mainRef.scrollLeft;
+            const visibleCount = Math.ceil(mainRef.offsetWidth / estimatedItemWidth());
+            const startIndex = Math.max(0, Math.floor(scrollLeft / estimatedItemWidth()));
+            const endIndex = Math.min(checkData().length, startIndex + visibleCount);
+
+            console.log(startIndex, endIndex)
+            // setTranslateX(scrollLeft)
+            setVisibleItems([startIndex, endIndex]);
+
+            setDataItems(checkData().slice(startIndex, endIndex));
+
+
+            // Calculate the new translateX based on scroll
+
         };
 
         createEffect(() => {
-            const container = containerRef;
-            if (container) {
-                container.addEventListener('scroll', handleScroll);
-                updateDataView(); // Inisialisasi tampilan data
+            if (mainRef) {
+                updateVisibleItems();
+                const handleScroll = debounce(() => {
+                    updateVisibleItems();
+                }, 10); // Menunda pemanggilan updateVisibleItems selama 100 ms
 
-                // Cleanup function
-                return () => {
-                    container.removeEventListener('scroll', handleScroll);
-                };
+                mainRef.addEventListener('scroll', handleScroll);
+                onCleanup(() => {
+                    mainRef.removeEventListener('scroll', handleScroll)
+                    setDataItems([])
+                });
             }
+        });
+
+        createEffect(() => {
+            if (!mainRef) return;
+
+            setEstimatedItemWidth(dataItems().length === 3 ? mainRef.offsetWidth / 2 : mainRef.offsetWidth / 3.5);
+
         });
 
         return (
             <CardFrame isLoading={isLoading} count={checkData} title={`INFORMATION category`} className="flex flex-col flex-1 relative">
-                <div id="container" ref={container => containerRef = container} className="absolute top-0 h-full flex flex-1 flex-col w-full left-0 px-4 overflow-auto py-4 gap-2">
-                    <div className="flex gap-4 flex-1">
-                        {data().map((d, i) => (
-                            <div className="grid">
-                                {/* Render komponen data Anda di sini */}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="absolute right-[20px] bottom-[20px] flex items-center justify-center">
-                    <div className="relative flex items-center gap-2 justify-center bg-primarry-2 px-4 py-2">
-                        <span>
-                            {startLimit()} - {startLimit() + limit()} / {checkData().length} TOTAL
-                        </span>
+                <div ref={mainRef} className="w-full h-full absolute left-0 top-0 overflow-auto">
+                    <div className="overflow-hidden" ref={container => containerRef = container} style={{ width: `${checkData().length * estimatedItemWidth()}px`, overflowX: 'auto' }}>
+                        <div id="content" className="flex gap-4 flex-1 " style={{
+                            transform: `translateX(${translateX() + "px"})`
+                        }}>
+                            {dataItems().map((d, i) => (
+                                <div className="grid" key={i}>
+                                    <RenderData b={d} k={i} checkItems={checkItems} Tags={Tags} IconButton={IconButton} ContentCopy={ContentCopy} CheckboxItems={CheckboxItems} FormControlLabel={FormControlLabel} checkData={checkData} setCheck={setCheck} setCheckAll={setCheckAll} onCopy={onCopy} mode={mode} saved={saved} />
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </CardFrame>
         );
     };
+
+
 
     return <ContainerPages>
         <div className="py-6 flex flex-col flex-1">
@@ -632,8 +657,8 @@ const DatabaseInformation = () => {
                 <div className="grid  flex-1 m-[-18px]">
                     <div className="xl:col-span-6 flex-1 px-4 py-2 flex flex-col">
                         <Tags label={"MULTI SOURCE DATABASE INFORMATION"}></Tags>
+                        {isLoading() && <CardFrameData></CardFrameData>}
 
-                        <CardFrameData></CardFrameData>
                     </div>
                 </div>
             </CardBox>

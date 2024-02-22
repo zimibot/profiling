@@ -4,7 +4,7 @@ const RenderData = ({refData, checkData, checkItems, setCheckAll, setCheck, onCo
   // Kembalikan hasil pemetaan data ke elemen yang diperlukan
 
 
-  return <div ref={refData} className={`bg-[#1e1e1e] p-2 ${k === 0 ? " col-span-full" : checkData().length === 2 ? "col-span-full" : ""}`}>
+  return <div  ref={refData} className={`bg-[#1e1e1e] p-2 ${k === 0 ? " col-span-full" : checkData().length === 2 ? "col-span-full" : ""}`}>
     <div className="border border-primarry-2 px-4 bg-primarry-1  z-50 flex justify-between items-center">
       <Tags label={<span>DATA FROM <b>{b.label}</b></span>}></Tags>
       <div>
@@ -32,8 +32,8 @@ const RenderData = ({refData, checkData, checkItems, setCheckAll, setCheck, onCo
                         checked={d.active}
                         onChange={(c) => checkItems(b.id, d.id, c.target.checked)}
                         label={
-                          <div className={`whitespace-nowrap max-w-xs relative ${x.label === "ID CARD PHOTO" ? "hover:z-50  hover:scale-[2.5] transition-all" : ""}`}>
-                            <div className={x.label !== "ID CARD PHOTO" ? "text-ellipsis overflow-hidden relative" : "z-50"}>
+                          <div className={` relative ${x.label === "ID CARD PHOTO" ? "hover:z-50  hover:scale-[2.5] transition-all" : ""}`}>
+                            <div className={x.label !== "ID CARD PHOTO" ? "" : "z-50"}>
                               {x.label !== "ID CARD PHOTO" ? d.label : <div><img className="w-20" src={d.label} /></div>}
                             </div>
                           </div>
