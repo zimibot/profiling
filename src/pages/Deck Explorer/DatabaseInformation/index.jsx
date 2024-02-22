@@ -331,42 +331,54 @@ const DatabaseInformation = () => {
     }
 
     const CardFrameData = () => {
-        const [limit, setLimit] = createSignal(3);
+        const [limit, setLimit] = createSignal(4);
+        const [startLimit, setStartLimit] = createSignal(0)
         const [isLoadingData, setIsLoadingData] = createSignal(false);
-        const [isDataEmpty, setisDataEmpty] = createSignal(false);
         let containerRef = null;
 
         const handleScroll = () => {
             const container = containerRef;
-            if (container.scrollLeft <= 0) {
-                // Jika scroll ke kiri
-                setIsLoadingData(false);
-            } else if ((container.scrollLeft + container.clientWidth + 1) >= container.scrollWidth) {
-                // Jika scroll ke kanan dan mencapai akhir
 
-                if (limit() === checkData().length) {
-                    setIsLoadingData(false)
-                    setisDataEmpty(true)
-                } else {
-                    setIsLoadingData(true);
-                    setTimeout(() => {
-                        if (limit() < checkData().length) {
+            setLimit(prevLimit => {
+
+                // if (checkData().length > 0) {
+                    // let start = ((prevLimit - checkData().length) + (checkData().length - 4))
+
+                    // let data_start = Math.max(0, start)
+
+                    // if (data_start >= 0) {
+                    //     setStartLimit(data_start)
+                    // } else {
+                    //     setStartLimit(0)
+                    // }
+
+                    // setIsLoadingData(false)
+
+                if (container.scrollLeft <= 0) {
+                    setIsLoadingData(false);
+                } else if ((container.scrollLeft + container.clientWidth + 2) >= container.scrollWidth) {
+                    // Jika scroll ke kanan dan mencapai akhir
+
+                    if (prevLimit === checkData().length) {
+                        setIsLoadingData(false)
+                        
+                    } else {
+                        setIsLoadingData(true);
+                        if (prevLimit < checkData().length) {
                             // Tambah limit jika data masih tersedia
-                            setLimit(prevLimit => prevLimit + 3);
+                            prevLimit = prevLimit + 1
                             setIsLoadingData(false)
-                        } else {
-                            setLimit(checkData().length);
-                            setIsLoadingData(false); // Jika semua data sudah dimuat
-                        }
-                    }, 300);
 
+                            
+                        } 
+                    }
+
+                } else {
+                    
                 }
+                return prevLimit
+            });
 
-
-            } else {
-                setisDataEmpty(false)
-                setIsLoadingData(false)
-            }
         };
 
         createEffect(() => {
@@ -382,11 +394,18 @@ const DatabaseInformation = () => {
             });
         });
 
+        createEffect(() => {
+
+
+            if (checkData().length < limit() && checkData().length > limit()) {
+                setLimit(checkData().length)
+            }
+        })
         return (
             <CardFrame isLoading={isLoading} count={checkData} title={`INFORMATION category`} className="flex flex-col flex-1 relative">
                 <div id="container" ref={container => containerRef = container} className="absolute top-0 h-full  flex flex-1 flex-col w-full left-0 px-4 overflow-auto py-4 gap-2">
                     <div className="flex gap-4 flex-1">
-                        {checkData().slice(checkData().length === 1 ? checkData().length - 1 : checkData().length - limit(), checkData().length).map((d, i) => (
+                        {checkData().slice(startLimit(), limit()).map((d, i) => (
                             <RenderData key={i} b={d} k={i} checkItems={checkItems} Tags={Tags} IconButton={IconButton} ContentCopy={ContentCopy} CheckboxItems={CheckboxItems} FormControlLabel={FormControlLabel} checkData={checkData} setCheck={setCheck} setCheckAll={setCheckAll} onCopy={onCopy} mode={mode} saved={saved} />
                         ))}
                     </div>
