@@ -17,7 +17,7 @@ const AddPicture = () => {
   const [preview, setPreview] = createSignal();
   const parts = url.split("/"); // Memisahkan URL berdasarkan '/'
   const id_last = parts[3]; // Mengambil bagian yang berisi 'B23dsnd'
-  const desiredParts = parts.length > 2 ? parts.slice(0, 4) : parts;
+  const desiredParts = parts.length > 2 ? parts.slice(0, 5) : parts;
 
   // Menggabungkan kembali bagian yang diinginkan menjadi string dengan menyisipkan '/'
   const modifiedUrl = desiredParts.join("/").replace("#", "");
