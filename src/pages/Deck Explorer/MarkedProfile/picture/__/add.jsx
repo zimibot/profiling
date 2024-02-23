@@ -10,14 +10,19 @@ import { MultiTags } from "../../../../../component/multiTags";
 import { mode } from "../../../../../helper/_helper.theme";
 import Swal from "sweetalert2";
 import { api } from "../../../../../helper/_helper.api";
+import { createSignal } from "solid-js";
 
 const AddPicture = () => {
-  const id = window.location.hash;
-
-  const parts = id.split("/"); // Memisahkan URL berdasarkan '/'
+  const url = window.location.hash;
+  const [preview, setPreview] = createSignal();
+  const parts = url.split("/"); // Memisahkan URL berdasarkan '/'
   const id_last = parts[3]; // Mengambil bagian yang berisi 'B23dsnd'
+  const desiredParts = parts.length > 2 ? parts.slice(0, 4) : parts;
 
-  console.log(id_last);
+  // Menggabungkan kembali bagian yang diinginkan menjadi string dengan menyisipkan '/'
+  const modifiedUrl = desiredParts.join("/").replace("#", "");
+
+  console.log(modifiedUrl);
   const redirect = useNavigate();
   const group = createFormGroup({
     title: createFormControl("", {
@@ -43,6 +48,7 @@ const AddPicture = () => {
     formData.append("description", data.description);
     formData.append("file", data.files);
     formData.append("tags", data.tags);
+    formData.append("type", "picture");
 
     // Jika ada data tambahan yang perlu dikirim, tambahkan ke formData
     // Contoh: formData.append('key', 'value');
@@ -65,6 +71,9 @@ const AddPicture = () => {
         icon: "success",
         title: "Success",
         text: "data has been successfully add.",
+        didClose: () => {
+          redirect(modifiedUrl);
+        },
       });
 
       console.log("Response:", response); // Opsi: Tampilkan response di console
@@ -115,6 +124,17 @@ const AddPicture = () => {
         return; // Keluar dari fungsi jika file terlalu besar
       }
 
+      var reader = new FileReader();
+
+      reader.onload = function (e) {
+        var base64Image = e.target.result;
+        setPreview(base64Image);
+        // Atau mengirimnya ke server, dll.
+      };
+
+      // Membaca file sebagai Data URL, menjalankan callback onload setelah selesai
+      reader.readAsDataURL(file);
+
       group.controls.files.setValue(file);
     }
   };
@@ -135,7 +155,10 @@ const AddPicture = () => {
           >
             <div className="col-span-5 relative border-r-2 border-primarry-2 ">
               <div className="h-full absolute  w-full overflow-hidden flex items-center justify-center p-4">
-                <div className="flex flex-col items-center border p-4 border-[#333] cursor-pointer relative">
+                <div className="w-full h-full absolute top-0 left-0 flex items-center justify-center">
+                  <img className="w-full" src={preview()}></img>
+                </div>
+                <div className=" bg-primarry-1 bg-opacity-50 flex flex-col items-center border p-4 border-[#333] cursor-pointer relative">
                   <FileUpload sx={{ fontSize: 50 }}></FileUpload>
                   <span>UPLOAD YOUR PICTURE</span>
                   <input
