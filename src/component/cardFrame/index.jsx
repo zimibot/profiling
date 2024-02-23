@@ -3,7 +3,13 @@ import { mode } from "../../helper/_helper.theme";
 
 import { Loading } from "../loading";
 
-export const CardFrame = ({ children, className, title, count, isLoading }) => {
+export const CardFrame = ({
+  children,
+  className,
+  title,
+  count,
+  isLoading = true,
+}) => {
   return (
     <Card
       sx={{
@@ -39,7 +45,13 @@ export const CardFrame = ({ children, className, title, count, isLoading }) => {
           fontSize: "16px",
         }}
       >
-        {children}
+        {isLoading || isLoading() ? (
+          children
+        ) : (
+          <div className="absolute w-full h-full top-0 left-0 flex justify-center items-center">
+            {<Loading></Loading>}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

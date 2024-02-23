@@ -29,9 +29,7 @@ export const CardBox = ({
     }));
   });
 
-  createEffect(() => {
-    console.log(state());
-  });
+
 
   const navi = useLocation().pathname;
   let ds = navi.split("/")[4];
