@@ -35,7 +35,7 @@ const AddPicture = () => {
     // Asumsi 'group' adalah referensi ke input file dan hanya memproses file pertama
     formData.append("title", data.title);
     formData.append("description", data.description);
-    formData.append("files", data.files);
+    formData.append("file", data.files);
     formData.append("tags", data.tags);
 
     // Jika ada data tambahan yang perlu dikirim, tambahkan ke formData
