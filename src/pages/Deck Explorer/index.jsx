@@ -56,8 +56,8 @@ const DeckExplorer = () => {
                         setLoading(true)
                         try {
                             if (d.marked) {
-                                let type = d.type === "person" ? "phone-list" : d.type === "family_data" ? 'family-member' : d.type === "vehicle" ? "vehicle" : "identification"
-                                navi(`/deck-explorer/marked-profile/${d.path}/${type}`)
+                                let type = d.type === "person" ? "msisdn" : d.type === "family_data" ? 'family-member' : d.type === "vehicle" ? "vehicle" : "identification"
+                                navi(`/deck-explorer/marked-profile/${d.keyword}/${type}`)
                             } else {
                                 let data = { search: d.keyword, type: d.type, path: `/deck-explorer/search-result/database-information/${d.keyword}` }
                                 let postLogin = await OnSearch(data)
@@ -137,7 +137,7 @@ const DeckExplorer = () => {
                 <CardFrame isLoading={markedLoading} className={"flex flex-col flex-1 relative"}>
                     <div className="absolute w-full h-full overflow-auto left-0 px-6 pb-6 flex gap-4">
                         {!marked() ? "" : marked().length === 0 ? <Empty className="h-full justify-center items-center" /> : marked().map((d, i) => {
-                            let type = d.type === "MSISDN" ? "phone-list" : d.type === "FAMILY ID" ? 'family-member' : d.type === "VEHICLE" ? "vehicle" : "identification"
+                            let type = d.type === "MSISDN" ? "msisdn" : d.type === "FAMILY ID" ? 'family-member' : d.type === "VEHICLE" ? "vehicle" : "identification"
                             let path = d.type !== "PERSONAL ID" ? `/deck-explorer/marked-profile/${d.keyword}/${type}` : `/deck-explorer/marked-profile/${d.keyword}/${type}`
 
 

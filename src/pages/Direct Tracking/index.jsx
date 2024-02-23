@@ -10,8 +10,6 @@ import { createFormControl, createFormGroup } from "solid-forms";
 import { api } from "../../helper/_helper.api";
 import moment from "moment";
 import Swal from "sweetalert2";
-import { Collapse } from "solid-collapse";
-import { ArrowBack, ArrowDownward, ContentCopy, CopyAll, KeyboardArrowDown, KeyboardArrowUp, LocationCity, LocationSearching, PinDrop, SwipeDown } from "@suid/icons-material";
 import { Button, Chip, Divider, IconButton } from "@suid/material";
 import { notify } from "../../component/notify";
 const data = new Array(10).fill("")
@@ -19,6 +17,7 @@ const data = new Array(10).fill("")
 let maps
 
 const DirectTracking = () => {
+    const [isLoad, setIsload] = createSignal(false)
 
     var LeafIcon = L.Icon.extend({
         options: {
@@ -147,9 +146,10 @@ const DirectTracking = () => {
     }
 
     createEffect(() => {
+        setIsload(false)
         api().get("/checkpos/search").then(d => {
             setData(d.data.items)
-
+            setIsload(true)
         })
         load()
     })
@@ -162,16 +162,6 @@ const DirectTracking = () => {
         }, 500);
     }
 
-    function copyTextToClipboard(text) {
-        // Menggunakan Clipboard API untuk menyalin teks ke clipboard
-        navigator.clipboard.writeText(text)
-            .then(() => {
-                notify({ title: "Success", text: "Text successfully copied to the clipboard.", position: "center" })
-            })
-            .catch((error) => {
-                console.error('Gagal menyalin teks ke clipboard:', error);
-            });
-    }
 
     const marker = (data, keyword) => {
         let items = data[0]
@@ -369,7 +359,7 @@ const DirectTracking = () => {
                 </form>
                 <div className="flex flex-col flex-1 col-span-6">
                     <Tags label="LOCATION SOURCE"></Tags>
-                    <CardFrame title={"MAPS"} className="flex-1 !p-0 flex flex-col">
+                    <CardFrame isLoading={isLoad} title={"MAPS"} className="flex-1 !p-0 flex flex-col">
                         <div className="flex-1">
                             <div className="w-full h-full">
                                 <div ref={mapDiv} className="w-full h-full"></div>

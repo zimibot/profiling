@@ -37,10 +37,7 @@
   a:hover {
     @apply text-white underline;
   }
-
 }
-
-
 
 @tailwind components;
 @tailwind utilities;
@@ -67,7 +64,6 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-
 }
 
 button {
@@ -170,7 +166,6 @@ div:where(.swal2-container) button:where(.swal2-styled).warning {
   border: 1px solid #f8bb86 !important;
 }
 
-
 .leaflet-bottom.leaflet-right {
   display: none !important;
 }
@@ -197,22 +192,21 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   height: 100%;
 } */
 
-.fade-in-element {
-  opacity: 0; /* Mulai dengan opacity 0 */
-  animation: fadeInAnimation 0.4s ease-in forwards; /* Gunakan animasi fadeInAnimation */
-}
-
-@keyframes fadeInAnimation {
-  from {
-      opacity: 0; /* Dimulai dengan opacity 0 */
+@keyframes slideAndFade {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
   }
-  to {
-      opacity: 1; /* Berakhir dengan opacity 1 */
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
+.animated-element {
+  animation: slideAndFade 0.6s ease-in-out forwards;
+}
 @media (prefers-color-scheme: light) {
-
   div:where(.swal2-container) div:where(.swal2-popup) {
     background: #fff !important;
     color: #444 !important;
@@ -227,7 +221,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   :root {
     color: black;
     font-weight: 500;
-    background-color: #F5F5F5;
+    background-color: #f5f5f5;
     color: #222;
   }
 
@@ -246,7 +240,6 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   button {
     background-color: #f9f9f9;
   }
-
 
   ::-webkit-scrollbar-track {
     background: #aaa;

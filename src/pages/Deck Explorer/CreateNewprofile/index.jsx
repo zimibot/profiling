@@ -31,7 +31,7 @@ const CreateNewProfile = () => {
     });
 
     let typeSearch = localStorage.getItem("typeSearch")
-    let typePath = typeSearch === "MSISDN" ? "phone-list" : typeSearch === "FAMILY ID" ? 'family-member' : typeSearch === "VEHICLE" ? "vehicle" : "identification"
+    let typePath = typeSearch === "MSISDN" ? "msisdn" : typeSearch === "FAMILY ID" ? 'family-member' : typeSearch === "VEHICLE" ? "vehicle" : "identification"
 
     const [someArray] = createSignal(items()?.hasilSearch || [])
 

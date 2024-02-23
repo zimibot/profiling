@@ -114,7 +114,7 @@ export const route = [
                         ]
                     },
                     {
-                        path: "/phone-list",
+                        path: "/msisdn",
                         children: [
                             {
                                 path: "/",

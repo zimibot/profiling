@@ -2,7 +2,7 @@ import DinamisPage from "."
 
 const FamilyPagesDetails = () => {
 
-    return <DinamisPage key={"getPhoneList"} name={'PHONE-LIST'}></DinamisPage>
+    return <DinamisPage key={"getPhoneList"} name={'MSISDN'}></DinamisPage>
 }
 
 export default FamilyPagesDetails
