@@ -24,6 +24,8 @@ const ViewsPicture = () => {
 
     }
 
+    
+
     return <LayoutMarkedProfile title={"VIEWS"}>
         <div className="flex-1 flex flex-col min-h-[600px] space-y-3">
             <div className="flex justify-between w-full">
