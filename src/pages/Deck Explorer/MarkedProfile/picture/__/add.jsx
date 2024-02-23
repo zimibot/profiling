@@ -12,6 +12,12 @@ import Swal from "sweetalert2";
 import { api } from "../../../../../helper/_helper.api";
 
 const AddPicture = () => {
+  const id = window.location.hash;
+
+  const parts = id.split("/"); // Memisahkan URL berdasarkan '/'
+  const id_last = parts[3]; // Mengambil bagian yang berisi 'B23dsnd'
+
+  console.log(id_last);
   const redirect = useNavigate();
   const group = createFormGroup({
     title: createFormControl("", {
@@ -44,17 +50,21 @@ const AddPicture = () => {
     try {
       // Menggunakan await untuk menunggu response dari API
       // Pastikan untuk mengirimkan 'formData' sebagai data
-      const response = await api().post("/deck-explorer/storage", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data", // Penting untuk upload file
-        },
-      });
+      const response = await api().post(
+        `/deck-explorer/storage?keyword=${id_last}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data", // Penting untuk upload file
+          },
+        }
+      );
 
       // Jika API berhasil
       Swal.fire({
         icon: "success",
         title: "Success",
-        text: "File has been successfully uploaded.",
+        text: "data has been successfully add.",
       });
 
       console.log("Response:", response); // Opsi: Tampilkan response di console
@@ -63,7 +73,7 @@ const AddPicture = () => {
       Swal.fire({
         icon: "error",
         title: "Failed",
-        text: "There was an error uploading your file.",
+        text: "There was an error.",
       });
 
       console.error("Error:", error); // Opsi: Tampilkan error di console
