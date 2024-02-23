@@ -4,15 +4,16 @@ import { CardBox } from "../../../component/cardBox"
 import { CardFrame } from "../../../component/cardFrame"
 import { Tags } from "../../../component/tags"
 import { mode } from "../../../helper/_helper.theme"
-import { createSignal, createEffect, onCleanup, For } from "solid-js"
+import { createSignal, createEffect, onCleanup } from "solid-js"
 import { CheckboxItems } from "../../../component/form/checkbox"
 import AlertDialog, { DialogPopup } from "../../../component/dialog"
 import { useAppState } from "../../../helper/_helper.context"
 import { useLocation, useNavigate } from "@solidjs/router"
-import { Check, Close, CoPresent, ContentCopy } from "@suid/icons-material"
+import { Check, Close, CoPresent, ContentCopy, CopyAll } from "@suid/icons-material"
 import { Drawer } from "@suid/material"
 import { api } from "../../../helper/_helper.api"
 import RenderData from "./renderData"
+import { Loading } from "../../../component/loading"
 
 const DatabaseInformation = () => {
     const [__, { update }] = useAppState()
@@ -328,94 +329,82 @@ const DatabaseInformation = () => {
             })
         ));
     }
-
-    function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
-
     const CardFrameData = () => {
-        const itemsPerScroll = 3;
-        const [visibleItems, setVisibleItems] = createSignal([0, itemsPerScroll]);
-        const [dataItems, setDataItems] = createSignal([]);
-        const [estimatedItemWidth, setEstimatedItemWidth] = createSignal(0);
-        const [translateX, setTranslateX] = createSignal(0); // Added to control translateX
+        const displayCount = 3; // Jumlah item yang ditampilkan dalam viewport
+        const [startLimit, setStartLimit] = createSignal(0);
         let containerRef = null;
-        let mainRef = null;
 
-        const updateVisibleItems = () => {
+        const itemWidth = 700; // Lebar setiap item
+        const buffer = 2; // Menambahkan buffer untuk memperhalus pengalaman scroll
+        const totalItems = checkData().length; // Jumlah total item
 
+        const containerWidth = totalItems * itemWidth; // Total lebar container berdasarkan jumlah item
+        let animationFrameId = null; // Untuk menyimpan ID dari requestAnimationFrame
 
+        const updateDisplayedItemsOnScroll = () => {
+            const container = containerRef;
+            const scrollLeft = container.scrollLeft;
 
-            let main = mainRef.querySelector('#content')
-            let contentW = main.querySelectorAll('.grid')
+            // Membatalkan frame animasi sebelumnya jika ada
+            if (animationFrameId !== null) {
+                cancelAnimationFrame(animationFrameId);
+            }
 
-
-            const scrollLeft = mainRef.scrollLeft;
-            const visibleCount = Math.ceil(mainRef.offsetWidth / estimatedItemWidth());
-            const startIndex = Math.max(0, Math.floor(scrollLeft / estimatedItemWidth()));
-            const endIndex = Math.min(checkData().length, startIndex + visibleCount);
-
-            console.log(startIndex, endIndex)
-            // setTranslateX(scrollLeft)
-            setVisibleItems([startIndex, endIndex]);
-
-            setDataItems(checkData().slice(startIndex, endIndex));
-
-
-            // Calculate the new translateX based on scroll
-
+            // Memperbarui state dalam requestAnimationFrame untuk memastikan smooth scrolling
+            animationFrameId = requestAnimationFrame(() => {
+                // Hitung indeks baru berdasarkan posisi scroll
+                const newStartLimit = Math.floor(scrollLeft / itemWidth) - buffer;
+                setStartLimit(Math.max(0, newStartLimit));
+            });
         };
+
 
         createEffect(() => {
-            if (mainRef) {
-                updateVisibleItems();
-                const handleScroll = debounce(() => {
-                    updateVisibleItems();
-                }, 10); // Menunda pemanggilan updateVisibleItems selama 100 ms
+            const container = containerRef;
+            if (container) {
+                container.addEventListener('scroll', updateDisplayedItemsOnScroll);
+            }
 
-                mainRef.addEventListener('scroll', handleScroll);
-                onCleanup(() => {
-                    mainRef.removeEventListener('scroll', handleScroll)
-                    setDataItems([])
-                });
+
+        });
+
+        onCleanup(() => {
+            if (containerRef) {
+                containerRef.removeEventListener('scroll', updateDisplayedItemsOnScroll);
+            }
+            if (animationFrameId !== null) {
+                cancelAnimationFrame(animationFrameId);
             }
         });
 
-        createEffect(() => {
-            if (!mainRef) return;
 
-            setEstimatedItemWidth(dataItems().length === 3 ? mainRef.offsetWidth / 2 : mainRef.offsetWidth / 3.5);
+        // Menghitung translateX untuk menyesuaikan posisi item berdasarkan startLimit
+        const translateX = () => startLimit() * itemWidth;
 
-        });
 
         return (
             <CardFrame isLoading={isLoading} count={checkData} title={`INFORMATION category`} className="flex flex-col flex-1 relative">
-                <div ref={mainRef} className="w-full h-full absolute left-0 top-0 overflow-auto">
-                    <div className="overflow-hidden" ref={container => containerRef = container} style={{ width: `${checkData().length * estimatedItemWidth()}px`, overflowX: 'auto' }}>
-                        <div id="content" className="flex gap-4 flex-1 " style={{
-                            transform: `translateX(${translateX() + "px"})`
-                        }}>
-                            {dataItems().map((d, i) => (
-                                <div className="grid" key={i}>
-                                    <RenderData b={d} k={i} checkItems={checkItems} Tags={Tags} IconButton={IconButton} ContentCopy={ContentCopy} CheckboxItems={CheckboxItems} FormControlLabel={FormControlLabel} checkData={checkData} setCheck={setCheck} setCheckAll={setCheckAll} onCopy={onCopy} mode={mode} saved={saved} />
+                <div ref={container => containerRef = container} className="absolute left-0 top-0 h-full w-full overflow-auto flex flex-col">
+                    <div id="container" className="top-0 flex flex-1 w-full left-0 px-4 py-4" style={{ width: `${containerWidth}px` }}>
+                        <div className="flex gap-4" style={{ transform: `translateX(${translateX()}px)` }}>
+                            {/* Menyesuaikan slice untuk memperhitungkan buffer */}
+                            {checkData().slice(Math.max(0, startLimit() - buffer), startLimit() + displayCount + buffer).map((d, i) => (
+                                <div className="grid" key={i + startLimit()} style={{ width: `${itemWidth}px`, }}>
+                                    <RenderData b={d} k={i + startLimit()} checkItems={checkItems} Tags={Tags} IconButton={IconButton} ContentCopy={ContentCopy} CheckboxItems={CheckboxItems} FormControlLabel={FormControlLabel} checkData={checkData} setCheck={setCheck} setCheckAll={setCheckAll} onCopy={onCopy} mode={mode} saved={saved} />
                                 </div>
                             ))}
                         </div>
                     </div>
                 </div>
+
+                <div className="absolute right-[20px] bottom-[20px] flex items-center justify-center">
+                    <div className="relative flex items-center gap-2 justify-center bg-primary-2 px-4 py-2">
+                        <span>{Math.min(checkData().length, startLimit() + displayCount)} / {totalItems} TOTAL</span>
+                    </div>
+                </div>
             </CardFrame>
         );
     };
-
-
 
     return <ContainerPages>
         <div className="py-6 flex flex-col flex-1">
@@ -657,8 +646,8 @@ const DatabaseInformation = () => {
                 <div className="grid  flex-1 m-[-18px]">
                     <div className="xl:col-span-6 flex-1 px-4 py-2 flex flex-col">
                         <Tags label={"MULTI SOURCE DATABASE INFORMATION"}></Tags>
-                        {isLoading() && <CardFrameData></CardFrameData>}
 
+                        {isLoading() && <CardFrameData></CardFrameData>}
                     </div>
                 </div>
             </CardBox>
