@@ -116,7 +116,7 @@ const ViewsPicture = () => {
               <div className="space-y-3 flex flex-col flex-1">
                 <div className="grid ">
                   <Button
-                    href={`#${currentHref().replace("views", "")}/edit`}
+                    href={`#${currentHref().replace("views", "edit")}`}
                     variant="contained"
                     color="secondary"
                     fullWidth

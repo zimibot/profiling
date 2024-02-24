@@ -13,8 +13,8 @@ import { api } from "../../../../../helper/_helper.api";
 import { createSignal } from "solid-js";
 
 const AddPicture = () => {
-    const [preview, setPreview] = createSignal();
-    const url = window.location.hash;
+  const [preview, setPreview] = createSignal();
+  const url = window.location.hash;
   const parts = url.split("/"); // Memisahkan URL berdasarkan '/'
   const id_last = parts[3]; // Mengambil bagian yang berisi 'B23dsnd'
   const desiredParts = parts.length > 2 ? parts.slice(0, 5) : parts;
