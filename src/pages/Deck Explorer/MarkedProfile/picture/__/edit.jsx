@@ -11,10 +11,14 @@ import { mode } from "../../../../../helper/_helper.theme";
 import Swal from "sweetalert2";
 import { api } from "../../../../../helper/_helper.api";
 import { createEffect, createSignal } from "solid-js";
+import { defaultPathRedirect } from "../../../../../helper/_helper.default.path";
 
 const EditPicture = () => {
   const [preview, setPreview] = createSignal();
-  const url = window.location.hash;
+  const [items, setitems] = createSignal();
+  let { currentHref } = defaultPathRedirect;
+
+  const url = currentHref();
   const parts = url.split("/"); // Memisahkan URL berdasarkan '/'
   const idPost = parts.pop();
   const id_last = parts[3]; // Mengambil bagian yang berisi 'B23dsnd'
@@ -23,7 +27,6 @@ const EditPicture = () => {
   // Menggabungkan kembali bagian yang diinginkan menjadi string dengan menyisipkan '/'
   const modifiedUrl = desiredParts.join("/").replace("#", "");
 
-  console.log(modifiedUrl);
   const redirect = useNavigate();
   const group = createFormGroup({
     title: createFormControl("", {
@@ -141,10 +144,16 @@ const EditPicture = () => {
   };
 
   createEffect(() => {
+    console.log(idPost);
     api()
       .get(`/deck-explorer/storage?id=${idPost}`)
       .then((a) => {
-        console.log(a);
+        const items = a.data.items;
+        console.log(items);
+
+        group.controls.title.setValue(items.title);
+        group.controls.description.setValue(items.description);
+        setPreview(items.files.url);
       });
   });
   return (
@@ -157,14 +166,14 @@ const EditPicture = () => {
           </Button>
         </div>
         <CardFrame className="relative flex-1" title={"Edit PICTURE"}>
-          <form className="grid grid-cols-7 absolute w-full h-full overflow-auto top-0 left-0">
+          <form onSubmit={onsubmit} className="grid grid-cols-7 absolute w-full h-full overflow-auto top-0 left-0">
             <div className="col-span-5 relative border-r-2">
               <div className="h-full absolute  w-full overflow-hidden flex items-center justify-center p-4">
                 <div className="absolute w-full h-full overflow-hidden p-4">
-                  {/* <img
+                  <img
                     className="w-full h-full object-contain"
-                    src={gambar}
-                  ></img> */}
+                    src={preview()}
+                  ></img>
                 </div>
                 <div className="flex flex-col items-center border p-4 cursor-pointer relative bg-primarry-1 bg-opacity-60 backdrop-blur">
                   <FileUpload sx={{ fontSize: 50 }}></FileUpload>
@@ -172,6 +181,7 @@ const EditPicture = () => {
                   <input
                     accept="image/*"
                     type="file"
+                    onChange={onFiles}
                     className="opacity-0 w-full absolute top-0 left-0 h-full cursor-pointer"
                   />
                 </div>
@@ -197,6 +207,7 @@ const EditPicture = () => {
                     variant="contained"
                     color="secondary"
                     fullWidth
+                    type="submit"
                     startIcon={<Save></Save>}
                   >
                     SAVE
@@ -221,6 +232,10 @@ const EditPicture = () => {
                 <div>
                   <Tags label={"Description"}></Tags>
                   <textarea
+                    onChange={(e) => {
+                      group.controls.description.setValue(e.target.value);
+                    }}
+                    value={group.controls.description.value}
                     className={`p-2 w-full outline-none min-h-[200px] text-[20px] ${
                       mode() === "dark"
                         ? "bg-primarry-2 "
