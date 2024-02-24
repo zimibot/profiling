@@ -5,7 +5,6 @@ import { ButtonForm } from "../component/form/button";
 import { createFormGroup, createFormControl } from "solid-forms";
 import { Navigate, useNavigate, } from "@solidjs/router";
 import { defaultPathRedirect } from "../helper/_helper.default.path";
-import { getToken } from "../helper/_helper.auth";
 import { useAppState } from "../helper/_helper.context";
 import axios from "axios";
 import Swal from 'sweetalert2/dist/sweetalert2.js'

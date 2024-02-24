@@ -43,9 +43,6 @@ export const api = () => {
           timer: 5000,
           didClose: () => {
             localStorage.removeItem("token");
-            setTimeout(() => {
-              window.location.reload();
-            }, 100);
           },
         });
       }
