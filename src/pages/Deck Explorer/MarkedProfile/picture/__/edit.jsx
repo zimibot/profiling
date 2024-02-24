@@ -60,8 +60,8 @@ const EditPicture = () => {
     try {
       // Menggunakan await untuk menunggu response dari API
       // Pastikan untuk mengirimkan 'formData' sebagai data
-      const response = await api().post(
-        `/deck-explorer/storage?keyword=${id_last}`,
+      const response = await api().put(
+        `/deck-explorer/storage?id=${idPost}`,
         formData,
         {
           headers: {
@@ -74,7 +74,7 @@ const EditPicture = () => {
       Swal.fire({
         icon: "success",
         title: "Success",
-        text: "data has been successfully add.",
+        text: "data has been successfully update.",
         didClose: () => {
           redirect(modifiedUrl);
         },
@@ -166,7 +166,10 @@ const EditPicture = () => {
           </Button>
         </div>
         <CardFrame className="relative flex-1" title={"Edit PICTURE"}>
-          <form onSubmit={onsubmit} className="grid grid-cols-7 absolute w-full h-full overflow-auto top-0 left-0">
+          <form
+            onSubmit={onSubmit}
+            className="grid grid-cols-7 absolute w-full h-full overflow-auto top-0 left-0"
+          >
             <div className="col-span-5 relative border-r-2">
               <div className="h-full absolute  w-full overflow-hidden flex items-center justify-center p-4">
                 <div className="absolute w-full h-full overflow-hidden p-4">
