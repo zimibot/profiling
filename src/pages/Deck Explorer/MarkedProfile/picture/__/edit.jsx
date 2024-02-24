@@ -96,6 +96,8 @@ const EditPicture = () => {
   const onFiles = (e) => {
     const files = e.target.files;
 
+    console.log(e.target)
+
     // Cek tipe file (hanya menerima gambar)
 
     if (files.length === 0) {
