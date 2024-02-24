@@ -46,6 +46,9 @@ const EditPicture = () => {
     let formData = new FormData();
     const data = group.value;
 
+    console.log(data.files)
+
+
     // Misalnya 'group' adalah input untuk file, tambahkan file ke dalam formData
     // Asumsi 'group' adalah referensi ke input file dan hanya memproses file pertama
     formData.append("title", data.title);
@@ -95,8 +98,7 @@ const EditPicture = () => {
 
   const onFiles = (e) => {
     const files = e.target.files;
-
-    console.log(e.target)
+    
 
     // Cek tipe file (hanya menerima gambar)
 
