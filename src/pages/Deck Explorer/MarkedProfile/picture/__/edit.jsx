@@ -15,13 +15,11 @@ import { defaultPathRedirect } from "../../../../../helper/_helper.default.path"
 
 const EditPicture = () => {
   const [preview, setPreview] = createSignal();
-  const [items, setitems] = createSignal();
   let { currentHref } = defaultPathRedirect;
 
   const url = currentHref();
   const parts = url.split("/"); // Memisahkan URL berdasarkan '/'
   const idPost = parts.pop();
-  const id_last = parts[3]; // Mengambil bagian yang berisi 'B23dsnd'
   const desiredParts = parts.length > 2 ? parts.slice(0, 5) : parts;
 
   // Menggabungkan kembali bagian yang diinginkan menjadi string dengan menyisipkan '/'

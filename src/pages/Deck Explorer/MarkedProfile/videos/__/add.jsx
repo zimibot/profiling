@@ -1,9 +1,5 @@
 import {
   Add,
-  ArrowLeft,
-  FileUpload,
-  Image,
-  Save,
   Upload,
 } from "@suid/icons-material";
 import { LayoutMarkedProfile } from "../..";
@@ -14,7 +10,6 @@ import { useNavigate } from "@solidjs/router";
 import { DefaultInput } from "../../../../../component/form/input";
 import { createFormControl, createFormGroup } from "solid-forms";
 import { MultiTags } from "../../../../../component/multiTags";
-import exampleVideo from "../../../../../assets/video/mov_bbb.mp4";
 import { mode } from "../../../../../helper/_helper.theme";
 import { createSignal } from "solid-js";
 import Swal from "sweetalert2";
@@ -57,57 +52,84 @@ const AddVideos = () => {
     formData.append("type", "video");
 
     // Menampilkan Swal loading
+    let timerInterval;
     Swal.fire({
-        title: 'Uploading...',
-        text: 'Please wait while the file is being uploaded.',
-        allowOutsideClick: false,
-        onBeforeOpen: () => {
-            Swal.showLoading();
-        },
+      title: "Uploading...",
+      html: "Please wait while the file is being uploaded.<br><b></b>", // Tempat untuk timer
+      allowOutsideClick: false,
+      timerProgressBar: true,
+      onBeforeOpen: () => {
+        Swal.showLoading();
+        const content = Swal.getContent();
+        const b = content.querySelector("b"); // Selector untuk elemen timer
+        if (b) {
+          // Waktu mulai
+          const startTime = Date.now();
+          // Update timer setiap detik
+          timerInterval = setInterval(() => {
+            const elapsedTime = Date.now() - startTime; // Hitung waktu yang telah berlalu
+            const seconds = Math.floor((elapsedTime % (1000 * 60)) / 1000); // Konversi ke detik
+            b.textContent = `${seconds} seconds`; // Tampilkan waktu yang telah berlalu dalam detik
+          }, 1000);
+        }
+      },
+      willClose: () => {
+        clearInterval(timerInterval);
+      },
     });
 
     try {
-        // Menggunakan await untuk menunggu response dari API
-        const response = await api().post(
-            `/deck-explorer/storage?keyword=${id_last}`,
-            formData,
-            {
-                headers: {
-                    "Content-Type": "multipart/form-data", // Penting untuk upload file
-                },
-            }
-        );
+      // Menggunakan await untuk menunggu response dari API
+      const response = await api().post(
+        `/deck-explorer/storage?keyword=${id_last}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data", // Penting untuk upload file
+          },
+        }
+      );
 
-        // Menutup Swal loading
-        Swal.close();
+      // Menutup Swal loading
+      Swal.close();
 
-        // Jika API berhasil
-        Swal.fire({
-            icon: "success",
-            title: "Success",
-            text: "Data has been successfully added.",
-            didClose: () => {
-                redirect(modifiedUrl);
-            },
-        });
+      // Jika API berhasil
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Data has been successfully added.",
+        didClose: () => {
+          redirect(modifiedUrl);
+        },
+      });
 
-        console.log("Response:", response); // Opsi: Tampilkan response di console
+      console.log("Response:", response); // Opsi: Tampilkan response di console
     } catch (error) {
-        // Menutup Swal loading jika terjadi error
-        Swal.close();
+      // Menutup Swal loading jika terjadi error
+      Swal.close();
 
-        // Jika API gagal
-        Swal.fire({
-            icon: "error",
-            title: "Failed",
-            text: "There was an error.",
-        });
+      // Mengakses pesan error dari response API, jika tersedia
+      let errorMessage = "There was an error."; // Pesan default jika detail error tidak tersedia
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
 
-        console.error("Error:", error); // Opsi: Tampilkan error di console
+      // Jika API gagal
+      Swal.fire({
+        icon: "error",
+        title: "Failed",
+        text: errorMessage,
+      });
+
+      console.error("Error:", error); // Opsi: Tampilkan error di console
     }
-};
-
-
+  };
 
   const onFiles = (e) => {
     const files = e.target.files;
@@ -161,6 +183,7 @@ const AddVideos = () => {
       group.controls.files.setValue(file); // Ensure this is applicable in your context or adjust accordingly
     }
   };
+
   return (
     <LayoutMarkedProfile title={"ADD"}>
       <div className="flex-1 flex flex-col min-h-[600px] space-y-3">
