@@ -91,7 +91,7 @@ const EditVideos = () => {
     try {
       // Menggunakan await untuk menunggu response dari API
       const response = await api().put(
-        `/deck-explorer/storage?keyword=${idPost}`,
+        `/deck-explorer/storage?id=${idPost}`,
         formData,
         {
           headers: {
