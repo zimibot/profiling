@@ -5,10 +5,11 @@ import { AddAPhoto, Delete, Edit, Tag, Visibility } from "@suid/icons-material";
 import notFoundImage from "../../../../assets/images/image-not-found.jpg";
 import { defaultPathRedirect } from "../../../../helper/_helper.default.path";
 import { Link } from "@solidjs/router";
-import { createEffect, createSignal } from "solid-js";
+import { createEffect, createSignal, onCleanup } from "solid-js";
 import { api } from "../../../../helper/_helper.api";
 import { Loading } from "../../../../component/loading";
 import { Tags } from "../../../../component/tags";
+import Swal from "sweetalert2";
 
 const Picture = () => {
   let { currentHref } = defaultPathRedirect;
@@ -20,6 +21,7 @@ const Picture = () => {
   const [status, setStatus] = createSignal(null); // Initial state is null to indicate no error
   const [items, setItems] = createSignal([]);
   const [isLoading, setIsLoading] = createSignal(true); // Start with loading state
+  const [isLoadItems, setisLoadItems] = createSignal(true); // Start with loading state
 
   createEffect(() => {
     setIsLoading(true); // Ensure loading state is true when starting to fetch
@@ -40,13 +42,14 @@ const Picture = () => {
         console.log("kan");
         setIsLoading(false); // Ensure loading state is false after fetch completes
       });
-  });
 
-  createEffect(() => {
-    console.log(items());
+    isLoadItems();
+    onCleanup(() => {
+      setItems([]);
+      setIsLoading(false);
+      setStatus(null);
+    });
   });
-
-  // itemData function...
 
   return (
     <LayoutMarkedProfile title={"PICTURE"}>
@@ -73,7 +76,7 @@ const Picture = () => {
             ) : items().length > 0 ? (
               items().map((item, index) => (
                 <div key={index} className="relative">
-                  {itemData({ item })}
+                  {itemData({ item, setisLoadItems })}
                 </div>
               ))
             ) : (
@@ -88,10 +91,47 @@ const Picture = () => {
   );
 };
 
-const itemData = ({ item }) => {
+const itemData = ({ item, setisLoadItems }) => {
   let { currentHref } = defaultPathRedirect;
 
-  console.log(item);
+  const onDelete = (id, name) => {
+    // Warning message asking for confirmation before deletion
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Proceed with deletion if confirmed
+
+        api()
+          .delete(`/deck-explorer/storage?id=${id}`)
+          .then(() => {
+            // Success message
+            Swal.fire({
+              title: "Deleted!",
+              text: `Your ${name} has been deleted.`,
+              icon: "success",
+            });
+          })
+          .catch((error) => {
+            // Error handling
+            Swal.fire(
+              "Error!",
+              "Something went wrong: " + error.message,
+              "error"
+            );
+          })
+          .finally(() => {
+            setisLoadItems((a) => !a);
+          });
+      }
+    });
+  };
 
   return (
     <div className="overflow-hidden p-1 relative">
@@ -160,6 +200,9 @@ const itemData = ({ item }) => {
             <Button
               color="secondary"
               variant="contained"
+              onClick={() => {
+                onDelete(item._id, item.title);
+              }}
               startIcon={<Delete></Delete>}
             >
               DELETE
