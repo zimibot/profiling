@@ -107,7 +107,7 @@ const EditVideos = () => {
       Swal.fire({
         icon: "success",
         title: "Success",
-        text: "Data has been successfully added.",
+        text: "Data has been successfully edit.",
         didClose: () => {
           redirect(modifiedUrl);
         },

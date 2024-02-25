@@ -46,11 +46,44 @@ const EditPicture = () => {
         setPreview(items.files.url);
       });
   });
+  function base64ToBlob(base64, type = "application/octet-stream") {
+    // Check for and remove Data URL prefix if present
+    const base64Data = base64.split(",")[1] || base64;
+
+    try {
+      const binStr = atob(base64Data);
+      const len = binStr.length;
+      const arr = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        arr[i] = binStr.charCodeAt(i);
+      }
+      return new Blob([arr], { type: type });
+    } catch (e) {
+      console.error("Error decoding base64 string: ", e);
+      return null;
+    }
+  }
 
   const onSubmit = async (e) => {
     e.preventDefault();
 
     // Membuat instance dari FormData
+
+    const proceed = await Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to save with the edit?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, save it!",
+    });
+
+    // Hentikan fungsi jika pengguna membatalkan
+    if (!proceed.value) {
+      return;
+    }
+
     let formData = new FormData();
     const data = group.value;
 
@@ -59,7 +92,7 @@ const EditPicture = () => {
     formData.append("description", data.description);
     formData.append("file", data.files); // Asumsi mengambil file pertama
     formData.append("tags", data.tags);
-    formData.append("type", "video");
+    formData.append("type", "document");
 
     // Menampilkan Swal loading
     let timerInterval;
@@ -107,7 +140,7 @@ const EditPicture = () => {
       Swal.fire({
         icon: "success",
         title: "Success",
-        text: "Data has been successfully added.",
+        text: "Data has been successfully save.",
         didClose: () => {
           redirect(modifiedUrl);
         },
@@ -145,142 +178,146 @@ const EditPicture = () => {
     const files = e.target.files;
 
     if (files.length === 0) {
-      // No file was selected
+      // Tidak ada file yang dipilih
       Swal.fire({
         icon: "warning",
         title: "No files selected",
         text: "Please select a file to upload.",
       });
     } else {
-      const file = files[0]; // Assuming only one file is processed
+      const file = files[0]; // Mengasumsikan hanya satu file yang diproses
 
-      // Check the file type (accepting only video files)
-      if (!file.type.startsWith("video/")) {
-        // File is not a video
+      // Memeriksa tipe file (hanya menerima file PDF)
+      if (file.type !== "application/pdf") {
+        // File bukan PDF
         Swal.fire({
           icon: "error",
           title: "Invalid File Type",
-          text: "Only video files are allowed.",
+          text: "Only PDF files are allowed.",
         });
-        return; // Exit the function if the file is not a video
+        return; // Keluar dari fungsi jika file bukan PDF
       }
 
-      if (file.size > 100 * 1024 * 1024) {
-        // 100MB limit
-        // File size exceeds 100MB
+      if (file.size > 5 * 1024 * 1024) {
+        // Batas ukuran file 5MB
         Swal.fire({
           icon: "error",
           title: "File Too Large",
-          text: "File size cannot exceed 100MB.",
+          text: "File size cannot exceed 5MB.",
         });
-        return; // Exit the function if the file is too large
+        return; // Keluar dari fungsi jika ukuran file terlalu besar
       }
 
       var reader = new FileReader();
 
       reader.onload = function (e) {
-        var base64Video = e.target.result;
-        // Here you can set the preview of the video or do other actions with the base64Video
-        setPreview(base64Video); // Assuming setPreview is defined elsewhere
-        // Or send it to the server, etc.
+        var base64PDF = e.target.result;
+        // Di sini Anda dapat menangani data PDF, seperti menampilkan pratinjau, jika berlaku
+        let blob = base64ToBlob(base64PDF, "application/pdf");
+        const url = URL.createObjectURL(blob);
+        console.log(blob);
+        setPreview(url); // Hilangkan komentar atau modifikasi baris ini sesuai kebutuhan Anda
+        // Atau kirim ke server, dll.
       };
 
-      // Read the file as a Data URL, executing the onload callback when done
+      // Membaca file sebagai Data URL, mengeksekusi callback onload saat selesai
       reader.readAsDataURL(file);
 
-      // Assuming 'group.controls.files.setValue(file);' is part of a form control system like Angular's Reactive Forms
-      // You might need to adapt this line according to your project's state management for forms
-      group.controls.files.setValue(file); // Ensure this is applicable in your context or adjust accordingly
+      // Mengasumsikan 'group.controls.files.setValue(file);' adalah bagian dari sistem kontrol formulir
+      // Anda mungkin perlu menyesuaikan baris ini sesuai dengan manajemen state formulir proyek Anda
+      group.controls.files.setValue(file); // Pastikan ini berlaku dalam konteks Anda atau sesuaikan sesuai kebutuhan
     }
   };
 
   return (
     <LayoutMarkedProfile title={"ADD"}>
-    <div className="flex-1 flex flex-col min-h-[600px] space-y-3">
-      <div className="flex justify-between w-full">
-        <Tags label={"ADDITIONAL INFORMATION"}></Tags>
-        <Button onClick={() => redirect(-1)} variant="outlined" color="error">
-          CANCEL
-        </Button>
-      </div>
-      <CardFrame className="relative flex-1" title={"Add Document"}>
-        <form
-          onSubmit={onSubmit}
-          className="grid grid-cols-7 absolute w-full h-full overflow-auto top-0 left-0"
-        >
-          <div className="col-span-5 relative border-r-2 border-[#333]">
-            <div className="h-full absolute w-full overflow-hidden flex items-center justify-center p-4 group">
-              <div className="absolute w-full h-full overflow-hidden p-4">
-                {preview() && (
-                  <object className="w-full h-full" data={preview()}></object>
-                )}
-              </div>
+      <div className="flex-1 flex flex-col min-h-[600px] space-y-3">
+        <div className="flex justify-between w-full">
+          <Tags label={"ADDITIONAL INFORMATION"}></Tags>
+          <Button onClick={() => redirect(-1)} variant="outlined" color="error">
+            CANCEL
+          </Button>
+        </div>
+        <CardFrame className="relative flex-1" title={"Add Document"}>
+          <form
+            onSubmit={onSubmit}
+            className="grid grid-cols-7 absolute w-full h-full overflow-auto top-0 left-0"
+          >
+            <div className="col-span-5 relative border-r-2 border-[#333]">
+              <div className="h-full absolute w-full overflow-hidden flex items-center justify-center p-4 group">
+                <div className="absolute w-full h-full overflow-hidden p-4 flex justify-center w-full h-full">
+                  {!preview() && <div>Preview Not Found</div>}
+                  {preview() && (
+                    <iframe src={preview()} className="w-full h-full" />
+                  )}
+                </div>
 
-              <div className="p-5 absolute bottom-0 left-0 w-full  justify-between flex items-center">
-                <div className="shadow-md bg-primarry-1">
-                  {/* <MultiTags
+                <div className="p-5 absolute bottom-0 left-0 w-full  justify-between flex items-center">
+                  <div className="shadow-md bg-primarry-1">
+                    {/* <MultiTags
                     onChange={(d) => {
                       console.log(d);
                     }}
                   ></MultiTags> */}
+                  </div>
+                  <div>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      class="relative"
+                      startIcon={<Upload></Upload>}
+                    >
+                      <input
+                        onChange={onFiles}
+                        className="absolute w-full h-full opacity-0"
+                        type="file"
+                        accept="application/pdf"
+                      ></input>
+                      UPLOAD DOCUMENT
+                    </Button>
+                  </div>
                 </div>
+              </div>
+            </div>
+            <div className="col-span-2 p-4 flex-1 flex flex-col justify-between">
+              <div className="space-y-3">
                 <div>
                   <Button
                     variant="contained"
                     color="secondary"
-                    class="relative"
-                    startIcon={<Upload></Upload>}
+                    type="submit"
+                    fullWidth
+                    startIcon={<Save></Save>}
                   >
-                    <input
-                      onChange={onFiles}
-                      className="absolute w-full h-full opacity-0"
-                      type="file"
-                      accept="application/pdf"
-                    ></input>
-                    UPLOAD DOCUMENT
+                    SAVE
                   </Button>
+                </div>
+                <div>
+                  <Tags label={"TITLE "}></Tags>
+                  <DefaultInput
+                    placeholder={"INPUT PICTURE NAME "}
+                    removeicon
+                    control={group.controls.title}
+                  />
+                </div>
+                <div>
+                  <Tags label={"Description"}></Tags>
+                  <textarea
+                    onChange={(e) => {
+                      group.controls.description.setValue(e.target.value);
+                    }}
+                    value={group.controls.description.value}
+                    className="bg-primarry-2 p-2 w-full outline-none min-h-[200px] text-[20px]"
+                    spellCheck={false}
+                    placeholder="INPUT DESCRIPTION"
+                  />
                 </div>
               </div>
             </div>
-          </div>
-          <div className="col-span-2 p-4 flex-1 flex flex-col justify-between">
-            <div className="space-y-3">
-              <div>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  type="submit"
-                  fullWidth
-                  startIcon={<Save></Save>}
-                >
-                  ADD
-                </Button>
-              </div>
-              <div>
-                <Tags label={"TITLE "}></Tags>
-                <DefaultInput
-                  placeholder={"INPUT PICTURE NAME "}
-                  removeicon
-                  control={group.controls.title}
-                />
-              </div>
-              <div>
-                <Tags label={"Description"}></Tags>
-                <textarea
-                  onChange={(e) => {
-                    group.controls.description.setValue(e.target.value);
-                  }}
-                  className="bg-primarry-2 p-2 w-full outline-none min-h-[200px] text-[20px]"
-                  spellCheck={false}
-                  placeholder="INPUT DESCRIPTION"
-                />
-              </div>
-            </div>
-          </div>
-        </form>
-      </CardFrame>
-    </div>
-  </LayoutMarkedProfile>
+          </form>
+        </CardFrame>
+      </div>
+    </LayoutMarkedProfile>
   );
 };
 
