@@ -30,7 +30,6 @@ const AddVideos = () => {
   // Menggabungkan kembali bagian yang diinginkan menjadi string dengan menyisipkan '/'
   const modifiedUrl = desiredParts.join("/").replace("#", "");
 
-  console.log(modifiedUrl);
   const redirect = useNavigate();
   const group = createFormGroup({
     title: createFormControl("", {
@@ -50,52 +49,65 @@ const AddVideos = () => {
     let formData = new FormData();
     const data = group.value;
 
-    // Misalnya 'group' adalah input untuk file, tambahkan file ke dalam formData
-    // Asumsi 'group' adalah referensi ke input file dan hanya memproses file pertama
+    // Tambahkan data ke dalam formData
     formData.append("title", data.title);
     formData.append("description", data.description);
-    formData.append("file", data.files);
+    formData.append("file", data.files); // Asumsi mengambil file pertama
     formData.append("tags", data.tags);
     formData.append("type", "video");
 
-    // Jika ada data tambahan yang perlu dikirim, tambahkan ke formData
-    // Contoh: formData.append('key', 'value');
+    // Menampilkan Swal loading
+    Swal.fire({
+        title: 'Uploading...',
+        text: 'Please wait while the file is being uploaded.',
+        allowOutsideClick: false,
+        onBeforeOpen: () => {
+            Swal.showLoading();
+        },
+    });
 
     try {
-      // Menggunakan await untuk menunggu response dari API
-      // Pastikan untuk mengirimkan 'formData' sebagai data
-      const response = await api().post(
-        `/deck-explorer/storage?keyword=${id_last}`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data", // Penting untuk upload file
-          },
-        }
-      );
+        // Menggunakan await untuk menunggu response dari API
+        const response = await api().post(
+            `/deck-explorer/storage?keyword=${id_last}`,
+            formData,
+            {
+                headers: {
+                    "Content-Type": "multipart/form-data", // Penting untuk upload file
+                },
+            }
+        );
 
-      // Jika API berhasil
-      Swal.fire({
-        icon: "success",
-        title: "Success",
-        text: "data has been successfully add.",
-        didClose: () => {
-          redirect(modifiedUrl);
-        },
-      });
+        // Menutup Swal loading
+        Swal.close();
 
-      console.log("Response:", response); // Opsi: Tampilkan response di console
+        // Jika API berhasil
+        Swal.fire({
+            icon: "success",
+            title: "Success",
+            text: "Data has been successfully added.",
+            didClose: () => {
+                redirect(modifiedUrl);
+            },
+        });
+
+        console.log("Response:", response); // Opsi: Tampilkan response di console
     } catch (error) {
-      // Jika API gagal
-      Swal.fire({
-        icon: "error",
-        title: "Failed",
-        text: "There was an error.",
-      });
+        // Menutup Swal loading jika terjadi error
+        Swal.close();
 
-      console.error("Error:", error); // Opsi: Tampilkan error di console
+        // Jika API gagal
+        Swal.fire({
+            icon: "error",
+            title: "Failed",
+            text: "There was an error.",
+        });
+
+        console.error("Error:", error); // Opsi: Tampilkan error di console
     }
-  };
+};
+
+
 
   const onFiles = (e) => {
     const files = e.target.files;
