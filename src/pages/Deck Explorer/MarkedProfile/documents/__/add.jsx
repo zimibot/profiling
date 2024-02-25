@@ -123,7 +123,6 @@ const AddPDF = () => {
         text: errorMessage,
       });
 
-      console.error("Error:", error); // Opsi: Tampilkan error di console
     }
   };
 

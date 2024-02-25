@@ -301,7 +301,7 @@ export const route = [
                 ),
               },
               {
-                path: "/views",
+                path: "/views/:id",
                 component: lazy(() =>
                   import(
                     "../pages/Deck Explorer/MarkedProfile/documents/__/views"
@@ -309,7 +309,7 @@ export const route = [
                 ),
               },
               {
-                path: "/edit",
+                path: "/edit/:id",
                 component: lazy(() =>
                   import(
                     "../pages/Deck Explorer/MarkedProfile/documents/__/edit"
