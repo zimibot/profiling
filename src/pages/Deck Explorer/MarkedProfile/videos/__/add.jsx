@@ -18,6 +18,7 @@ import exampleVideo from "../../../../../assets/video/mov_bbb.mp4";
 import { mode } from "../../../../../helper/_helper.theme";
 import { createSignal } from "solid-js";
 import Swal from "sweetalert2";
+import { api } from "../../../../../helper/_helper.api";
 
 const AddVideos = () => {
   const [preview, setPreview] = createSignal();
@@ -193,6 +194,7 @@ const AddVideos = () => {
               <div className="space-y-2">
                 <div className="grid">
                   <Button
+                    type="submit"
                     variant="contained"
                     color="secondary"
                     startIcon={<Add></Add>}
