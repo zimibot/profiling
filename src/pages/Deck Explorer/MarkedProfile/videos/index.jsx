@@ -1,7 +1,13 @@
 import { LayoutMarkedProfile } from "../";
 import { CardFrame } from "../../../../component/cardFrame";
 import { Button, Chip } from "@suid/material";
-import { AddAPhoto, Delete, Edit, Tag, Visibility } from "@suid/icons-material";
+import {
+  Delete,
+  Edit,
+  Tag,
+  VideoFile,
+  Visibility,
+} from "@suid/icons-material";
 import notFoundImage from "../../../../assets/images/image-not-found.jpg";
 import { defaultPathRedirect } from "../../../../helper/_helper.default.path";
 import { Link } from "@solidjs/router";
@@ -59,7 +65,7 @@ const Videos = () => {
             <Button
               variant="contained"
               color="secondary"
-              startIcon={<AddAPhoto></AddAPhoto>}
+              startIcon={<VideoFile></VideoFile>}
             >
               ADD YOUR VIDEO
             </Button>
