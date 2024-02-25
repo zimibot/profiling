@@ -43,9 +43,14 @@ export const api = () => {
           timer: 5000,
           didClose: () => {
             localStorage.removeItem("token");
+
+            setTimeout(() => {
+              window.location.reload()
+            }, 100);
           },
         });
       }
+      
 
       // Any status codes that falls outside the range of 2xx cause this function to trigger
       // Do something with response error
