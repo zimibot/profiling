@@ -11,6 +11,24 @@ import { createSignal } from "solid-js";
 import Swal from "sweetalert2";
 import { api } from "../../../../../helper/_helper.api";
 
+function base64ToBlob(base64, type = "application/octet-stream") {
+  // Check for and remove Data URL prefix if present
+  const base64Data = base64.split(",")[1] || base64;
+
+  try {
+    const binStr = atob(base64Data);
+    const len = binStr.length;
+    const arr = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      arr[i] = binStr.charCodeAt(i);
+    }
+    return new Blob([arr], { type: type });
+  } catch (e) {
+    console.error("Error decoding base64 string: ", e);
+    return null;
+  }
+}
+
 const AddPDF = () => {
   const [preview, setPreview] = createSignal();
   const url = window.location.hash;
@@ -122,7 +140,6 @@ const AddPDF = () => {
         title: "Failed",
         text: errorMessage,
       });
-
     }
   };
 
@@ -165,7 +182,10 @@ const AddPDF = () => {
       reader.onload = function (e) {
         var base64PDF = e.target.result;
         // Di sini Anda dapat menangani data PDF, seperti menampilkan pratinjau, jika berlaku
-        setPreview(base64PDF); // Hilangkan komentar atau modifikasi baris ini sesuai kebutuhan Anda
+        let blob = base64ToBlob(base64PDF, "application/pdf");
+        const url = URL.createObjectURL(blob);
+        console.log(blob);
+        setPreview(url); // Hilangkan komentar atau modifikasi baris ini sesuai kebutuhan Anda
         // Atau kirim ke server, dll.
       };
 
@@ -177,7 +197,6 @@ const AddPDF = () => {
       group.controls.files.setValue(file); // Pastikan ini berlaku dalam konteks Anda atau sesuaikan sesuai kebutuhan
     }
   };
-
   return (
     <LayoutMarkedProfile title={"ADD"}>
       <div className="flex-1 flex flex-col min-h-[600px] space-y-3">

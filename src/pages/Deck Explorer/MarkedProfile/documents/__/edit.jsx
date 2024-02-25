@@ -173,7 +173,7 @@ const EditPicture = () => {
       console.error("Error:", error); // Opsi: Tampilkan error di console
     }
   };
-
+// http://localhost:3000/25-02-2024/thumbnails/aacc-belajar-dan-pembelajaran-001.jpg
   const onFiles = (e) => {
     const files = e.target.files;
 
