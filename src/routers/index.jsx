@@ -48,8 +48,12 @@ export const route = [
       },
       {
         path: "/connection",
-        component: lazy(() => import("../pages/SNA")),
+       
         children: [
+          {
+            path:"/",
+            component: lazy(() => import("../pages/SNA")),
+          },
           {
             path: "add",
             component: lazy(() =>

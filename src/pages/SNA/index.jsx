@@ -47,7 +47,11 @@ const Connection = () => {
           </div>
           <div className="absolute top-0 right-0 p-4 z-10">
             <div>
-              <Link href="/deck-explorer/"></Link>
+              <Link href="/deck-explorer/connection/add">
+                <Button color="secondary" variant="contained" startIcon={<Add></Add>}>
+                  Connection
+                </Button>
+              </Link>
             </div>
           </div>
         </CardBox>
