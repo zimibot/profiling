@@ -49,6 +49,14 @@ export const route = [
       {
         path: "/connection",
         component: lazy(() => import("../pages/SNA")),
+        children: [
+          {
+            path: "add",
+            component: lazy(() =>
+              import("../pages/SNA/__/add")
+            ),
+          },
+        ]
       },
       {
         path: "/search-result",

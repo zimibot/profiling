@@ -53,7 +53,7 @@ export const Diagram = () => {
       return "https://www.nwoods.com/images/emojiflags/" + nation + ".png";
     }
 
-    
+
     // define the Node template
 
     myDiagram.nodeTemplate = $(
@@ -94,7 +94,6 @@ export const Diagram = () => {
         strokeWidth: 0
       },
         new go.Binding("fill", "", function (v, shape) {
-          console.log(v.key)
           var node = shape.part;
           return v.key === 0 ? "#0083ff" : node.findTreeChildrenNodes().count > 0 ? "#0040c5" : "#222";
         }).ofObject()
@@ -156,7 +155,11 @@ export const Diagram = () => {
           fill: "#fff",
           stretch: go.GraphObject.Horizontal,
         },
-          new go.Binding("visible").ofObject("INFO")
+          new go.Binding("visible").ofObject("INFO"),
+          new go.Binding("stroke", "", function (v, shape) {
+            var node = shape.part;
+            return v.key === 0 ? "#fff" : node.findTreeChildrenNodes().count > 0 ? "#aaa" : "#444";
+          }).ofObject()
         ),
         $(
           go.Panel,
