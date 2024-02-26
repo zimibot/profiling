@@ -20,7 +20,7 @@ export const route = [
     ],
   },
   {
-    path: "deck-explorer",
+    path: "/deck-explorer",
     component: () => {
       return (
         <>
@@ -45,6 +45,10 @@ export const route = [
       {
         path: "/direct-tracking",
         component: lazy(() => import("../pages/Direct Tracking")),
+      },
+      {
+        path: "/connection",
+        component: lazy(() => import("../pages/SNA")),
       },
       {
         path: "/search-result",

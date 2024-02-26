@@ -91,6 +91,7 @@
     "electron-log": "^5.0.0",
     "electron-progressbar": "^2.1.0",
     "electron-updater": "^6.1.4",
+    "gojs": "^2.3.14",
     "jquery": "^3.7.1",
     "leaflet": "^1.9.4",
     "lightbox2": "^2.11.4",
