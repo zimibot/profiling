@@ -75,12 +75,12 @@ const DatabaseInformation = () => {
   });
 
   createEffect(() => {
-    var regexp = /^[\s()+-]*([0-9][\s()+-]*){6,20}$/;
-    var no = query;
+    // var regexp = /^[\s()+-]*([0-9][\s()+-]*){6,20}$/;
+    // var no = query;
 
-    if (!regexp.test(no) && no.length < 0) {
-      navi("/");
-    }
+    // if (!regexp.test(no) && no.length < 0) {
+    //   navi("/");
+    // }
 
     let count = countActiveStatus(true);
 
