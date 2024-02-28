@@ -379,6 +379,8 @@ const AddConnection = () => {
         console.log(onListFIles())
     })
 
+    const handleChange = () => { }
+
 
 
     return (
@@ -568,19 +570,27 @@ const AddConnection = () => {
                                 <div>
                                     <Tags label="DESCRIPTION"></Tags>
                                 </div>
-                                {/* <div className="bg-primarry-2 px-2 py-1">
+                                <div className="bg-primarry-2 px-2 py-1">
                                     <FormControl
-                                        sx={{
-                                            m: 1,
-                                            width: 300,
-                                        }}
+                                        // sx={{
+                                        //     m: 1,
+                                        //     width: 300,
+                                        // }}
+                                        class="w-full"
+                                        color="info"
                                     >
-                                        <InputLabel id="demo-multiple-chip-label">Chip</InputLabel>
+                                        <InputLabel id="demo-multiple-chip-label">Select</InputLabel>
                                         <Select
+                                            variant="filled"
                                             labelId="demo-multiple-chip-label"
                                             id="demo-multiple-chip"
                                             multiple
-                                            value={personName()}
+                                            size="small"
+                                            color="info"
+                                            sx={{
+                                                border: "0px solid #fff"
+                                            }}
+                                            // value={personName()}
                                             onChange={handleChange}
                                             input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
                                             renderValue={(selected) => (
@@ -596,16 +606,16 @@ const AddConnection = () => {
                                                     ))}
                                                 </Box>
                                             )}
-                                            MenuProps={MenuProps}
+                                        // MenuProps={MenuProps}
                                         >
-                                            {names.map((name) => (
+                                            {/* {names.map((name) => (
                                                 <MenuItem value={name}>
                                                     {name}
                                                 </MenuItem>
-                                            ))}
+                                            ))} */}
                                         </Select>
                                     </FormControl>
-                                </div> */}
+                                </div>
                             </div>
                         </div>
                     </div>
