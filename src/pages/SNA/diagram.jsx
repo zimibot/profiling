@@ -24,11 +24,19 @@ export const Diagram = () => {
       initialContentAlignment: go.Spot.Center,
       initialDocumentSpot: go.Spot.Top,
       initialViewportSpot: go.Spot.Top,
-      layout: $(go.ForceDirectedLayout, {
-        defaultSpringLength: 100, // Panjang pegas yang lebih panjang
-        defaultElectricalCharge: 200, // Muatan listrik yang lebih besar
-        maxIterations: 200, // Iterasi maksimum yang lebih banyak
-      }),
+      layout: $(go.TreeLayout,
+        {
+          treeStyle: go.TreeLayout.StyleLastParents,
+          arrangement: go.TreeLayout.ArrangementHorizontal,
+          // properties for most of the tree:
+          angle: 90,
+          layerSpacing: 35,
+          // properties for the "last parents":
+          alternateAngle: 90,
+          alternateLayerSpacing: 35,
+          alternateAlignment: go.TreeLayout.AlignmentBus,
+          alternateNodeSpacing: 20
+        }),
       "commandHandler.copiesTree": true,
       "commandHandler.deletesTree": true,
       "draggingTool.dragsTree": true,
