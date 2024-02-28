@@ -459,12 +459,7 @@ const AddConnection = () => {
         form.append("descriptionList", JSON.stringify(value.descriptionList)); // Assuming it's an array or object
 
         // Check if 'multipleFiles' is an array and append each file to the FormData
-        if (Array.isArray(value.multipleFiles)) {
-            value.multipleFiles.forEach((file, index) => {
-                // Use 'files[]' as the name to indicate it's an array of files
-                form.append(`files[${index}]`, file);
-            });
-        }
+        form.append(`file`, value.multipleFiles);
 
         // Adjust the API call to include the FormData and set the correct content type
         api().post("/deck-explorer/sna-data", form, {
