@@ -459,26 +459,46 @@ const AddConnection = () => {
         form.append("parent", value.parent);
         form.append("descriptionList", JSON.stringify(value.descriptionList)); // Assuming it's an array or object
 
-        console.log(value.multipleFiles)
-
         for (let i = 0; i < value.multipleFiles.length; i++) {
-            console.log(value.multipleFiles[i])
             form.append('file', value.multipleFiles[i]);
         }
 
 
         // Adjust the API call to include the FormData and set the correct content type
+        Swal.fire({
+            title: 'Uploading...',
+            html: 'Please wait while the files are being uploaded',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
+
+        // Melakukan request API
         api().post("/deck-explorer/sna-data", form, {
             headers: {
-                // FormData automatically sets the correct content-type; just ensure no content-type is set so axios doesn't override it
                 'Content-Type': 'multipart/form-data'
             }
         }).then(response => {
-            console.log(response);
-            // Handle success
+            Swal.close();
+            // Tampilkan notifikasi sukses
+            Swal.fire({
+                icon: 'success',
+                title: 'Uploaded!',
+                text: 'Your files have been uploaded successfully.',
+                didClose: () => {
+                    navi("/deck-explorer/connection")
+                }
+            });
         }).catch(error => {
+
             console.error(error);
-            // Handle error
+            // Tampilkan notifikasi error
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Something went wrong with the upload!',
+            });
         });
     };
 
