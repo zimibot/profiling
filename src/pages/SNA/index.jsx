@@ -29,24 +29,30 @@ const Connection = () => {
 
   const [onMinimze, setMinimize] = createSignal(false)
   const [data, setData] = createSignal()
+  const [currentData, setCurrentData] = createSignal()
   const onShow = () => {
     setMinimize(a => !a)
   }
 
   createEffect(() => {
     api().get("/deck-explorer/sna-data").then(a => {
-      console.log(a)
 
       setData(a.data.items)
     })
   })
 
-  const onSelect = (id) => {
+  const onSelect = (id, config) => {
     api().get(`/deck-explorer/sna-data-id?id=${id}`).then(a => {
-      console.log(a)
-
+      setCurrentData({
+        data: a.data,
+        config,
+      })
     })
   }
+
+  createEffect(() => {
+    console.log(currentData())
+  })
   return (
     <ContainerPages>
       <div className="flex flex-1 pt-4 gap-2">
@@ -55,7 +61,7 @@ const Connection = () => {
             {data() ? data().map((a) => {
               return (
                 <div onClick={() => {
-                  onSelect(a._id)
+                  onSelect(a._id, a.config)
                 }} className="p-4 bg-[#0f0f0f] shadow border-b border-blue-400 flex flex-col gap-4 cursor-pointer">
                   <div>
                     <div>
@@ -81,9 +87,10 @@ const Connection = () => {
         </div>
 
         <CardBox className={`flex-1 flex flex-col relative`} title={"Connection"}>
-          <div className="flex flex-col flex-1">
-            <Diagram></Diagram>
-          </div>
+          {currentData() ? <div className="flex flex-col flex-1">
+            <Diagram data={currentData}></Diagram>
+          </div> : ""}
+
           <div className="absolute top-0 right-0 p-4 z-10">
             <div>
               <Link href="/deck-explorer/connection/add">

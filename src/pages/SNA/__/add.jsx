@@ -59,6 +59,9 @@ const AddConnection = () => {
         parent: createFormControl("", {
             required: true,
         }),
+        sub_title: createFormControl("", {
+            required: true,
+        }),
 
         descriptionList: createFormControl("", {
             required: true,
@@ -457,6 +460,7 @@ const AddConnection = () => {
         form.append("description", value.description);
         form.append("root", value.root);
         form.append("parent", value.parent);
+        form.append("sub_title", value.sub_title);
         form.append("descriptionList", JSON.stringify(value.descriptionList)); // Assuming it's an array or object
 
         for (let i = 0; i < value.multipleFiles.length; i++) {
@@ -621,6 +625,26 @@ const AddConnection = () => {
                                                         group.controls.parent.setValue(e.target.value)
                                                     }}
                                                     value={group.controls.parent.value}
+                                                    className="bg-primarry-2 outline-none w-full p-2">
+                                                    <option value={""}>Select Parent</option>
+                                                    {onListFIles().column.map(a => {
+                                                        return <option value={a}>{a}</option>
+                                                    })}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div>
+                                                <Tags label="SUB TITLE*"></Tags>
+                                            </div>
+                                            <div className="bg-primarry-2 px-2 py-1">
+                                                <select
+
+                                                    required={group.controls.sub_title.isRequired}
+                                                    onChange={(e) => {
+                                                        group.controls.sub_title.setValue(e.target.value)
+                                                    }}
+                                                    value={group.controls.sub_title.value}
                                                     className="bg-primarry-2 outline-none w-full p-2">
                                                     <option value={""}>Select Parent</option>
                                                     {onListFIles().column.map(a => {

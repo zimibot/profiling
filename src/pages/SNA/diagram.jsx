@@ -3,23 +3,14 @@ import {
   createEffect
 } from "solid-js";
 
-export const Diagram = () => {
-  let myDiagram;
+export const Diagram = ({ data }) => {
+  let myDiagram, mt8, mr8, $, ml8;
 
-  function init() {
-    // Since 2.2 you can also author concise templates with method chaining instead of GraphObject.make
-    // For details, see https://gojs.net/latest/intro/buildingObjects.html
-    const $ = go.GraphObject.make; // for conciseness in defining templates
-
-    // some constants that will be reused within templates
-    var mt8 = new go.Margin(8, 0, 15, 0);
-    var mr8 = new go.Margin(0, 8, 0, 0);
-    var ml8 = new go.Margin(0, 0, 0, 8);
-    var roundedRectangleParams = {
-      parameter1: 2, // set the rounded corner
-      spot1: go.Spot.TopLeft,
-      spot2: go.Spot.BottomRight, // make content go all the way to inside edges of rounded corners
-    };
+  createEffect(() => {
+    $ = go.GraphObject.make; // for conciseness in defining templates
+    mt8 = new go.Margin(8, 0, 15, 0);
+    mr8 = new go.Margin(0, 8, 0, 0);
+    ml8 = new go.Margin(0, 0, 0, 8);
     myDiagram = new go.Diagram("myDiagramDiv", {
       initialContentAlignment: go.Spot.Center,
       initialDocumentSpot: go.Spot.Top,
@@ -43,6 +34,17 @@ export const Diagram = () => {
       "undoManager.isEnabled": true
     });
 
+  })
+
+  function init() {
+    // Since 2.2 you can also author concise templates with method chaining instead of GraphObject.make
+    // For details, see https://gojs.net/latest/intro/buildingObjects.html
+
+    var roundedRectangleParams = {
+      parameter1: 2, // set the rounded corner
+      spot1: go.Spot.TopLeft,
+      spot2: go.Spot.BottomRight, // make content go all the way to inside edges of rounded corners
+    };
 
     // This function provides a common style for most of the TextBlocks.
     // Some of these values may be overridden in a particular TextBlock.
@@ -134,7 +136,7 @@ export const Diagram = () => {
               stroke: "#fff",
               maxSize: new go.Size(160, NaN),
             },
-              new go.Binding("text", "name")
+              new go.Binding("text", data().config.parent)
             ),
             $(
               go.TextBlock,
@@ -186,7 +188,7 @@ export const Diagram = () => {
             go.TextBlock,
             textStyle("boss"),
             new go.Binding("margin", "headOf", (head) => mt8),
-            new go.Binding("text", "boss", (boss) => {
+            new go.Binding("text", data().config.parent, (boss) => {
               var boss = myDiagram.model.findNodeDataForKey(boss);
               return boss !== null ? "Reporting to: " + boss.name : "";
             })
@@ -280,6 +282,19 @@ export const Diagram = () => {
     // });
 
     // set up the nodeDataArray, describing each person/position
+
+
+    // create the Model with data for the tree, and assign to the Diagram
+
+  }
+
+  // the Search functionality highlights all of the nodes that have at least one data property match a RegExp
+
+
+
+  createEffect(() => {
+    init();
+    console.log(data())
     var nodeDataArray = [{
       key: 0,
       name: "Ban Ki-moon 반기문",
@@ -345,18 +360,11 @@ export const Diagram = () => {
     },
     ];
 
-    // create the Model with data for the tree, and assign to the Diagram
     myDiagram.model = new go.TreeModel({
-      nodeParentKeyProperty: "boss", // this property refers to the parent node data
-      nodeDataArray: nodeDataArray,
+      nodeParentKeyProperty: data().config.parent, // this property refers to the parent node data
+      nodeDataArray: data().data,
     });
-  }
-
-  // the Search functionality highlights all of the nodes that have at least one data property match a RegExp
-
-  createEffect(() => {
-    init();
-  });
+  })
 
   return (<div className="w-full h-full" >
     <div id="myDiagramDiv" className="w-full h-full"> </div>
