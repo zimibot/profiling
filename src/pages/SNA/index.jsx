@@ -24,6 +24,7 @@ const formatDate = (dateString) => {
   }
 }
 
+
 const Connection = () => {
 
   const [onMinimze, setMinimize] = createSignal(false)
@@ -39,6 +40,13 @@ const Connection = () => {
       setData(a.data.items)
     })
   })
+
+  const onSelect = (id) => {
+    api().get(`/deck-explorer/sna-data-id?id=${id}`).then(a => {
+      console.log(a)
+
+    })
+  }
   return (
     <ContainerPages>
       <div className="flex flex-1 pt-4 gap-2">
@@ -46,7 +54,9 @@ const Connection = () => {
           <div className={`${onMinimze() && "opacity-0"} absolute w-full h-full overflow-auto p-2 left-0 top-0 flex flex-col gap-2`}>
             {data() ? data().map((a) => {
               return (
-                <div className="p-4 bg-[#0f0f0f] shadow border-b border-blue-400 flex flex-col gap-4 cursor-pointer">
+                <div onClick={() => {
+                  onSelect(a._id)
+                }} className="p-4 bg-[#0f0f0f] shadow border-b border-blue-400 flex flex-col gap-4 cursor-pointer">
                   <div>
                     <div>
                       <p className="text-blue-300 font-bold">{a.title}</p>
