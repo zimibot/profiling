@@ -448,6 +448,8 @@ const AddConnection = () => {
 
         const { value } = group
 
+        console.log(value)
+
     }
 
 
