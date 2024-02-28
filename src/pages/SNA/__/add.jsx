@@ -7,6 +7,7 @@ import { CardBox } from "../../../component/cardBox";
 import { createFormControl, createFormGroup } from "solid-forms";
 import { Tags } from "../../../component/tags";
 import Swal from "sweetalert2";
+import { api } from "../../../helper/_helper.api";
 
 const AddConnection = () => {
 
@@ -17,8 +18,8 @@ const AddConnection = () => {
     const [onMinimze, setMinimize] = createSignal(false)
     const [display, setdisplay] = createSignal()
     const [onListFIles, setListFiles] = createSignal({
-        mutipleFilesOriginal: [],
-        mutipleFiles: [],
+        multipleFilesOriginal: [],
+        multipleFiles: [],
         dataJson: {
             title: null,
             data: [],
@@ -48,7 +49,7 @@ const AddConnection = () => {
             required: true,
         }),
 
-        mutipleFiles: createFormControl("", {
+        multipleFiles: createFormControl("", {
             required: true,
         }),
 
@@ -59,7 +60,7 @@ const AddConnection = () => {
             required: true,
         }),
 
-        description: createFormControl("", {
+        descriptionList: createFormControl("", {
             required: true,
         }),
 
@@ -67,12 +68,12 @@ const AddConnection = () => {
     });
 
     createEffect(() => {
-        if (onListFIles().mutipleFilesOriginal.length !== 0) {
-            group.controls.mutipleFiles.setValue(onListFIles().mutipleFilesOriginal)
-            group.controls.mutipleFiles.markRequired(false)
+        if (onListFIles().multipleFilesOriginal.length !== 0) {
+            group.controls.multipleFiles.setValue(onListFIles().multipleFilesOriginal)
+            group.controls.multipleFiles.markRequired(false)
         } else {
-            group.controls.mutipleFiles.setValue([])
-            group.controls.mutipleFiles.markRequired(true)
+            group.controls.multipleFiles.setValue([])
+            group.controls.multipleFiles.markRequired(true)
         }
     })
 
@@ -98,7 +99,7 @@ const AddConnection = () => {
             if (file.type === "text/csv" || file.name.endsWith('.csv') || file.type === "text/plain" || file.name.endsWith('.txt')) {
 
                 // Check for duplicate file names
-                let isDuplicate = onListFIles().mutipleFiles.some(existingFile => existingFile.name === file.name);
+                let isDuplicate = onListFIles().multipleFiles.some(existingFile => existingFile.name === file.name);
 
                 if (isDuplicate) {
                     // Alert user about the duplicate file name
@@ -143,13 +144,13 @@ const AddConnection = () => {
                                 ...a.dataJson,
                                 title: file.name
                             },
-                            mutipleFiles: [fileDetails, ...a.mutipleFiles].map(a => {
+                            multipleFiles: [fileDetails, ...a.multipleFiles].map(a => {
                                 return ({
                                     ...a,
                                     active: a.url === blobUrl
                                 })
                             }),
-                            mutipleFilesOriginal: [...a.mutipleFilesOriginal, file] // Ensure you're adding the file itself correctly
+                            multipleFilesOriginal: [...a.multipleFilesOriginal, file] // Ensure you're adding the file itself correctly
                         }));
 
                         // setdisplay(blobUrl)
@@ -191,7 +192,7 @@ const AddConnection = () => {
 
     const handleDeleteFile = (fileName) => {
         // Filter out the file to delete
-        let mutipleFiles = (a) => a.filter(file => file.name !== fileName)
+        let multipleFiles = (a) => a.filter(file => file.name !== fileName)
 
         setListFiles((a) => ({
             ...a,
@@ -199,12 +200,12 @@ const AddConnection = () => {
                 ...a.dataJson,
                 data: a.dataJson.title === fileName ? [] : a.dataJson.data
             },
-            mutipleFiles: mutipleFiles(a.mutipleFiles),
-            mutipleFilesOriginal: mutipleFiles(a.mutipleFilesOriginal),
+            multipleFiles: multipleFiles(a.multipleFiles),
+            multipleFilesOriginal: multipleFiles(a.multipleFilesOriginal),
 
         }))
 
-        if (onListFIles().mutipleFiles.length === 0) {
+        if (onListFIles().multipleFiles.length === 0) {
             console.log("tester")
             setonShowConfig(false)
             setListFiles((a) => ({
@@ -259,7 +260,7 @@ const AddConnection = () => {
                 ...a.dataJson,
                 title: name
             },
-            mutipleFiles: a.mutipleFiles.map((s) => {
+            multipleFiles: a.multipleFiles.map((s) => {
                 if (s.url === url) {
                     s.active = true;
                 } else {
@@ -412,7 +413,7 @@ const AddConnection = () => {
 
         setSelect(value)
 
-        group.controls.description.setValue(value)
+        group.controls.descriptionList.setValue(value)
 
     }
 
@@ -433,7 +434,7 @@ const AddConnection = () => {
 
     const onSubmitClick = () => {
         setTimeout(() => {
-            if (onListFIles().mutipleFiles.length > 0) {
+            if (onListFIles().multipleFiles.length > 0) {
                 setonShowConfig(true)
             }
         }, 100);
@@ -441,16 +442,45 @@ const AddConnection = () => {
     }
 
 
-
     const onSubmit = (e) => {
-        console.log("submit")
-        e.preventDefault()
+        console.log("submit");
+        e.preventDefault();
 
-        const { value } = group
+        const form = new FormData();
 
-        console.log(value)
+        // Assuming 'group.value' holds your form data
+        const { value } = group;
 
-    }
+        // Append text fields
+        form.append("title", value.title);
+        form.append("description", value.description);
+        form.append("root", value.root);
+        form.append("parent", value.parent);
+        form.append("descriptionList", JSON.stringify(value.descriptionList)); // Assuming it's an array or object
+
+        // Check if 'multipleFiles' is an array and append each file to the FormData
+        if (Array.isArray(value.multipleFiles)) {
+            value.multipleFiles.forEach((file, index) => {
+                // Use 'files[]' as the name to indicate it's an array of files
+                form.append(`files[${index}]`, file);
+            });
+        }
+
+        // Adjust the API call to include the FormData and set the correct content type
+        api().post("/deck-explorer/sna-data", form, {
+            headers: {
+                // FormData automatically sets the correct content-type; just ensure no content-type is set so axios doesn't override it
+                'Content-Type': 'multipart/form-data'
+            }
+        }).then(response => {
+            console.log(response);
+            // Handle success
+        }).catch(error => {
+            console.error(error);
+            // Handle error
+        });
+    };
+
 
 
 
@@ -498,7 +528,7 @@ const AddConnection = () => {
                                 <div className="relative flex justify-between items-center">
                                     <div>
                                         <Button color="secondary" variant="contained" startIcon={<Upload></Upload>}>
-                                            <input required={group.controls.mutipleFiles.isRequired} id="input" accept=".csv,text/csv,.txt,text/plain" multiple onChange={onMultipleFiles} type="file" className="w-full h-full opacity-0 absolute"></input> Upload FIles .Csv or .txt*
+                                            <input required={group.controls.multipleFiles.isRequired} id="input" accept=".csv,text/csv,.txt,text/plain" multiple onChange={onMultipleFiles} type="file" className="w-full h-full opacity-0 absolute"></input> Upload FIles .Csv or .txt*
                                         </Button>
                                     </div>
                                     <div>
@@ -509,9 +539,9 @@ const AddConnection = () => {
                                 </div>
                                 <div className="grid gap-4 flex-1 relative">
                                     <div className="flex flex-col absolute h-full w-full left-0 top-0  gap-2">
-                                        {onListFIles().mutipleFiles.length === 0 ? <div className="w-full h-full flex items-center justify-center">
+                                        {onListFIles().multipleFiles.length === 0 ? <div className="w-full h-full flex items-center justify-center">
                                             Files Empty
-                                        </div> : onListFIles().mutipleFiles.map((d) => {
+                                        </div> : onListFIles().multipleFiles.map((d) => {
                                             return <div className="bg-primarry-2 p-2 flex justify-between items-center gap-2 border-b border-blue-400" title={d.name}>
                                                 <div className=" overflow-hidden">
                                                     <div className="font-bold text-nowrap overflow-hidden text-ellipsis">{d.name}</div>
@@ -603,7 +633,7 @@ const AddConnection = () => {
                                                         size="small"
                                                         color="secondary"
                                                         value={select()}
-                                                        required={group.controls.description.isRequired}
+                                                        required={group.controls.descriptionList.isRequired}
                                                         sx={{
                                                             border: "1px solid #323232",
                                                             color: "white",
@@ -669,7 +699,7 @@ const AddConnection = () => {
 
                 <CardBox className={`flex-1 flex flex-col relative gap-2`} title={"Table List Preview"}>
                     <div className="flex gap-2 overflow-auto flex-nowrap pb-2">
-                        {onListFIles().mutipleFiles.map((a) => {
+                        {onListFIles().multipleFiles.map((a) => {
                             return <div>
                                 <Button title={a.name} class="max-w-56" onClick={() => onPreview(a.url, a.name)} variant="contained" color="secondary" startIcon={a.active ? <CheckBox></CheckBox> : <CheckBoxOutlineBlank></CheckBoxOutlineBlank>}>
                                     <div className="whitespace-nowrap text-ellipsis overflow-hidden">
