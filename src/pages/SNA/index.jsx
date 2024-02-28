@@ -2,16 +2,22 @@ import { Add, ArrowBack, ArrowLeft, ArrowRight } from "@suid/icons-material";
 import ContainerPages from "..";
 import { CardBox } from "../../component/cardBox";
 import { Diagram } from "./diagram";
-import { createSignal } from "solid-js";
+import { createEffect, createSignal } from "solid-js";
 import { Button, IconButton } from "@suid/material";
 import { Link } from "@solidjs/router";
+import { api } from "../../helper/_helper.api";
 
 const Connection = () => {
 
   const [onMinimze, setMinimize] = createSignal(false)
+  const [data,setData] = createSignal()
   const onShow = () => {
     setMinimize(a => !a)
   }
+
+  createEffect(() => {
+    api()
+  })
   return (
     <ContainerPages>
       <div className="flex flex-1 pt-4">
