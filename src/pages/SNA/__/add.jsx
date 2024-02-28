@@ -1,6 +1,6 @@
 import { Add, ArrowLeft, ArrowRight, Check, CheckBox, CheckBoxOutlineBlank, Close, Delete, Search, Settings, Upload } from "@suid/icons-material";
 import { createEffect, createSignal, onCleanup } from "solid-js";
-import { Box, Button, Drawer, FormControl, IconButton, InputBase, InputLabel, MenuItem, OutlinedInput, Select } from "@suid/material";
+import { Box, Button, Chip, Drawer, FormControl, IconButton, InputBase, MenuItem, OutlinedInput, Select } from "@suid/material";
 import { useNavigate } from "@solidjs/router";
 import ContainerPages from "../..";
 import { CardBox } from "../../../component/cardBox";
@@ -11,7 +11,8 @@ import Swal from "sweetalert2";
 const AddConnection = () => {
 
     const navi = useNavigate()
-
+    const [select, setSelect] = createSignal([])
+    const [onShowConfig, setonShowConfig] = createSignal(false)
     const [search, setsearch] = createSignal(null)
     const [onMinimze, setMinimize] = createSignal(false)
     const [display, setdisplay] = createSignal()
@@ -46,7 +47,35 @@ const AddConnection = () => {
         description: createFormControl("", {
             required: true,
         }),
+
+        mutipleFiles: createFormControl("", {
+            required: true,
+        }),
+
+        root: createFormControl("", {
+            required: true,
+        }),
+        parent: createFormControl("", {
+            required: true,
+        }),
+
+        description: createFormControl("", {
+            required: true,
+        }),
+
+
     });
+
+    createEffect(() => {
+        if (onListFIles().mutipleFilesOriginal.length !== 0) {
+            group.controls.mutipleFiles.setValue(onListFIles().mutipleFilesOriginal)
+            group.controls.mutipleFiles.markRequired(false)
+        } else {
+            group.controls.mutipleFiles.setValue([])
+            group.controls.mutipleFiles.markRequired(true)
+        }
+    })
+
 
     const onMultipleFiles = async (e) => {
         const files = e.target.files;
@@ -171,21 +200,23 @@ const AddConnection = () => {
                 data: a.dataJson.title === fileName ? [] : a.dataJson.data
             },
             mutipleFiles: mutipleFiles(a.mutipleFiles),
-            mutipleFilesOriginal: mutipleFiles(a.mutipleFilesOriginal)
+            mutipleFilesOriginal: mutipleFiles(a.mutipleFilesOriginal),
+
         }))
+
+        if (onListFIles().mutipleFiles.length === 0) {
+            console.log("tester")
+            setonShowConfig(false)
+            setListFiles((a) => ({
+                ...a,
+                column: []
+
+            }))
+        }
 
         document.getElementById('input').value = '';
 
     };
-
-    const onSubmit = (e) => {
-        e.preventDefault()
-
-        const { value } = group
-
-        console.log(onListFIles())
-    }
-
 
 
     function csvToJson(csv) {
@@ -375,11 +406,51 @@ const AddConnection = () => {
 
 
 
-    createEffect(() => {
-        console.log(onListFIles())
-    })
 
-    const handleChange = () => { }
+    const handleChange = (e) => {
+        const value = e.target.value
+
+        setSelect(value)
+
+        group.controls.description.setValue(value)
+
+    }
+
+    const onConfig = () => {
+        if (onListFIles().column.length <= 0) {
+            // If the length of column is not greater than 0, show a SweetAlert2 notification
+            Swal.fire({
+                title: 'Error!',
+                text: 'Please upload your files first!',
+                icon: 'error',
+                confirmButtonText: 'Ok'
+            });
+        } else {
+            // If the length of column is greater than 0, perform another action
+            setonShowConfig(a => !a);
+        }
+    }
+
+    const onSubmitClick = () => {
+        setTimeout(() => {
+            if (onListFIles().mutipleFiles.length > 0) {
+                setonShowConfig(true)
+            }
+        }, 100);
+
+    }
+
+
+
+    const onSubmit = (e) => {
+        console.log("submit")
+        e.preventDefault()
+
+        const { value } = group
+
+    }
+
+
 
 
 
@@ -387,17 +458,17 @@ const AddConnection = () => {
         <ContainerPages>
             <div className="flex flex-1 pt-4 gap-1">
                 <div className={`w-96 ${onMinimze() && "!w-0"} bg-primarry-1 relative items-center flex flex-col justify-center z-10 transition-all`}>
-                    <div className={`${onMinimze() && "opacity-0"} absolute w-full h-full overflow-auto p-4 left-0 top-0 grid gap-2`}>
+                    <div className={`${onMinimze() && "opacity-0"} absolute w-full h-full  p-4 left-0 top-0 grid gap-2`}>
                         <div className="flex flex-col">
                             <form onSubmit={onSubmit} className="flex flex-col gap-2 flex-1">
                                 <div className="w-full">
-                                    <Button type="submit" fullWidth startIcon={<Add></Add>} variant="contained" color="secondary">
+                                    <Button onClick={onSubmitClick} type="submit" fullWidth startIcon={<Add></Add>} variant="contained" color="secondary">
                                         SUBMIT
                                     </Button>
                                 </div>
                                 <div>
                                     <div>
-                                        <Tags label="TITLE CONNECTION"></Tags>
+                                        <Tags label="TITLE CONNECTION*"></Tags>
                                     </div>
                                     <div className="bg-primarry-2 px-2 py-1">
                                         <InputBase
@@ -425,17 +496,17 @@ const AddConnection = () => {
                                 <div className="relative flex justify-between items-center">
                                     <div>
                                         <Button color="secondary" variant="contained" startIcon={<Upload></Upload>}>
-                                            <input id="input" accept=".csv,text/csv,.txt,text/plain" multiple onChange={onMultipleFiles} type="file" className="w-full h-full opacity-0 absolute"></input> Upload FIles .Csv or .txt
+                                            <input required={group.controls.mutipleFiles.isRequired} id="input" accept=".csv,text/csv,.txt,text/plain" multiple onChange={onMultipleFiles} type="file" className="w-full h-full opacity-0 absolute"></input> Upload FIles .Csv or .txt*
                                         </Button>
                                     </div>
                                     <div>
-                                        <Button color="info" startIcon={<Settings></Settings>}>
+                                        <Button onClick={onConfig} color={onShowConfig() ? "error" : "info"} startIcon={<Settings></Settings>}>
                                             Config
                                         </Button>
                                     </div>
                                 </div>
                                 <div className="grid gap-4 flex-1 relative">
-                                    <div className="flex flex-col absolute h-full w-full left-0 top-0 overflow-auto gap-2">
+                                    <div className="flex flex-col absolute h-full w-full left-0 top-0  gap-2">
                                         {onListFIles().mutipleFiles.length === 0 ? <div className="w-full h-full flex items-center justify-center">
                                             Files Empty
                                         </div> : onListFIles().mutipleFiles.map((d) => {
@@ -457,6 +528,132 @@ const AddConnection = () => {
                                         })}
                                     </div>
 
+                                </div>
+                                <div className={`absolute w-80 bg-[#1b1b1b] h-full right-[1000px] top-0 z-10  transition-all ${onShowConfig() ? "opacity-100 right-[-350px]" : "opacity-0"}`}>
+                                    <div className="flex justify-between items-center p-2">
+                                        <div className="pl-4">CONFIG</div>
+                                        <IconButton color="error" onClick={onConfig}>
+                                            <Close></Close>
+                                        </IconButton>
+                                    </div>
+                                    <div className="px-4 flex gap-2 flex-col">
+                                        <div>
+                                            <div>
+                                                <Tags label="ROOT*"></Tags>
+                                            </div>
+                                            <div className="bg-primarry-2 px-2 py-1">
+                                                <select
+                                                    required={group.controls.root.isRequired}
+                                                    onChange={(e) => {
+                                                        group.controls.root.setValue(e.target.value)
+                                                    }}
+                                                    value={group.controls.root.value}
+                                                    className="bg-primarry-2 outline-none w-full p-2">
+                                                    <option value={""}>Select Root</option>
+                                                    {onListFIles().column.map(a => {
+                                                        return <option value={a}>{a}</option>
+                                                    })}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div>
+                                                <Tags label="PARENT*"></Tags>
+                                            </div>
+                                            <div className="bg-primarry-2 px-2 py-1">
+                                                <select
+
+                                                    required={group.controls.parent.isRequired}
+                                                    onChange={(e) => {
+                                                        group.controls.parent.setValue(e.target.value)
+                                                    }}
+                                                    value={group.controls.parent.value}
+                                                    className="bg-primarry-2 outline-none w-full p-2">
+                                                    <option value={""}>Select Parent</option>
+                                                    {onListFIles().column.map(a => {
+                                                        return <option value={a}>{a}</option>
+                                                    })}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div>
+                                                <Tags label="DESCRIPTION*"></Tags>
+                                            </div>
+                                            <div className=" px-2 py-1 bg-primarry-2">
+                                                <FormControl
+                                                    // sx={{
+                                                    //     m: 1,
+                                                    //     width: 300,
+                                                    // }}
+                                                    class="w-full"
+                                                    color="info"
+
+                                                >
+
+                                                    <Select
+                                                        placeholder="Select"
+                                                        variant="standard"
+
+                                                        labelId="demo-multiple-chip-label"
+                                                        id="demo-multiple-chip"
+                                                        multiple
+                                                        size="small"
+                                                        color="secondary"
+                                                        value={select()}
+                                                        required={group.controls.description.isRequired}
+                                                        sx={{
+                                                            border: "1px solid #323232",
+                                                            color: "white",
+                                                            "& .Mui-selected": {
+                                                                background: "red !important"
+                                                            }
+                                                        }}
+                                                        // value={personName()}
+                                                        onChange={handleChange}
+                                                        input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
+                                                        renderValue={(selected) => (
+                                                            <Box
+                                                                sx={{
+                                                                    display: "flex",
+                                                                    flexWrap: "wrap",
+                                                                    gap: 0.5,
+                                                                }}
+                                                            >
+                                                                {selected.map((value) => (
+                                                                    <Chip color="info" label={value} />
+                                                                ))}
+                                                            </Box>
+                                                        )}
+                                                    // MenuProps={MenuProps}
+                                                    >
+                                                        {onListFIles().column.map((name) => (
+                                                            <MenuItem value={name} sx={{
+                                                                '&.Mui-selected': {
+                                                                    color: "white",
+                                                                    bgcolor: "#222"
+                                                                },
+                                                                '&.Mui-selected': {
+                                                                    color: "white",
+                                                                    bgcolor: "#222",
+                                                                    "&:hover": {
+                                                                        color: "#fff",
+                                                                        bgcolor: "#222",
+                                                                    }
+                                                                },
+                                                                '&:hover': {
+                                                                    bgcolor: "#222",
+                                                                    color: "white"
+                                                                }
+                                                            }}>
+                                                                {name}
+                                                            </MenuItem>
+                                                        ))}
+                                                    </Select>
+                                                </FormControl>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </form>
                         </div>
@@ -480,6 +677,7 @@ const AddConnection = () => {
                             </div>
                         })}
                     </div>
+
                     {onListFIles().dataJson.data.length > 0 && <div className="flex gap-2 justify-between">
                         <div className="py-1 px-3 bg-primarry-2 flex items-center gap-2">
                             <Search></Search>
@@ -533,92 +731,7 @@ const AddConnection = () => {
                             </>}
                         </div>
                     </div>
-                    <div className="absolute w-80 bg-[#1b1b1b] h-full left-0 top-0 z-10">
-                        <div className="flex justify-end p-2">
-                            <IconButton color="error">
-                                <Close></Close>
-                            </IconButton>
-                        </div>
-                        <div className="px-4 flex gap-2 flex-col">
-                            <div>
-                                <div>
-                                    <Tags label="ROOT"></Tags>
-                                </div>
-                                <div className="bg-primarry-2 px-2 py-1">
-                                    <select className="bg-primarry-2 outline-none w-full p-2">
-                                        <option>Select Root</option>
-                                        {onListFIles().column.map(a => {
-                                            return <option value={a}>{a}</option>
-                                        })}
-                                    </select>
-                                </div>
-                            </div>
-                            <div>
-                                <div>
-                                    <Tags label="PARENT"></Tags>
-                                </div>
-                                <div className="bg-primarry-2 px-2 py-1">
-                                    <select className="bg-primarry-2 outline-none w-full p-2">
-                                        <option>Select Parent</option>
-                                        {onListFIles().column.map(a => {
-                                            return <option value={a}>{a}</option>
-                                        })}
-                                    </select>
-                                </div>
-                            </div>
-                            <div>
-                                <div>
-                                    <Tags label="DESCRIPTION"></Tags>
-                                </div>
-                                <div className="bg-primarry-2 px-2 py-1">
-                                    <FormControl
-                                        // sx={{
-                                        //     m: 1,
-                                        //     width: 300,
-                                        // }}
-                                        class="w-full"
-                                        color="info"
-                                    >
-                                        <InputLabel id="demo-multiple-chip-label">Select</InputLabel>
-                                        <Select
-                                            variant="filled"
-                                            labelId="demo-multiple-chip-label"
-                                            id="demo-multiple-chip"
-                                            multiple
-                                            size="small"
-                                            color="info"
-                                            sx={{
-                                                border: "0px solid #fff"
-                                            }}
-                                            // value={personName()}
-                                            onChange={handleChange}
-                                            input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
-                                            renderValue={(selected) => (
-                                                <Box
-                                                    sx={{
-                                                        display: "flex",
-                                                        flexWrap: "wrap",
-                                                        gap: 0.5,
-                                                    }}
-                                                >
-                                                    {selected.map((value) => (
-                                                        <Chip label={value} />
-                                                    ))}
-                                                </Box>
-                                            )}
-                                        // MenuProps={MenuProps}
-                                        >
-                                            {/* {names.map((name) => (
-                                                <MenuItem value={name}>
-                                                    {name}
-                                                </MenuItem>
-                                            ))} */}
-                                        </Select>
-                                    </FormControl>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+
                 </CardBox>
             </div>
         </ContainerPages>
