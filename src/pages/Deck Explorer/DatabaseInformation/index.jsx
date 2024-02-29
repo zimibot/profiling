@@ -202,25 +202,25 @@ const DatabaseInformation = () => {
 
   const onCopy = (text) => {
     // Buat sebuah area teks sementara
-    const tempElement = document.createElement("div");
-    tempElement.textContent = text;
-    document.body.appendChild(tempElement);
+    // const tempElement = document.createElement("div");
+    // tempElement.textContent = text;
+    // document.body.appendChild(tempElement);
 
-    // Seleksi teks dalam area teks sementara
-    const selection = window.getSelection();
-    const range = document.createRange();
-    range.selectNodeContents(tempElement);
-    selection.removeAllRanges();
-    selection.addRange(range);
+    // // Seleksi teks dalam area teks sementara
+    // const selection = window.getSelection();
+    // const range = document.createRange();
+    // range.selectNodeContents(tempElement);
+    // selection.removeAllRanges();
+    // selection.addRange(range);
 
-    // Salin teks ke clipboard
-    document.execCommand("copy");
+    // // Salin teks ke clipboard
+    // document.execCommand("copy");
 
-    // Hapus area teks sementara
-    document.body.removeChild(tempElement);
+    // // Hapus area teks sementara
+    // document.body.removeChild(tempElement);
 
-    // Beri pesan pemberitahuan
-    alert("The text has been copied successfully");
+    // // Beri pesan pemberitahuan
+    // alert("The text has been copied successfully");
   };
 
   const onAdd = () => {
