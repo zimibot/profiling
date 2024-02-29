@@ -3,23 +3,17 @@ import {
   createEffect
 } from "solid-js";
 
-export const Diagram = () => {
-  let myDiagram;
+export const Diagram = ({ data }) => {
+  let myDiagram, $, mt8, mr8, ml8;
 
-  function init() {
-    // Since 2.2 you can also author concise templates with method chaining instead of GraphObject.make
-    // For details, see https://gojs.net/latest/intro/buildingObjects.html
-    const $ = go.GraphObject.make; // for conciseness in defining templates
+  createEffect(() => {
+    $ = go.GraphObject.make; // for conciseness in defining templates
 
     // some constants that will be reused within templates
-    var mt8 = new go.Margin(8, 0, 15, 0);
-    var mr8 = new go.Margin(0, 8, 0, 0);
-    var ml8 = new go.Margin(0, 0, 0, 8);
-    var roundedRectangleParams = {
-      parameter1: 2, // set the rounded corner
-      spot1: go.Spot.TopLeft,
-      spot2: go.Spot.BottomRight, // make content go all the way to inside edges of rounded corners
-    };
+    mt8 = new go.Margin(8, 0, 15, 0);
+    mr8 = new go.Margin(0, 8, 0, 0);
+    ml8 = new go.Margin(0, 0, 0, 8);
+
     myDiagram = new go.Diagram("myDiagramDiv", {
       initialContentAlignment: go.Spot.Center,
       initialDocumentSpot: go.Spot.Top,
@@ -42,8 +36,18 @@ export const Diagram = () => {
       "draggingTool.dragsTree": true,
       "undoManager.isEnabled": true
     });
+  })
+
+  function init() {
+    // Since 2.2 you can also author concise templates with method chaining instead of GraphObject.make
+    // For details, see https://gojs.net/latest/intro/buildingObjects.html
 
 
+    var roundedRectangleParams = {
+      parameter1: 2, // set the rounded corner
+      spot1: go.Spot.TopLeft,
+      spot2: go.Spot.BottomRight, // make content go all the way to inside edges of rounded corners
+    };
     // This function provides a common style for most of the TextBlocks.
     // Some of these values may be overridden in a particular TextBlock.
     function textStyle(field) {
@@ -134,7 +138,7 @@ export const Diagram = () => {
               stroke: "#fff",
               maxSize: new go.Size(160, NaN),
             },
-              new go.Binding("text", "name")
+              new go.Binding("text", data().config.root)
             ),
             $(
               go.TextBlock,
@@ -345,17 +349,46 @@ export const Diagram = () => {
     },
     ];
 
+
     // create the Model with data for the tree, and assign to the Diagram
-    myDiagram.model = new go.TreeModel({
-      nodeParentKeyProperty: "boss", // this property refers to the parent node data
-      nodeDataArray: nodeDataArray,
-    });
+
   }
 
   // the Search functionality highlights all of the nodes that have at least one data property match a RegExp
 
   createEffect(() => {
     init();
+
+    let filteredByBNumber = data().data.filter(item => item.BNUMBER.startsWith('62'));
+
+
+    let filteredNodeData = filteredByBNumber.reduce((acc, current) => {
+      if (!acc.find(item => item.ANUMBER === current.ANUMBER)) {
+        acc.push(current);
+      }
+      return acc;
+    }, []);
+
+    // Melakukan modifikasi pada nodeData berdasarkan filteredNodeData
+    let modifiedNodeData = filteredByBNumber.map(item => {
+      let foundItem = filteredNodeData.find(filteredItem => filteredItem.ANUMBER === item.ANUMBER);
+      if (foundItem) {
+        return { ...item, ANUMBER: item.BNUMBER, BNUMBER: item.ANUMBER };
+      }
+      return item;
+    });
+
+    const currentData = [...filteredNodeData, ...modifiedNodeData]
+
+    myDiagram.model = new go.TreeModel({
+      nodeKeyProperty: data().config.root,
+      nodeParentKeyProperty: data().config.parent, // this property refers to the parent node data
+      nodeDataArray: currentData,
+    });
+
+    console.log([...filteredNodeData, ...modifiedNodeData])
+
+
   });
 
   return (<div className="w-full h-full" >
