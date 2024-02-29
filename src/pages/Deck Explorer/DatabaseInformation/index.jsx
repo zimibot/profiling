@@ -179,17 +179,17 @@ const DatabaseInformation = () => {
   });
 
   createEffect(() => {
+    setisLoading(false);
     api()
       .get(`/deck-explorer/database_result?keyword=${query}`)
       .then((a) => {
-        console.log(a.data.items.data);
-        setCheck(a.data.items.data);
+
         setisLoading(true);
+        setCheck(a.data.items.data);
       });
   });
 
   onCleanup(() => {
-    setisLoading(false);
     setCheck();
     setdataExisting();
     setisCheck(false);
@@ -496,7 +496,6 @@ const DatabaseInformation = () => {
 
     return (
       <CardFrame
-        isLoading={isLoading}
         count={checkData}
         title={`INFORMATION category`}
         className="flex flex-col flex-1 relative"
@@ -514,7 +513,6 @@ const DatabaseInformation = () => {
               className="flex gap-4"
               style={{ transform: `translateX(${translateX()}px)` }}
             >
-              {/* Menyesuaikan slice untuk memperhitungkan buffer */}
               {mainData().map((d, i) => (
                 <div
                   className={`grid `}
@@ -913,7 +911,9 @@ const DatabaseInformation = () => {
             <div className="xl:col-span-6 flex-1 px-4 py-2 flex flex-col">
               <Tags label={"MULTI SOURCE DATABASE INFORMATION"}></Tags>
 
-              {isLoading() && <CardFrameData></CardFrameData>}
+              {!isLoading() ? <div className="absolute w-full h-full top-1 left-0">
+                <Loading></Loading>
+              </div> : <CardFrameData></CardFrameData>}
             </div>
           </div>
         </CardBox>
