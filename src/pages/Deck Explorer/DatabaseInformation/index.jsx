@@ -50,10 +50,10 @@ const DatabaseInformation = () => {
     typeSearch === "MSISDN"
       ? "msisdn"
       : typeSearch === "FAMILY ID"
-      ? "family-member"
-      : typeSearch === "VEHICLE"
-      ? "vehicle"
-      : "identification";
+        ? "family-member"
+        : typeSearch === "VEHICLE"
+          ? "vehicle"
+          : "identification";
 
   const [dataExisting, setdataExisting] = createSignal(null);
   const [saved, setSaved] = createSignal({
@@ -202,25 +202,25 @@ const DatabaseInformation = () => {
 
   const onCopy = (text) => {
     // Buat sebuah area teks sementara
-    // const tempElement = document.createElement("div");
-    // tempElement.textContent = text;
-    // document.body.appendChild(tempElement);
+    const tempElement = document.createElement("div");
+    tempElement.textContent = text;
+    document.body.appendChild(tempElement);
 
-    // // Seleksi teks dalam area teks sementara
-    // const selection = window.getSelection();
-    // const range = document.createRange();
-    // range.selectNodeContents(tempElement);
-    // selection.removeAllRanges();
-    // selection.addRange(range);
+    // Seleksi teks dalam area teks sementara
+    const selection = window.getSelection();
+    const range = document.createRange();
+    range.selectNodeContents(tempElement);
+    selection.removeAllRanges();
+    selection.addRange(range);
 
-    // // Salin teks ke clipboard
-    // document.execCommand("copy");
+    // Salin teks ke clipboard
+    document.execCommand("copy");
 
-    // // Hapus area teks sementara
-    // document.body.removeChild(tempElement);
+    // Hapus area teks sementara
+    document.body.removeChild(tempElement);
 
-    // // Beri pesan pemberitahuan
-    // alert("The text has been copied successfully");
+    // Beri pesan pemberitahuan
+    alert("The text has been copied successfully");
   };
 
   const onAdd = () => {
@@ -486,10 +486,10 @@ const DatabaseInformation = () => {
         typeSearch === "MSISDN"
           ? "phone_number_list"
           : typeSearch === "FAMILY ID"
-          ? "family"
-          : typeSearch === "VEHICLE"
-          ? "no_pol"
-          : "replace_personal";
+            ? "family"
+            : typeSearch === "VEHICLE"
+              ? "no_pol"
+              : "replace_personal";
 
       setpilihan(typePath);
     });
@@ -646,9 +646,9 @@ const DatabaseInformation = () => {
                     sx={{
                       color: mode() === "dark" ? "#eee" : "#444",
                       "&.Mui-disabled,.MuiFormControlLabel-label.Mui-disabled":
-                        {
-                          color: "#444",
-                        },
+                      {
+                        color: "#444",
+                      },
                     }}
                     onClick={(event) => {
                       setisExisting(true);
@@ -785,77 +785,77 @@ const DatabaseInformation = () => {
                               {dataExisting()?.length === 0
                                 ? "NO DATA"
                                 : dataExisting()?.map((d) => {
-                                    return (
-                                      <div
-                                        className="border border-primarry-2 flex justify-between flex-1"
-                                        onClick={() => {
-                                          setexistingValue((a) => ({
-                                            ...a,
-                                            type: d.type,
-                                          }));
+                                  return (
+                                    <div
+                                      className="border border-primarry-2 flex justify-between flex-1"
+                                      onClick={() => {
+                                        setexistingValue((a) => ({
+                                          ...a,
+                                          type: d.type,
+                                        }));
+                                      }}
+                                    >
+                                      <FormControlLabel
+                                        value={d.keyword}
+                                        name={d?.profile_name || "-"}
+                                        class="w-full flex-1 !m-0"
+                                        sx={{
+                                          ".MuiFormControlLabel-label": {
+                                            flex: 1,
+                                          },
                                         }}
-                                      >
-                                        <FormControlLabel
-                                          value={d.keyword}
-                                          name={d?.profile_name || "-"}
-                                          class="w-full flex-1 !m-0"
-                                          sx={{
-                                            ".MuiFormControlLabel-label": {
-                                              flex: 1,
-                                            },
-                                          }}
-                                          control={() => (
-                                            <Radio class="tester" />
-                                          )}
-                                          label={
-                                            <div className="w-full px-2 py-2 flex gap-2 flex-col ">
-                                              <div className="flex gap-2 items-center justify-between border-b border-primarry-2 py-2">
-                                                <div className="w-12">
-                                                  <img
-                                                    className="w-full"
-                                                    src={d?.foto_url?.label}
-                                                  ></img>
-                                                </div>
-                                                <div>
-                                                  <div>
-                                                    <Chip
-                                                      color="secondary"
-                                                      sx={{
-                                                        borderRadius: 0,
-                                                      }}
-                                                      label={d.profile_name}
-                                                    ></Chip>
-                                                  </div>
-                                                </div>
+                                        control={() => (
+                                          <Radio class="tester" />
+                                        )}
+                                        label={
+                                          <div className="w-full px-2 py-2 flex gap-2 flex-col ">
+                                            <div className="flex gap-2 items-center justify-between border-b border-primarry-2 py-2">
+                                              <div className="w-12">
+                                                <img
+                                                  className="w-full"
+                                                  src={d?.foto_url?.label}
+                                                ></img>
                                               </div>
-                                              <div className="flex justify-between text-xs">
+                                              <div>
                                                 <div>
-                                                  REMARKS :
                                                   <Chip
                                                     color="secondary"
                                                     sx={{
                                                       borderRadius: 0,
                                                     }}
-                                                    label={d.remarks}
-                                                  ></Chip>
-                                                </div>
-                                                <div>
-                                                  TYPE :
-                                                  <Chip
-                                                    color="secondary"
-                                                    sx={{
-                                                      borderRadius: 0,
-                                                    }}
-                                                    label={d.type}
+                                                    label={d.profile_name}
                                                   ></Chip>
                                                 </div>
                                               </div>
                                             </div>
-                                          }
-                                        />
-                                      </div>
-                                    );
-                                  })}
+                                            <div className="flex justify-between text-xs">
+                                              <div>
+                                                REMARKS :
+                                                <Chip
+                                                  color="secondary"
+                                                  sx={{
+                                                    borderRadius: 0,
+                                                  }}
+                                                  label={d.remarks}
+                                                ></Chip>
+                                              </div>
+                                              <div>
+                                                TYPE :
+                                                <Chip
+                                                  color="secondary"
+                                                  sx={{
+                                                    borderRadius: 0,
+                                                  }}
+                                                  label={d.type}
+                                                ></Chip>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        }
+                                      />
+                                    </div>
+                                  );
+                                })}
                             </RadioGroup>
                           </FormControl>
                         </div>

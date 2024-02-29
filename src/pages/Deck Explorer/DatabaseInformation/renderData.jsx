@@ -13,8 +13,8 @@ const RenderData = ({ refData, checkData, checkItems, setCheckAll, setCheck, onC
       index++;
       if (index >= b.data.length) clearInterval(intervalId); // Hentikan interval jika semua item sudah ditampilkan
     }, 10); // Setiap 1000ms atau 1 detik
-  
-  
+
+
     const cleanup = () => clearInterval(intervalId);
     onCleanup(cleanup);
   };
@@ -24,7 +24,7 @@ const RenderData = ({ refData, checkData, checkItems, setCheckAll, setCheck, onC
   createEffect(() => {
     displayItemsSequentially();
   });
-  
+
 
 
   return <div ref={refData} className={`bg-[#1e1e1e] p-2 ${k === 0 ? " col-span-full" : checkData().length === 2 ? "col-span-full" : ""}`}>

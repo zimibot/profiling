@@ -356,40 +356,40 @@ export const Diagram = ({ data }) => {
 
   // the Search functionality highlights all of the nodes that have at least one data property match a RegExp
 
-  createEffect(() => {
-    init();
+  // createEffect(() => {
+  //   init();
 
-    let filteredByBNumber = data().data.filter(item => item.BNUMBER.startsWith('62'));
-
-
-    let filteredNodeData = filteredByBNumber.reduce((acc, current) => {
-      if (!acc.find(item => item.ANUMBER === current.ANUMBER)) {
-        acc.push(current);
-      }
-      return acc;
-    }, []);
-
-    // Melakukan modifikasi pada nodeData berdasarkan filteredNodeData
-    let modifiedNodeData = filteredByBNumber.map(item => {
-      let foundItem = filteredNodeData.find(filteredItem => filteredItem.ANUMBER === item.ANUMBER);
-      if (foundItem) {
-        return { ...item, ANUMBER: item.BNUMBER, BNUMBER: item.ANUMBER };
-      }
-      return item;
-    });
-
-    const currentData = [...filteredNodeData, ...modifiedNodeData]
-
-    myDiagram.model = new go.TreeModel({
-      nodeKeyProperty: data().config.root,
-      nodeParentKeyProperty: data().config.parent, // this property refers to the parent node data
-      nodeDataArray: currentData,
-    });
-
-    console.log([...filteredNodeData, ...modifiedNodeData])
+  //   let filteredByBNumber = data().data.filter(item =>  item.BNUMBER.startsWith('62'));
 
 
-  });
+  //   let filteredNodeData = filteredByBNumber.reduce((acc, current) => {
+  //     if (!acc.find(item => item.ANUMBER === current.ANUMBER)) {
+  //       acc.push(current);
+  //     }
+  //     return acc;
+  //   }, []);
+
+  //   // Melakukan modifikasi pada nodeData berdasarkan filteredNodeData
+  //   let modifiedNodeData = filteredByBNumber.map(item => {
+  //     let foundItem = filteredNodeData.find(filteredItem => filteredItem.ANUMBER === item.ANUMBER);
+  //     if (foundItem) {
+  //       return { ...item, ANUMBER: item.BNUMBER, BNUMBER: item.ANUMBER };
+  //     }
+  //     return item;
+  //   });
+
+  //   const currentData = [...filteredNodeData, ...modifiedNodeData]
+
+  //   myDiagram.model = new go.TreeModel({
+  //     nodeKeyProperty: data().config.root,
+  //     nodeParentKeyProperty: data().config.parent, // this property refers to the parent node data
+  //     nodeDataArray: currentData,
+  //   });
+
+  //   console.log([...filteredNodeData, ...modifiedNodeData])
+
+
+  // });
 
   return (<div className="w-full h-full" >
     <div id="myDiagramDiv" className="w-full h-full"> </div>
