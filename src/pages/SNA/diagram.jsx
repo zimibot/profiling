@@ -43,50 +43,26 @@ export const Diagram = ({ data }) => {
   function init() {
     // Inisialisasi diagram dengan gojs
 
-    var $ = go.GraphObject.make; // Untuk menyederhanakan pembuatan definisi grafis
-
     myDiagram.nodeTemplate =
       $(go.Node, "Auto",
         $(go.Shape, "Circle",
           { strokeWidth: 2, fill: "white" },
-          new go.Binding("fill", "color")),
+          new go.Binding("fill", "color")
+        ),
         $(go.TextBlock,
           { margin: 10 },
-          new go.Binding("text", "key")),
-        // Membuat panel yang berisi tombol custom untuk expand/collapse, ditampilkan hanya pada root
-        $("Panel", "Horizontal",
-          { alignment: go.Spot.Bottom, alignmentFocus: go.Spot.Top },
-          new go.Binding("itemArray", "", function (node) {
-            // Mengembalikan array kosong jika bukan root, sehingga tidak menampilkan tombol
-            return node.data.root ? [{}] : [];
-          }).ofObject(),
-          { // Template untuk tombol expand/collapse
-            itemTemplate:
-              $("Button",
-                { click: toggleChildrenVisibility }, // Menambahkan event listener untuk klik tombol
-                $(go.TextBlock, "±") // Teks dalam tombol
-              )
-          }
+          new go.Binding("text", "key")
+        ),
+        // Menambahkan TreeExpanderButton dengan visibility binding berdasarkan properti 'root'
+        $("TreeExpanderButton",
+          { alignment: go.Spot.Bottom, alignmentFocus: go.Spot.Top }, // Menyesuaikan posisi tombol
+          // Binding untuk menentukan visibilitas berdasarkan properti 'root'
+          new go.Binding("visible", "", function (node) {
+            // Mengecek apakah properti 'root' dari data node adalah true
+            return node.data.root === true;
+          }).ofObject()
         )
       );
-
-    // Fungsi untuk toggle visibilitas children
-    function toggleChildrenVisibility(e, obj) {
-      var node = obj.part; // Mendapatkan node dari tombol yang diklik
-      if (node === null) return;
-      var diagram = node.diagram;
-      diagram.startTransaction("toggleChildren");
-      // Toggle visibilitas dari setiap child node dan link ke child
-      node.findTreeChildrenNodes().each(function (child) {
-        child.visible = !child.visible; // Toggle visibilitas node child
-        var link = node.findTreeParentLink(child);
-        if (link !== null) {
-          link.visible = child.visible; // Menyesuaikan visibilitas link
-        }
-      });
-      diagram.commitTransaction("toggleChildren");
-    }
-
 
     // Template untuk link dengan strokeWidth yang menyesuaikan berdasarkan totaluniq
     myDiagram.linkTemplate =
