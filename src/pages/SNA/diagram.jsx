@@ -2,89 +2,114 @@ import * as go from "gojs";
 import { createEffect } from "solid-js";
 
 export const Diagram = ({ data }) => {
-
-  function init() {
-    var $ = go.GraphObject.make; // untuk mendefinisikan template
-    var myDiagram =
+  let myDiagram, $
+  createEffect(() => {
+    $ = go.GraphObject.make; // untuk mendefinisikan template
+    myDiagram =
       $(go.Diagram, "myDiagramDiv", { // ID dari DIV tempat diagram akan ditampilkan
         "undoManager.isEnabled": true, // enable undo & redo
         layout: $(go.ForceDirectedLayout, {
-          defaultSpringLength: 10,
-          defaultElectricalCharge: 50,
+          defaultSpringLength: 50,
+          defaultElectricalCharge: 100,
         }),
+        "LayoutCompleted": function (e) {
+          var root = e.diagram.findNodeForKey("from"); // Ganti "rootKey" dengan kunci sebenarnya dari root
+          if (root) {
+            root.location = e.diagram.actualBounds.center;
+          }
+        },
         "animationManager.isEnabled": true,
         "animationManager.initialAnimationStyle": go.AnimationManager.AnimateLocations, // Animasi perubahan lokasi
         "animationManager.duration": 800 // Durasi animasi dalam milidetik
       });
+  })
 
-    // Mendefinisikan template node
-  // Mendefinisikan template node dengan tooltip
-myDiagram.nodeTemplate =
-$(go.Node, "Auto",
-  // Tooltip Adornment
-  { // ToolTip definition
-    toolTip:  // define a tooltip for each node that displays the text value of the model data
-      $("ToolTip",
-        $(go.TextBlock, { margin: 4 },
-          new go.Binding("text", "", function(data) { return "Key: " + data.key + "\nColor: " + data.color; }))
-      )  // end of Adornment
-  },
-  $(go.Shape, "Circle",
-    { strokeWidth: 2, fill: "white" },
-    new go.Binding("fill", "color")),
-  $(go.TextBlock, { margin: 10 },
-    new go.Binding("text", "key"))
-);
-
-    // Mendefinisikan template link
-    myDiagram.linkTemplate =
-      $(go.Link,
-        { routing: go.Link.Normal, curve: go.Link.Bezier }, // Anda bisa mengatur routing dan curve sesuai kebutuhan
-        $(go.Shape, { strokeWidth: 2, stroke: "white" }) // Mengatur warna link menjadi putih
+  function init() {
+    // Inisialisasi diagram dengan gojs
+    myDiagram.nodeTemplate =
+      $(go.Node, "Auto",
+        $(go.Shape, "Circle", { strokeWidth: 2, fill: "white" }, new go.Binding("fill", "color")),
+        $(go.TextBlock, { margin: 10 }, new go.Binding("text", "key"))
       );
 
-    // Mendefinisikan model dengan data node
-    var nodeDataArray = [
-      { key: "1", color: "orange" },
-      { key: "2", color: "orange" },
-
-      { key: "3", color: "lightblue" }, // root node
-      { key: "4", color: "lightblue" }, // root node
-      { key: "5", color: "lightblue" }, // root node
-      { key: "6", color: "lightblue" }, // root node
-      { key: "7", color: "lightblue" }, // root node
-      { key: "8", color: "lightblue" }, // root node
-      { key: "9", color: "lightblue" }, // root node
-      { key: "10", color: "lightblue" }, // root node
-      // child nodes dengan parent
-      // Tambahkan child nodes lain di sini
-    ];
-
-    var linkDataArray = [
-      // Definisikan hubungan antar nodes
-      { from: "10", to: "2" },
-      { from: "5", to: "1" },
+    // Template untuk link dengan strokeWidth yang menyesuaikan berdasarkan totaluniq
+    myDiagram.linkTemplate =
+      $(go.Link, { routing: go.Link.Normal, curve: go.Link.Bezier },
+        $(go.Shape,
+          new go.Binding("stroke", "totaluniqFrom", function (total) {
+            // Menghitung intensitas biru berdasarkan totaluniqFrom
+            const blueIntensity = Math.min(255, 100 + total * 15); // Dasar + peningkatan per totaluniq
+            return `rgb(96, 165, ${blueIntensity})`; // Menghasilkan warna biru dengan intensitas yang dihitung
+          }),
+          new go.Binding("strokeWidth", "totaluniqFrom", function (total) {
+            // Misalnya, setiap 5 kemunculan meningkatkan strokeWidth sebanyak 1
+            return Math.max(2, total / 5); // Minimum strokeWidth adalah 2
+          }))
+      );
 
 
-      { from: "3", to: "2" },
-      { from: "4", to: "2" },
-      { from: "5", to: "2" },
-      { from: "6", to: "2" },
-      { from: "7", to: "2" },
-      { from: "8", to: "2" },
-      { from: "9", to: "2" },
-      // Tambahkan hubungan lainnya di sini
-    ];
+    let rawData = data().data;
 
-    myDiagram.model = new go.GraphLinksModel(nodeDataArray, linkDataArray);
+    // Hitung jumlah kemunculan untuk ANUMBER dan BNUMBER
+    let aNumberCounts = new Map();
+    let bNumberCounts = new Map();
 
-    myDiagram.layoutCompleted = function (e) {
-      var root = e.diagram.findNodeForKey("6281211548212");
-      if (root !== null) {
-        root.location = e.diagram.actualBounds.center;
+    rawData.forEach(item => {
+      aNumberCounts.set(item.ANUMBER, (aNumberCounts.get(item.ANUMBER) || 0) + 1);
+      bNumberCounts.set(item.BNUMBER, (bNumberCounts.get(item.BNUMBER) || 0) + 1);
+    });
+
+    // Konversi data menjadi format yang dibutuhkan untuk link
+    let linkData = rawData.map(a => ({
+      from: a.BNUMBER,
+      to: a.ANUMBER,
+      totaluniqFrom: bNumberCounts.get(a.BNUMBER) // Menambahkan totaluniq dari BNUMBER
+    }));
+
+    // Menghapus duplikat dari linkData
+    const uniqueLinkData = [...new Map(linkData.map(item => [`${item.from}->${item.to}`, item])).values()];
+
+    // Menghapus duplikat dari data node berdasarkan 'ANUMBER'
+    const uniqueNodeData = [...new Map(rawData.map(item => [item.ANUMBER, item])).values()];
+
+    // Membuat array node unik dengan menambahkan 'totaluniq'
+    let nodes = uniqueNodeData.map(a => ({
+      key: a.ANUMBER,
+      color: "#46a5ff",
+      totaluniq: aNumberCounts.get(a.ANUMBER) // Total kemunculan ANUMBER di rawData
+    }));
+
+    // Menambahkan node yang unik dari data link yang mungkin belum termasuk
+    uniqueLinkData.forEach(link => {
+      if (!nodes.some(node => node.key === link.from)) {
+        nodes.push({
+          key: link.from,
+          totaluniq: bNumberCounts.get(link.from) // Total kemunculan BNUMBER di rawData
+        });
       }
-    };
+    });
+
+    myDiagram.addDiagramListener("PartMoved", function (e) {
+      var part = e.subject.part; // Mendapatkan node yang dipindahkan
+      if (part instanceof go.Node && part.data.key === "from") { // Ganti "rootKey" dengan kunci sebenarnya dari root
+        // Node yang dipindahkan adalah root, sesuaikan posisi parent-node disini
+        var rootLocation = part.location;
+
+        // Iterasi melalui semua node yang terhubung dan sesuaikan posisi mereka
+        part.findLinksConnected().each(function (link) {
+          var parent = link.getOtherNode(part);
+          // Logika untuk menentukan posisi baru parent-node relatif terhadap root
+          // Contoh sederhana: Memindahkan semua parent sejauh 100 unit ke kanan dari root
+          // Ini harus disesuaikan sesuai dengan logika layout yang diinginkan
+          parent.location = new go.Point(rootLocation.x + 100, rootLocation.y);
+        });
+      }
+    });
+
+    // Menetapkan model dengan data node dan link yang unik
+    myDiagram.model = new go.GraphLinksModel(nodes, uniqueLinkData);
   }
+
 
   createEffect(() => {
     init();
