@@ -3,7 +3,7 @@ import ContainerPages from "..";
 import { CardBox } from "../../component/cardBox";
 import { Diagram } from "./diagram";
 import { createEffect, createSignal } from "solid-js";
-import { Button, IconButton } from "@suid/material";
+import { Button, IconButton, LinearProgress } from "@suid/material";
 import { Link } from "@solidjs/router";
 import { api } from "../../helper/_helper.api";
 
@@ -48,6 +48,11 @@ const Connection = () => {
         config,
       })
     })
+
+    setData(a => a.map(s => ({
+      ...s,
+      active: s._id === id
+    })))
   }
 
   createEffect(() => {
@@ -62,7 +67,7 @@ const Connection = () => {
               return (
                 <div onClick={() => {
                   onSelect(a._id, a.config)
-                }} className="p-4 bg-[#0f0f0f] shadow border-b border-blue-400 flex flex-col gap-4 cursor-pointer">
+                }} className={`p-4 bg-[#0f0f0f] shadow border-b-2  flex flex-col gap-4 cursor-pointer ${a.active ? "border-blue-400" : ""}`}>
                   <div>
                     <div>
                       <p className="text-blue-300 font-bold">{a.title}</p>
@@ -74,8 +79,8 @@ const Connection = () => {
                   </div>
                 </div>
               );
-            }) : <div>
-              Loading
+            }) : <div className="flex justify-center items-center">
+              <LinearProgress></LinearProgress>
             </div>}
 
           </div>
@@ -89,7 +94,9 @@ const Connection = () => {
         <CardBox className={`flex-1 flex flex-col relative`} title={"Connection"}>
           {currentData() ? <div className="flex flex-col flex-1">
             <Diagram data={currentData}></Diagram>
-          </div> : ""}
+          </div> : <div className="absolute w-full h-full left-0 top-0 flex items-center justify-center">
+            <div>
+              Data not select</div></div>}
 
           <div className="absolute top-0 right-0 p-4 z-10">
             <div>

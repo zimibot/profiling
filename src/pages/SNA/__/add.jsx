@@ -586,7 +586,7 @@ const AddConnection = () => {
                                     </div>
 
                                 </div>
-                                <div className={`absolute w-80 bg-[#1b1b1b] h-full right-[1000px] top-0 z-10  transition-all ${onShowConfig() ? "opacity-100 right-[-350px]" : "opacity-0"}`}>
+                                <div className={`absolute w-80 bg-[#1b1b1b] h-full  top-0 z-10  transition-all ${onShowConfig() ? "opacity-100 right-[-350px]" : "opacity-0 right-[1000px]"}`}>
                                     <div className="flex justify-between items-center p-2">
                                         <div className="pl-4">CONFIG</div>
                                         <IconButton color="error" onClick={onConfig}>
