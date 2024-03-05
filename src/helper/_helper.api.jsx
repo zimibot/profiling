@@ -1,9 +1,9 @@
 import axios from "axios";
 import Swal from "sweetalert2";
 
-export const api = () => {
+export const api = (baseurl) => {
   const instance = axios.create({
-    baseURL:
+    baseURL: baseurl ||
       process.env.NODE_ENV === "production"
         ? "https://k17tech.com/users"
         : "http://localhost:3000/users",

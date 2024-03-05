@@ -97,6 +97,7 @@
     "lightbox2": "^2.11.4",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
+    "socket.io-client": "^4.7.4",
     "solform": "^1.0.7",
     "solid-collapse": "^1.1.0",
     "solid-forms": "^0.4.8",

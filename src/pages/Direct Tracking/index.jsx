@@ -12,6 +12,10 @@ import moment from "moment";
 import Swal from "sweetalert2";
 import { Button, Chip, Divider, IconButton } from "@suid/material";
 import { notify } from "../../component/notify";
+import axios from "axios";
+
+import io from "socket.io-client"
+
 const data = new Array(10).fill("")
 
 let maps
@@ -62,7 +66,7 @@ const DirectTracking = () => {
             window.api.invoke("new_browser", res.maps)
         }
 
-        
+
         return <div class="grid gap-2 relative text-[14px] overflow-auto">
             <div class="flex gap-2">
                 <div class="font-bold">MSIDN</div>
@@ -99,6 +103,8 @@ const DirectTracking = () => {
     const onSubmit = async (e) => {
         e.preventDefault()
 
+
+
         let { search } = group.value
 
         let data = {
@@ -107,22 +113,37 @@ const DirectTracking = () => {
         setload(true)
 
         try {
-            const as = await api().post("/checkpos/search", data)
-            let keyword = as.data.data.keyword
-            let res = as.data.data.response[0]
-            L.marker([res.lat, res.long], { icon: greenIcon }).addTo(maps)
-                .bindPopup(html(keyword, res))
-                .openPopup();
 
-            Swal.fire({
-                icon: "success",
-                title: "SUCCESS",
-                text: as.data.message,
-                didClose: () => {
-                    setload(false)
-                    group.controls.search.setValue("")
-                }
-            })
+            const cekPing = await axios.get(`http://localhost:8080/target/+${search}`)
+
+            
+            var socket = io('http://192.168.1.123:3000');
+
+            socket.on("connect", () => {
+                console.log("Connected to the server");
+            });
+    
+            socket.on("target-ping-response", data => {
+                alert(data);
+            });
+
+            setload(false)
+            // const as = await api().post("/checkpos/search", data)
+            // let keyword = as.data.data.keyword
+            // let res = as.data.data.response[0]
+            // L.marker([res.lat, res.long], { icon: greenIcon }).addTo(maps)
+            //     .bindPopup(html(keyword, res))
+            //     .openPopup();
+
+            // Swal.fire({
+            //     icon: "success",
+            //     title: "SUCCESS",
+            //     text: as.data.message,
+            //     didClose: () => {
+            //         setload(false)
+            //         group.controls.search.setValue("")
+            //     }
+            // })
 
         } catch (error) {
             if (/^62\d{10,15}$/.test(search)) {
@@ -215,9 +236,9 @@ const DirectTracking = () => {
                                                     })
                                                     ))
 
-                                                }} 
-                                                // endIcon={d.active ? <KeyboardArrowUp></KeyboardArrowUp> : <KeyboardArrowDown fontSize="small"></KeyboardArrowDown>}
-                                                startIcon={<PinDrop></PinDrop>}
+                                                }}
+                                                    // endIcon={d.active ? <KeyboardArrowUp></KeyboardArrowUp> : <KeyboardArrowDown fontSize="small"></KeyboardArrowDown>}
+                                                    startIcon={<PinDrop></PinDrop>}
                                                 >
                                                     {d.keyword}
                                                 </Button>
