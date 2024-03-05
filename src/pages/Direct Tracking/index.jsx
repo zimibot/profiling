@@ -31,6 +31,13 @@ const DirectTracking = () => {
         }
     });
 
+    let socket
+
+    onMount(() => {
+        socket = io('http://192.168.1.123:8080');
+    })
+
+
 
     let greenIcon = new LeafIcon({ iconUrl: "./assets/marker.png" })
 
@@ -100,6 +107,7 @@ const DirectTracking = () => {
         </div>
     }
 
+
     const onSubmit = async (e) => {
         e.preventDefault()
 
@@ -112,20 +120,19 @@ const DirectTracking = () => {
         }
         setload(true)
 
+
         try {
 
             const cekPing = await axios.get(`http://localhost:8080/target/+${search}`)
 
-            
-            var socket = io('http://192.168.1.123:3000');
-
             socket.on("connect", () => {
                 console.log("Connected to the server");
             });
-    
+
             socket.on("target-ping-response", data => {
                 alert(data);
             });
+
 
             setload(false)
             // const as = await api().post("/checkpos/search", data)
