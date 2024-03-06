@@ -15,8 +15,8 @@ import { notify } from "../../component/notify";
 import axios from "axios";
 
 import io from "socket.io-client"
+import { Circle } from "@suid/icons-material";
 
-const data = new Array(10).fill("")
 
 let maps
 
@@ -33,8 +33,79 @@ const DirectTracking = () => {
 
     let socket
 
-    onMount(() => {
+    createEffect(() => {
         socket = io('http://192.168.1.123:8080');
+
+        socket.on("connect", () => {
+            console.log("Connected to the server");
+
+
+        });
+
+        socket.on("target-ping-response", async (ping) => {
+            console.log(ping);
+            if (ping === "TARGET ONLINE") {
+                setload(false);
+                Swal.fire({
+                    icon: "success",
+                    title: "Target Available!",
+                    confirmButtonText: "Search for Target Location",
+                    timer: 4000,
+                    timerProgressBar: true,
+                    didClose: async () => {
+                        let swalProgress = Swal.fire({
+                            title: 'Searching for target location...',
+                            html: 'Please wait...',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+                        try {
+                            const { search } = group.value;
+                            const data = { keyword: search };
+                            const response = await api().post("/checkpos/search", data);
+                            const { keyword, response: [res] } = response.data.data;
+                            swalProgress.close();
+
+                            // Add marker to the map for the target
+                            L.marker([res.lat, res.long], { icon: greenIcon }).addTo(maps)
+                                .bindPopup(html(keyword, res))
+                                .openPopup();
+
+                            // Success notification
+                            Swal.fire({
+                                icon: "success",
+                                title: "Success!",
+                                text: "Target location successfully found.",
+                                didClose: () => {
+                                    setload(false);
+                                    group.controls.search.setValue("");
+                                }
+                            });
+                        } catch (error) {
+                            swalProgress.close();
+                            Swal.fire({
+                                icon: "error",
+                                title: "Error!",
+                                text: "Target location could not be found."
+                            });
+                        }
+
+                    }
+                });
+            } else {
+                // Handle inactive target number
+                Swal.fire({
+                    icon: "error",
+                    title: "Error!",
+                    text: "The target number is inactive or unavailable."
+                });
+
+                setload(false);
+            }
+        });
+
     })
 
 
@@ -52,7 +123,133 @@ const DirectTracking = () => {
 
         }).addTo(maps);
 
+        L.control.scale({ maxWidth: 100, metric: true, imperial: false }).addTo(maps);
+
+
+
     }
+
+    var circle;
+    var drawingCircle = false;
+    var moved = false;
+
+    // Fungsi untuk menginisialisasi proses gambar lingkaran
+    function activateCircleDraw() {
+        if (circle) {
+            maps.removeLayer(circle);
+            circle = null
+        }
+
+        if (document.getElementById('dynamicTooltip')) {
+            document.getElementById('dynamicTooltip').style.display = "none"
+        }
+        if (drawingCircle) return;
+        drawingCircle = true;
+        maps.dragging.disable();
+        maps.scrollWheelZoom.disable();
+        maps.doubleClickZoom.disable();
+        moved = false; // Reset moved flag
+
+        maps.on('mousedown', onMouseDown);
+        maps.on('mouseup', onMouseUp);
+    }
+
+    // Fungsi yang dijalankan ketika mouse ditekan
+    function onMouseDown(e) {
+        moved = false; // Reset moved flag
+        var startLatLng = e.latlng;
+        maps.on('mousemove', onMouseMove);
+
+        // Membuat elemen tooltip jika belum ada
+        if (!document.getElementById('dynamicTooltip')) {
+            var tooltip = document.createElement('div');
+            tooltip.id = 'dynamicTooltip';
+            tooltip.style.position = 'absolute';
+            tooltip.style.color = "#444";
+            tooltip.style.zIndex = "9999";
+            tooltip.style.fontSize = "14px";
+            tooltip.style.backgroundColor = 'white';
+            tooltip.style.padding = '3px 6px';
+            tooltip.style.borderRadius = '4px';
+            tooltip.style.border = '1px solid #ddd';
+            tooltip.style.display = 'none'; // Sembunyikan dulu tooltipnya
+            document.body.appendChild(tooltip);
+        }
+
+        // Fungsi yang dijalankan ketika mouse bergerak
+        function onMouseMove(e) {
+            moved = true;
+
+            var radius = startLatLng.distanceTo(e.latlng);
+            var radiusInKm = (radius / 1000).toFixed(2);
+            if (circle) {
+                maps.removeLayer(circle);
+            }
+            circle = L.circle(startLatLng, { radius: radius }).addTo(maps);
+
+            // Perbarui dan tampilkan tooltip
+            if (circle) {
+                var tooltip = document.getElementById('dynamicTooltip');
+                tooltip.style.display = 'block';
+                tooltip.innerHTML = "Radius: " + radiusInKm + " km";
+                tooltip.style.left = e.originalEvent.clientX + 15 + 'px'; // Menyesuaikan posisi tooltip
+                tooltip.style.top = e.originalEvent.clientY + 15 + 'px';
+            }
+        }
+    }
+
+    function getAreaInfo(lat, lng) {
+        var url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data); // Data berisi informasi lokasi, termasuk nama wilayah, kota, dll.
+                alert(`Wilayah: ${data.address.suburb}, Kota: ${data.address.city}`);
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Fungsi yang dijalankan ketika mouse dilepas
+    function onMouseUp() {
+        if (!moved && circle) {
+            maps.removeLayer(circle);
+        }
+        maps.off('mousemove');
+        maps.dragging.enable();
+        maps.scrollWheelZoom.enable();
+        maps.doubleClickZoom.enable();
+        drawingCircle = false;
+        // Sembunyikan tooltip
+        var tooltip = document.getElementById('dynamicTooltip');
+        if (tooltip) tooltip.style.display = 'none';
+
+        if (circle && moved) {
+            var radiusInKm = (circle.getRadius() / 1000).toFixed(2);
+            circle.bindTooltip("Radius: " + radiusInKm + " km").openTooltip();
+        }
+
+        // if (circle && moved) {
+        //     var center = circle.getLatLng();
+        //     getAreaInfo(center.lat, center.lng);
+        // }
+
+        maps.off('mousedown', onMouseDown); // Cleanup
+        maps.off('mouseup', onMouseUp); // Cleanup
+    }
+
+    createEffect(() => {
+        document.addEventListener('mousemove', function (e) {
+            if (circle && drawingCircle) {
+                var tooltip = document.getElementById('dynamicTooltip');
+                if (tooltip.style.display !== 'block') {
+                    tooltip.style.display = 'block';
+                }
+                tooltip.style.left = e.clientX + 15 + 'px';
+                tooltip.style.top = e.clientY + 15 + 'px';
+            }
+        });
+    })
 
     let mapDiv
 
@@ -108,70 +305,40 @@ const DirectTracking = () => {
     }
 
 
+
+
     const onSubmit = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
 
-
-
-        let { search } = group.value
-
-        let data = {
-            keyword: search
-        }
-        setload(true)
-
+        const { search } = group.value;
+        setload(true);
 
         try {
+            // Request to check if the target is online
+            await axios.get(`http://localhost:8080/target/+${search}`);
 
-            const cekPing = await axios.get(`http://localhost:8080/target/+${search}`)
-
-            socket.on("connect", () => {
-                console.log("Connected to the server");
-            });
-
-            socket.on("target-ping-response", data => {
-                alert(data);
-            });
-
-
-            setload(false)
-            // const as = await api().post("/checkpos/search", data)
-            // let keyword = as.data.data.keyword
-            // let res = as.data.data.response[0]
-            // L.marker([res.lat, res.long], { icon: greenIcon }).addTo(maps)
-            //     .bindPopup(html(keyword, res))
-            //     .openPopup();
-
-            // Swal.fire({
-            //     icon: "success",
-            //     title: "SUCCESS",
-            //     text: as.data.message,
-            //     didClose: () => {
-            //         setload(false)
-            //         group.controls.search.setValue("")
-            //     }
-            // })
+            // Listen for a response once to avoid multiple triggers
 
         } catch (error) {
             if (/^62\d{10,15}$/.test(search)) {
+                // Handle invalid number format
                 Swal.fire({
                     icon: "error",
-                    title: "OOPS",
-                    text: "Number not found or switch off"
-                })
+                    title: "Oops...",
+                    text: "The number is not found or might be switched off."
+                });
             } else {
+                // Handle case when the input does not follow the Indonesian country code format
                 Swal.fire({
                     icon: "error",
-                    title: "OOPS",
-                    text: "Invalid MSISDN. Please use the Indonesian country code (e.g., 6287654321)."
-                })
+                    title: "Oops...",
+                    text: "Invalid number format. Please use the Indonesian country code format (e.g., 6287654321)."
+                });
             }
 
-            setload(false)
+            setload(false);
         }
-
-
-    }
+    };
 
     createEffect(() => {
         setIsload(false)
@@ -252,7 +419,7 @@ const DirectTracking = () => {
                                             </div>
                                             <div> {moment(d.timestamp).format("D/M/YY | HH:MM:SS")}</div>
                                         </div>
-                                        {/* <div className={d.active ? "bg-[#1e1e1e] p-2" : ""}>
+                                        <div className={d.active ? "bg-[#1e1e1e] p-2" : ""}>
                                             <Collapse value={d.active} class="transition">
                                                 {d.response.map((d, i) => {
                                                     return <div>
@@ -377,7 +544,7 @@ const DirectTracking = () => {
                                                     </div>
                                                 })}
                                             </Collapse>
-                                        </div> */}
+                                        </div>
                                     </div>
                                 }) : "Loading..."}
                             </div>
@@ -389,8 +556,15 @@ const DirectTracking = () => {
                     <Tags label="LOCATION SOURCE"></Tags>
                     <CardFrame isLoading={isLoad} title={"MAPS"} className="flex-1 !p-0 flex flex-col">
                         <div className="flex-1">
-                            <div className="w-full h-full">
+                            <div className="w-full h-full relative">
                                 <div ref={mapDiv} className="w-full h-full"></div>
+                                <div className="absolute right-0 top-0 p-4 z-[1000]">
+                                    <div className="bg-white p-1">
+                                        <Button variant="contained" color="secondary" onClick={activateCircleDraw}>
+                                            <svg fill="white" stroke="white" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M760-600v-160H600v-80h240v240h-80ZM120-120v-240h80v160h160v80H120Zm0-320v-80h80v80h-80Zm0-160v-80h80v80h-80Zm0-160v-80h80v80h-80Zm160 0v-80h80v80h-80Zm160 640v-80h80v80h-80Zm0-640v-80h80v80h-80Zm160 640v-80h80v80h-80Zm160 0v-80h80v80h-80Zm0-160v-80h80v80h-80Zm0-160v-80h80v80h-80Z" /></svg>
+                                        </Button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </CardFrame>

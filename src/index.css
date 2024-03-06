@@ -166,6 +166,10 @@ div:where(.swal2-container) button:where(.swal2-styled).warning {
   border: 1px solid #f8bb86 !important;
 }
 
+.swal2-timer-progress-bar {
+  background: #2778c4;
+} 
+
 .leaflet-bottom.leaflet-right {
   display: none !important;
 }
