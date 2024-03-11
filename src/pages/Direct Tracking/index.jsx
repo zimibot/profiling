@@ -115,6 +115,7 @@ const DirectTracking = () => {
     let greenIcon = new LeafIcon({ iconUrl: "./assets/marker.png" })
 
     const [items, setData] = createSignal(null)
+    const [iframeMaps, setIframeMaps] = createSignal(null)
 
     var gisarea = [
         [-6.289391, 106.996586], [-6.289204, 106.996714], [-6.287402, 106.997787],
@@ -160,18 +161,6 @@ const DirectTracking = () => {
         [-6.286119, 106.996982], [-6.285896, 106.997101], [-6.286415, 106.997426],
         [-6.286304, 106.997243]
     ];
-
-
-    function calculateCentroid(coords) {
-        let centroid = { lat: 0, lng: 0 };
-        coords.forEach(coord => {
-            centroid.lat += coord[0];
-            centroid.lng += coord[1];
-        });
-        centroid.lat /= coords.length;
-        centroid.lng /= coords.length;
-        return centroid;
-    }
 
     function buildMap(div) {
         maps = L.map(div, {
@@ -556,7 +545,7 @@ const DirectTracking = () => {
 
     let mapDiv
 
-    onMount(() => buildMap(mapDiv));
+    // onMount(() => buildMap(mapDiv));
 
     const group = createFormGroup({
         search: createFormControl("", {
@@ -615,7 +604,6 @@ const DirectTracking = () => {
 
         const { search } = group.value;
         setload(true);
-
         try {
             // Request to check if the target is online
             await axios.get(`http://localhost:8080/target/+${search}`);
@@ -652,6 +640,12 @@ const DirectTracking = () => {
         load()
     })
 
+    createEffect(() => {
+        axios.get("http://localhost:5000/iframe-data/0").then(s => {
+            console.log(s)
+            setIframeMaps(s.data.iframe)
+        })
+    })
     function moveToLocation(latitude, longitude) {
         var newCenter = L.latLng(latitude, longitude);
         maps.panTo(newCenter);
@@ -860,7 +854,8 @@ const DirectTracking = () => {
                     <CardFrame isLoading={isLoad} title={"MAPS"} className="flex-1 !p-0 flex flex-col">
                         <div className="flex-1">
                             <div className="w-full h-full relative">
-                                <div ref={mapDiv} className="w-full h-full"></div>
+                                <iframe className="w-full h-full" src="http://localhost:5000/serve-html/0"></iframe>
+                                {/* <div ref={mapDiv} className="w-full h-full"></div> */}
                                 {/* <div className="absolute right-0 top-0 p-4 z-[1000]">
                                     <div className="bg-white p-1">
                                         <Button variant="contained" color="secondary" onClick={activateCircleDraw}>
