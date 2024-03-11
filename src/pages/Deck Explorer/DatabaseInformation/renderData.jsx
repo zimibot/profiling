@@ -3,29 +3,7 @@ import { createSignal, createEffect, For, onCleanup } from 'solid-js';
 // Definisikan fungsi komponen di luar fungsi utama
 const RenderData = ({ refData, checkData, checkItems, setCheckAll, setCheck, onCopy, mode, saved, CheckboxItems, FormControlLabel, ContentCopy, IconButton, Tags, b, k }) => {
   // Kembalikan hasil pemetaan data ke elemen yang diperlukan
-  const [displayedItems, setDisplayedItems] = createSignal([]);
-
-  // Fungsi untuk menambahkan item ke displayedItems setiap detik
-  const displayItemsSequentially = () => {
-    let index = 0; // Mulai dari index 0
-    const intervalId = setInterval(() => {
-      setDisplayedItems((oldItems) => [...oldItems, b.data[index]]);
-      index++;
-      if (index >= b.data.length) clearInterval(intervalId); // Hentikan interval jika semua item sudah ditampilkan
-    }, 10); // Setiap 1000ms atau 1 detik
-
-
-    const cleanup = () => clearInterval(intervalId);
-    onCleanup(cleanup);
-  };
-
-
-  // Panggil fungsi displayItemsSequentially saat komponen ter-mount
-  createEffect(() => {
-    displayItemsSequentially();
-  });
-
-
+  
 
   return <div ref={refData} className={`bg-[#1e1e1e] p-2 ${k === 0 ? " col-span-full" : checkData().length === 2 ? "col-span-full" : ""}`}>
     <div className="border border-primarry-2 px-4 bg-primarry-1  z-50 flex justify-between items-center">

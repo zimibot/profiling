@@ -338,6 +338,9 @@ const DatabaseInformation = () => {
     );
   }
   const CardFrameData = () => {
+    if (checkData().length === 0) {
+      return ""
+    }
     const [mainData, setMainData] = createSignal(checkData());
 
     const displayCount = 3; // Jumlah item yang ditampilkan dalam viewport
@@ -913,7 +916,7 @@ const DatabaseInformation = () => {
 
               {!isLoading() ? <div className="absolute w-full h-full top-1 left-0">
                 <Loading></Loading>
-              </div> : <CardFrameData></CardFrameData>}
+              </div> : checkData().length > 0 && <CardFrameData></CardFrameData>}
             </div>
           </div>
         </CardBox>
