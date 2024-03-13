@@ -25,6 +25,7 @@ import {
     DialogTitle, Chip, Divider, IconButton, Input, FormControlLabel, FormControl, RadioGroup, FormLabel, Radio
 } from "@suid/material";
 import axios from "axios";
+import { PinDrop } from "@suid/icons-material";
 
 // import io from "socket.io-client"
 
@@ -635,7 +636,7 @@ const DirectTracking = () => {
 
     createEffect(() => {
         setIsload(false)
-        api().get("/checkpos/search").then(d => {
+        api().get("/checkpos/position").then(d => {
             setData(d.data.items)
             setIsload(true)
         })
@@ -734,7 +735,7 @@ const DirectTracking = () => {
                                             </div>
                                             <div> {moment(d.timestamp).format("D/M/YY | HH:MM:SS")}</div>
                                         </div>
-                                        <div className={d.active ? "bg-[#1e1e1e] p-2" : ""}>
+                                        {/* <div className={d.active ? "bg-[#1e1e1e] p-2" : ""}>
                                             <Collapse value={d.active} class="transition">
                                                 {d.response.map((d, i) => {
                                                     return <div>
@@ -859,7 +860,7 @@ const DirectTracking = () => {
                                                     </div>
                                                 })}
                                             </Collapse>
-                                        </div>
+                                        </div> */}
                                     </div>
                                 }) : "Loading..."}
                             </div>
