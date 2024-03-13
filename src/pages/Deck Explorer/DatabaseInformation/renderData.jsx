@@ -3,7 +3,7 @@ import { createSignal, createEffect, For, onCleanup } from 'solid-js';
 // Definisikan fungsi komponen di luar fungsi utama
 const RenderData = ({ refData, checkData, checkItems, setCheckAll, setCheck, onCopy, mode, saved, CheckboxItems, FormControlLabel, ContentCopy, IconButton, Tags, b, k }) => {
   // Kembalikan hasil pemetaan data ke elemen yang diperlukan
-  
+
 
   return <div ref={refData} className={`bg-[#1e1e1e] p-2 ${k === 0 ? " col-span-full" : checkData().length === 2 ? "col-span-full" : ""}`}>
     <div className="border border-primarry-2 px-4 bg-primarry-1  z-50 flex justify-between items-center">
@@ -25,7 +25,7 @@ const RenderData = ({ refData, checkData, checkItems, setCheckAll, setCheck, onC
             <div className="flex gap-4 items-start flex-1 relative">
               <div className={`${mode() === "dark" ? "text-[#aaa]" : "text-[#444]"} sticky top-[10px] whitespace-nowrap w-[200px] z-10 px-4 pt-2`}> {x.total_data === 1 ? "" : `[${x.total_data}]`} {x.label}</div>
               <div className="flex-1 ">
-                <div className="gap-2 flex  px-4 items-center">
+                <div className="gap-2 flex px-4 items-center flex-wrap">
                   {x.data.map((d) => {
                     return (
                       <div title={d.label} className="flex items-center gap-2">
