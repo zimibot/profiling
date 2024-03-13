@@ -5,8 +5,8 @@ export const api = (baseurl) => {
   const instance = axios.create({
     baseURL: baseurl ||
       process.env.NODE_ENV === "production"
-        ? "https://k17tech.com/users"
-        : "http://localhost:3000/users",
+      ? "https://k17tech.com/users"
+      : "http://localhost:3000/users",
     timeout: 30000,
   });
 
@@ -35,6 +35,7 @@ export const api = (baseurl) => {
       return response;
     },
     function (error) {
+      console.log(error)
       if (error?.code !== "ERR_BAD_REQUEST") {
         Swal.fire({
           icon: "error",
@@ -44,13 +45,13 @@ export const api = (baseurl) => {
           didClose: () => {
             localStorage.removeItem("token");
 
-            setTimeout(() => {
-              window.location.reload()
-            }, 100);
+            // setTimeout(() => {
+            //   window.location.reload()
+            // }, 100);
           },
         });
       }
-      
+
 
       // Any status codes that falls outside the range of 2xx cause this function to trigger
       // Do something with response error
