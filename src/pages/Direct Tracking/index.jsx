@@ -645,7 +645,6 @@ const DirectTracking = () => {
 
     createEffect(() => {
         axios.get("http://localhost:5000/iframe-data/0").then(s => {
-            console.log(s)
             setIframeMaps(s.data.iframe)
         })
     })
@@ -743,132 +742,7 @@ const DirectTracking = () => {
                                             </div>
                                             <div> {moment(d.timestamp).format("D/M/YY | HH:MM:SS")}</div>
                                         </div>
-                                        {/* <div className={d.active ? "bg-[#1e1e1e] p-2" : ""}>
-                                            <Collapse value={d.active} class="transition">
-                                                {d.response.map((d, i) => {
-                                                    return <div>
-                                                        <Tags label={`CEK POS ${i + 1}x`}></Tags>
-                                                        <div className="space-y-2">
-                                                            <div className="text-xs grid grid-cols-5 items-center">
-                                                                <div>
-                                                                    ADDRESS
-                                                                </div>
-                                                                <div className="col-span-4" title={d.address}>
-                                                                    <Chip title={d.address} icon={
-                                                                        <IconButton onClick={() => {
-                                                                            copyTextToClipboard(d.address)
-                                                                        }} size="small"><ContentCopy fontSize="small"></ContentCopy></IconButton>
-                                                                    } label={d.address} sx={{
-                                                                        borderRadius: 0
-                                                                    }} color="secondary"></Chip>
-                                                                </div>
-                                                            </div>
-                                                            <Divider sx={{
-                                                                borderColor: "#444"
-                                                            }}></Divider>
-                                                            <div className="text-xs grid grid-cols-5 items-center">
-                                                                <div className="uppercase">
-                                                                    network
-                                                                </div>
-                                                                <div className="col-span-4" title={d.network}>
-                                                                    <Chip label={d.network} sx={{
-                                                                        borderRadius: 0
-                                                                    }} color="secondary"></Chip>
-                                                                </div>
-                                                            </div>
-                                                            <Divider sx={{
-                                                                borderColor: "#444"
-                                                            }}></Divider>
-                                                            <div className="text-xs grid grid-cols-5 items-center">
-                                                                <div className="uppercase">
-                                                                    lat
-                                                                </div>
-                                                                <div className="col-span-4" title={d.lat}>
-                                                                    <Chip label={d.lat} sx={{
-                                                                        borderRadius: 0
-                                                                    }} color="secondary"></Chip>
-                                                                </div>
-                                                            </div>
-                                                            <Divider sx={{
-                                                                borderColor: "#444"
-                                                            }}></Divider>
-                                                            <div className="text-xs grid grid-cols-5 items-center">
-                                                                <div className="uppercase">
-                                                                    long
-                                                                </div>
-                                                                <div className="col-span-4" title={d.long}>
-                                                                    <Chip label={d.long} sx={{
-                                                                        borderRadius: 0
-                                                                    }} color="secondary"></Chip>
-                                                                </div>
-                                                            </div>
-                                                            <Divider sx={{
-                                                                borderColor: "#444"
-                                                            }}></Divider>
-                                                            <div className="text-xs grid grid-cols-5 items-center">
-                                                                <div className="uppercase">
-                                                                    maps
-                                                                </div>
-                                                                <div className="col-span-4">
-                                                                    <Chip title={d.maps} icon={
-                                                                        <IconButton onClick={() => {
-                                                                            copyTextToClipboard(d.maps)
-                                                                        }} size="small"><ContentCopy fontSize="small"></ContentCopy></IconButton>
-                                                                    } label={
-                                                                        <div className="underline text-blue-300 cursor-pointer " onClick={() => {
-                                                                            window.api.invoke("new_browser", d.maps)
-                                                                        }}>{d.maps}</div>
-                                                                    } sx={{
-                                                                        borderRadius: 0
-                                                                    }} color="secondary"></Chip>
-                                                                </div>
-                                                            </div>
-                                                            <Divider sx={{
-                                                                borderColor: "#444"
-                                                            }}></Divider>
-                                                            <div className="text-xs grid grid-cols-5 items-center">
-                                                                <div className="uppercase">
-                                                                    device
-                                                                </div>
-                                                                <div className="col-span-4" title={d.device}>
-                                                                    <Chip label={d.device} sx={{
-                                                                        borderRadius: 0
-                                                                    }} color="secondary"></Chip>
-                                                                </div>
-                                                            </div>
-                                                            <Divider sx={{
-                                                                borderColor: "#444"
-                                                            }}></Divider>
-                                                            <div className="text-xs grid grid-cols-5 items-center">
-                                                                <div className="uppercase">
-                                                                    imei
-                                                                </div>
-                                                                <div className="col-span-4" title={d.imei}>
-                                                                    <Chip label={d.imei} sx={{
-                                                                        borderRadius: 0
-                                                                    }} color="secondary"></Chip>
-                                                                </div>
-                                                            </div>
-                                                            <Divider sx={{
-                                                                borderColor: "#444"
-                                                            }}></Divider>
-                                                            <div className="text-xs grid grid-cols-5 items-center">
-                                                                <div className="uppercase">
-                                                                    imsi
-                                                                </div>
-                                                                <div className="col-span-4" title={d.imsi}>
-                                                                    <Chip label={d.imsi} sx={{
-                                                                        borderRadius: 0
-                                                                    }} color="secondary"></Chip>
-                                                                </div>
-                                                            </div>
-
-
-                                                        </div>
-                                                    </div>
-                                                })}
-                                            </Collapse>
-                                        </div> */}
+                                     
                                     </div>
                                 }) : "Loading..."}
                             </div>
