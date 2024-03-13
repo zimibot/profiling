@@ -26,7 +26,7 @@ import {
 } from "@suid/material";
 import axios from "axios";
 
-import io from "socket.io-client"
+// import io from "socket.io-client"
 
 let maps
 
@@ -63,7 +63,9 @@ const DirectTracking = () => {
         title: createFormControl("", { required: true }),
         msisdn: createFormControl("", { required: true }),
         startDate: createFormControl("", { required: true }),
+        startTime: createFormControl("", { required: true }),
         endDate: createFormControl("", { required: true }),
+        endTime: createFormControl("", { required: true }),
         interval: createFormControl(0)
     });
 
@@ -910,12 +912,18 @@ const DirectTracking = () => {
                             </div>
                             {open().showSchedule && <div className="flex flex-col gap-4">
                                 <div>
-                                    <Tags label="START DATE"></Tags>
-                                    <Input required={group.controls.startDate.isRequired} value={group.controls.startDate.value} onChange={(d) => group.controls.startDate.setValue(d.target.value)} fullWidth class="bg-primarry-2 p-1" sx={{ color: "white" }} type="date"></Input>
+                                    <Tags label="START TIME DATE"></Tags>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <Input required={group.controls.endDate.isRequired} value={group.controls.endDate.value} onChange={(d) => group.controls.endDate.setValue(d.target.value)} fullWidth class="bg-primarry-2 p-1" sx={{ color: "white" }} type="date"></Input>
+                                        <Input required={group.controls.startTime.isRequired} value={group.controls.startTime.value} onChange={(d) => group.controls.startTime.setValue(d.target.value)} fullWidth class="bg-primarry-2 p-1" sx={{ color: "white" }} type="time"></Input>
+                                    </div>
                                 </div>
                                 <div>
-                                    <Tags label="END DATE"></Tags>
-                                    <Input required={group.controls.endDate.isRequired} value={group.controls.endDate.value} onChange={(d) => group.controls.endDate.setValue(d.target.value)} fullWidth class="bg-primarry-2 p-1" sx={{ color: "white" }} type="date"></Input>
+                                    <Tags label="END TIME DATE"></Tags>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <Input required={group.controls.endDate.isRequired} value={group.controls.endDate.value} onChange={(d) => group.controls.endDate.setValue(d.target.value)} fullWidth class="bg-primarry-2 p-1" sx={{ color: "white" }} type="date"></Input>
+                                        <Input required={group.controls.endTime.isRequired} value={group.controls.endTime.value} onChange={(d) => group.controls.endDate.setValue(d.target.value)} fullWidth class="bg-primarry-2 p-1" sx={{ color: "white" }} type="time"></Input>
+                                    </div>
                                 </div>
                                 <div>
                                     <FormControl>
