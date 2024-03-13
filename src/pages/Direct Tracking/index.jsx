@@ -61,7 +61,6 @@ const DirectTracking = () => {
             required: true,
         }),
         title: createFormControl("", { required: true }),
-        msisdn: createFormControl("", { required: true }),
         startDate: createFormControl("", { required: true }),
         startTime: createFormControl("", { required: true }),
         endDate: createFormControl("", { required: true }),
@@ -680,8 +679,23 @@ const DirectTracking = () => {
         }, 500);
     }
 
-    const onStartTracking = (e) => {
+    const onStartTracking = async (e) => {
         e.preventDefault()
+
+        let value = group.value
+
+        value = {
+            ...value,
+            keyword: value.search
+        }
+        try {
+            let data = await api().post("/checkpos/position", value)
+
+            console.log(data)
+        } catch (error) {
+            console.log(error)
+        }
+
     }
 
     return <ContainerPages>
@@ -850,7 +864,6 @@ const DirectTracking = () => {
                                 }) : "Loading..."}
                             </div>
                         </div>
-
                     </div>
                 </form>
                 <div className="flex flex-col flex-1 col-span-6">
@@ -888,14 +901,14 @@ const DirectTracking = () => {
             }}
 
         >
-            <form>
+            <form onSubmit={onStartTracking} >
 
                 <DialogTitle id="alert-dialog-title">
                     {"SELECT SCHEDULE OR RUN NOW ?"}
                 </DialogTitle>
                 <DialogContent >
                     <DialogContentText sx={{ color: "white" }} id="alert-dialog-description">
-                        <div onSubmit={onStartTracking} className={`grid ${open().showSchedule ? "grid-cols-2" : ""}  gap-2`}>
+                        <div className={`grid ${open().showSchedule ? "grid-cols-2" : ""}  gap-2`}>
                             <div className="flex flex-col gap-4">
                                 <div>
                                     <Tags label="TITLE TARGET"></Tags>
@@ -914,7 +927,7 @@ const DirectTracking = () => {
                                 <div>
                                     <Tags label="START TIME DATE"></Tags>
                                     <div className="grid grid-cols-2 gap-3">
-                                        <Input required={group.controls.endDate.isRequired} value={group.controls.endDate.value} onChange={(d) => group.controls.endDate.setValue(d.target.value)} fullWidth class="bg-primarry-2 p-1" sx={{ color: "white" }} type="date"></Input>
+                                        <Input required={group.controls.startDate.isRequired} value={group.controls.startDate.value} onChange={(d) => group.controls.startDate.setValue(d.target.value)} fullWidth class="bg-primarry-2 p-1" sx={{ color: "white" }} type="date"></Input>
                                         <Input required={group.controls.startTime.isRequired} value={group.controls.startTime.value} onChange={(d) => group.controls.startTime.setValue(d.target.value)} fullWidth class="bg-primarry-2 p-1" sx={{ color: "white" }} type="time"></Input>
                                     </div>
                                 </div>
@@ -922,7 +935,7 @@ const DirectTracking = () => {
                                     <Tags label="END TIME DATE"></Tags>
                                     <div className="grid grid-cols-2 gap-3">
                                         <Input required={group.controls.endDate.isRequired} value={group.controls.endDate.value} onChange={(d) => group.controls.endDate.setValue(d.target.value)} fullWidth class="bg-primarry-2 p-1" sx={{ color: "white" }} type="date"></Input>
-                                        <Input required={group.controls.endTime.isRequired} value={group.controls.endTime.value} onChange={(d) => group.controls.endDate.setValue(d.target.value)} fullWidth class="bg-primarry-2 p-1" sx={{ color: "white" }} type="time"></Input>
+                                        <Input required={group.controls.endTime.isRequired} value={group.controls.endTime.value} onChange={(d) => group.controls.endTime.setValue(d.target.value)} fullWidth class="bg-primarry-2 p-1" sx={{ color: "white" }} type="time"></Input>
                                     </div>
                                 </div>
                                 <div>
