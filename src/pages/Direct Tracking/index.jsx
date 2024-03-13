@@ -681,23 +681,41 @@ const DirectTracking = () => {
     }
 
     const onStartTracking = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
 
-        let value = group.value
+        let value = group.value;
 
         value = {
             ...value,
             keyword: value.search
-        }
+        };
+        setload(true)
         try {
-            let data = await api().post("/checkpos/position", value)
+            let data = await api().post("/checkpos/position", value);
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Your tracking has started successfully.',
+                confirmButtonText: 'Great!'
+            });
 
-            console.log(data)
+            setOpen(a => ({ ...a, openPopup: false }))
+
+            setload(false)
+            // If you also want to show a success message with SweetAlert2, you can do it here.
         } catch (error) {
-            console.log(error)
+            console.log(error);
+            // Display error message using SweetAlert2
+            setload(false)
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Something went wrong!',
+                footer: `<div class="text-red-500">${error.response?.data?.message}</div>` || 'Please try again later.'
+            });
         }
+    };
 
-    }
 
     return <ContainerPages>
         <div className="flex flex-1 flex-col py-4">
@@ -711,27 +729,17 @@ const DirectTracking = () => {
                             <div className="px-4 space-y-4 absolute w-full h-full left-0 top-0 overflow-auto">
                                 {items() ? items().length === 0 ? "Data Not Found" : items()?.map((d, i) => {
                                     return <div>
-                                        <div className="flex justify-between items-center border pr-2 border-primarry-2">
+                                        <div className="flex justify-between items-center bg-primarry-2 border-b pr-2 border-blue-400">
                                             <div className="flex gap-2">
-                                                <Button onClick={() => {
+                                                <div className="pl-2 py-2">
+                                                    <div>
+                                                        {d.title}
+                                                    </div>
+                                                    <div>
+                                                        {d.keyword}
+                                                    </div>
 
-                                                    let x = items().filter(s => d._id === s._id)
-
-                                                    marker(x, d.keyword, d.active)
-
-
-                                                    setData(a => a.map(s => ({
-                                                        ...s,
-                                                        active: d._id === s._id && !s.active
-                                                    })
-                                                    ))
-
-                                                }}
-                                                    // endIcon={d.active ? <KeyboardArrowUp></KeyboardArrowUp> : <KeyboardArrowDown fontSize="small"></KeyboardArrowDown>}
-                                                    startIcon={<PinDrop></PinDrop>}
-                                                >
-                                                    {d.keyword}
-                                                </Button>
+                                                </div>
                                             </div>
                                             <div> {moment(d.timestamp).format("D/M/YY | HH:MM:SS")}</div>
                                         </div>
