@@ -43,7 +43,7 @@ export const api = (baseurl) => {
           text: "Session Expired",
           timer: 5000,
           didClose: () => {
-            localStorage.removeItem("token");
+            // localStorage.removeItem("token");
 
             // setTimeout(() => {
             //   window.location.reload()
