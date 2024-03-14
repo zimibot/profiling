@@ -12,7 +12,6 @@ import { api } from "../../../helper/_helper.api";
 const AddConnection = () => {
 
     const navi = useNavigate()
-    const [select, setSelect] = createSignal([])
     const [onShowConfig, setonShowConfig] = createSignal(false)
     const [search, setsearch] = createSignal(null)
     const [onMinimze, setMinimize] = createSignal(false)
@@ -59,13 +58,7 @@ const AddConnection = () => {
         parent: createFormControl("", {
             required: true,
         }),
-        sub_title: createFormControl("", {
-            required: true,
-        }),
-
-        descriptionList: createFormControl("", {
-            required: true,
-        }),
+      
 
 
     });
@@ -411,14 +404,7 @@ const AddConnection = () => {
 
 
 
-    const handleChange = (e) => {
-        const value = e.target.value
-
-        setSelect(value)
-
-        group.controls.descriptionList.setValue(value)
-
-    }
+  
 
     const onConfig = () => {
         if (onListFIles().column.length <= 0) {
@@ -460,8 +446,6 @@ const AddConnection = () => {
         form.append("description", value.description);
         form.append("root", value.root);
         form.append("parent", value.parent);
-        form.append("sub_title", value.sub_title);
-        form.append("descriptionList", JSON.stringify(value.descriptionList)); // Assuming it's an array or object
 
         for (let i = 0; i < value.multipleFiles.length; i++) {
             form.append('file', value.multipleFiles[i]);
@@ -633,103 +617,8 @@ const AddConnection = () => {
                                                 </select>
                                             </div>
                                         </div>
-                                        <div>
-                                            <div>
-                                                <Tags label="SUB TITLE*"></Tags>
-                                            </div>
-                                            <div className="bg-primarry-2 px-2 py-1">
-                                                <select
-
-                                                    required={group.controls.sub_title.isRequired}
-                                                    onChange={(e) => {
-                                                        group.controls.sub_title.setValue(e.target.value)
-                                                    }}
-                                                    value={group.controls.sub_title.value}
-                                                    className="bg-primarry-2 outline-none w-full p-2">
-                                                    <option value={""}>Select Parent</option>
-                                                    {onListFIles().column.map(a => {
-                                                        return <option value={a}>{a}</option>
-                                                    })}
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div>
-                                                <Tags label="DESCRIPTION*"></Tags>
-                                            </div>
-                                            <div className=" px-2 py-1 bg-primarry-2">
-                                                <FormControl
-                                                    // sx={{
-                                                    //     m: 1,
-                                                    //     width: 300,
-                                                    // }}
-                                                    class="w-full"
-                                                    color="info"
-
-                                                >
-
-                                                    <Select
-                                                        placeholder="Select"
-                                                        variant="standard"
-
-                                                        labelId="demo-multiple-chip-label"
-                                                        id="demo-multiple-chip"
-                                                        multiple
-                                                        size="small"
-                                                        color="secondary"
-                                                        value={select()}
-                                                        required={group.controls.descriptionList.isRequired}
-                                                        sx={{
-                                                            border: "1px solid #323232",
-                                                            color: "white",
-                                                            "& .Mui-selected": {
-                                                                background: "red !important"
-                                                            }
-                                                        }}
-                                                        // value={personName()}
-                                                        onChange={handleChange}
-                                                        input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
-                                                        renderValue={(selected) => (
-                                                            <Box
-                                                                sx={{
-                                                                    display: "flex",
-                                                                    flexWrap: "wrap",
-                                                                    gap: 0.5,
-                                                                }}
-                                                            >
-                                                                {selected.map((value) => (
-                                                                    <Chip color="info" label={value} />
-                                                                ))}
-                                                            </Box>
-                                                        )}
-                                                    // MenuProps={MenuProps}
-                                                    >
-                                                        {onListFIles().column.map((name) => (
-                                                            <MenuItem value={name} sx={{
-                                                                '&.Mui-selected': {
-                                                                    color: "white",
-                                                                    bgcolor: "#222"
-                                                                },
-                                                                '&.Mui-selected': {
-                                                                    color: "white",
-                                                                    bgcolor: "#222",
-                                                                    "&:hover": {
-                                                                        color: "#fff",
-                                                                        bgcolor: "#222",
-                                                                    }
-                                                                },
-                                                                '&:hover': {
-                                                                    bgcolor: "#222",
-                                                                    color: "white"
-                                                                }
-                                                            }}>
-                                                                {name}
-                                                            </MenuItem>
-                                                        ))}
-                                                    </Select>
-                                                </FormControl>
-                                            </div>
-                                        </div>
+                                        
+                                    
                                     </div>
                                 </div>
                             </form>

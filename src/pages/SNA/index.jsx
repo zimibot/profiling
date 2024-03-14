@@ -41,12 +41,13 @@ const Connection = () => {
     })
   })
 
-  const onSelect = (id, config) => {
+  const onSelect = (id, config, modelData) => {
     api().get(`/deck-explorer/sna-data-id?id=${id}`).then(a => {
       setCurrentData({
         data: a.data,
         config,
-        id
+        id,
+        modelData
       })
     })
 
@@ -56,7 +57,7 @@ const Connection = () => {
     })))
   }
 
-  let onSave 
+  let onSave
 
   createEffect(() => {
     console.log(currentData())
@@ -69,7 +70,7 @@ const Connection = () => {
             {data() ? data().map((a) => {
               return (
                 <div onClick={() => {
-                  onSelect(a._id, a.config)
+                  onSelect(a._id, a.config, a.modelData)
                 }} className={`p-4 bg-[#0f0f0f] shadow border-b-2  flex flex-col gap-4 cursor-pointer ${a.active ? "border-blue-400" : ""}`}>
                   <div>
                     <div>

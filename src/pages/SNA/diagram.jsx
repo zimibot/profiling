@@ -13,6 +13,7 @@ import { jsPDF } from "jspdf";
 import { Tags } from "../../component/tags";
 import { createFormControl, createFormGroup } from "solid-forms";
 import { api } from "../../helper/_helper.api";
+import Swal from "sweetalert2";
 
 export const Diagram = ({ data }) => {
   let myDiagram, $
@@ -38,30 +39,43 @@ export const Diagram = ({ data }) => {
 
 
 
+
+
+
   createEffect(() => {
     $ = go.GraphObject.make; // untuk mendefinisikan template
     myDiagram =
       $(go.Diagram, "myDiagramDiv", { // ID dari DIV tempat diagram akan ditampilkan
         "undoManager.isEnabled": true, // enable undo & redo
-        layout: $(go.ForceDirectedLayout, {
-          defaultSpringLength: 100,
-          defaultElectricalCharge: 200,
-          epsilonDistance: 1,
-          maxIterations: 200,
-          infinityDistance: 1000,
-          arrangementSpacing: new go.Size(100, 100)
-        }),
-
-
         "animationManager.isEnabled": true,
         "animationManager.initialAnimationStyle": go.AnimationManager.AnimateLocations, // Animasi perubahan lokasi
         "animationManager.duration": 800 // Durasi animasi dalam milidetik
       });
   })
 
+  createEffect(() => {
+
+    let isInitial = data()?.modelData ? false : true
+
+    myDiagram.layout = $(go.ForceDirectedLayout, {
+      isInitial,
+      isOngoing: false,
+      defaultSpringLength: 100,
+      defaultElectricalCharge: 200,
+      epsilonDistance: 1,
+      maxIterations: 200,
+      infinityDistance: 1000,
+      arrangementSpacing: new go.Size(100, 100)
+    })
+
+  })
+
   function init() {
+
+
     myDiagram.nodeTemplate =
       $(go.Node, "Auto",
+        new go.Binding("location", "loc", go.Point.parse).makeTwoWay(go.Point.stringify),
         {
           locationObjectName: "PORT",
           locationSpot: go.Spot.Top, // location point is the middle top of the PORT
@@ -286,8 +300,6 @@ export const Diagram = ({ data }) => {
         // Mendapatkan semua perubahan yang terjadi selama transaksi
         var txn = e.object; // Transaksi
 
-
-
         if (txn?.name === "Initial Layout") {
           setUpdate(a => ({
             ...a,
@@ -317,19 +329,22 @@ export const Diagram = ({ data }) => {
     var nodesToShow = getDataByPage(nodes, currentPage, pageSize);
     var linksToShow = getDataByPage(uniqueLinkData, currentPage, pageSize);
 
-    myDiagram.model = new go.GraphLinksModel(nodesToShow, linksToShow);
+    if (data()?.modelData) {
+      myDiagram.model = go.Model.fromJson(data().modelData);
+    } else {
+      myDiagram.model = new go.GraphLinksModel(nodesToShow, linksToShow);
+    }
   }
+
+
 
 
   createEffect(() => {
     init();
 
-    console.log(data())
-    // var diagramModelJson = myDiagram.model.toJson();
-
-    // console.log(diagramModelJson)
-
   });
+
+
 
   const onRedo = () => {
     if (myDiagram.commandHandler.canRedo()) {
@@ -415,12 +430,26 @@ export const Diagram = ({ data }) => {
   }
 
   const onSaveData = () => {
-    const data2 = myDiagram.model.toJson()
+    const data2 = myDiagram.model.toJson();
     api().put(`/deck-explorer/sna-update?id=${data().id}`, {
       modelData: data2
-    }).then(a => {
-      console.log(a)
-    })
+    }).then(response => {
+      // Tampilkan notifikasi sukses
+      Swal.fire({
+        title: 'Success!',
+        text: 'Data has been saved successfully.',
+        icon: 'success',
+        confirmButtonText: 'OK'
+      })
+    }).catch(error => {
+      // Tampilkan notifikasi error
+      Swal.fire({
+        title: 'Error!',
+        text: 'Failed to save data.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      })
+    });
   }
 
 
