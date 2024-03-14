@@ -12,6 +12,7 @@ import { createEffect, createSignal } from "solid-js";
 import { jsPDF } from "jspdf";
 import { Tags } from "../../component/tags";
 import { createFormControl, createFormGroup } from "solid-forms";
+import { api } from "../../helper/_helper.api";
 
 export const Diagram = ({ data }) => {
   let myDiagram, $
@@ -323,6 +324,7 @@ export const Diagram = ({ data }) => {
   createEffect(() => {
     init();
 
+
     // var diagramModelJson = myDiagram.model.toJson();
 
     // console.log(diagramModelJson)
@@ -400,11 +402,6 @@ export const Diagram = ({ data }) => {
     });
   }
 
-
-  createEffect(() => {
-    console.log(preview())
-  })
-
   const onExport = (e) => {
     e.preventDefault()
     const value = group.value
@@ -415,6 +412,15 @@ export const Diagram = ({ data }) => {
     } else {
       exportDiagramToFullHDPNG({ width: resolution[0], height: resolution[1] }, value.resolution)
     }
+  }
+
+  const onSaveData = () => {
+    const data2 = myDiagram.model.toJson()
+    api().put(`/deck-explorer/sna-update?id=${data().config._id}`, {
+      modelData: data2
+    }).then(a => {
+      console.log(a)
+    })
   }
 
 
@@ -441,7 +447,7 @@ export const Diagram = ({ data }) => {
         <div>
           {update().model &&
             <>
-              <Button color="success" variant="contained" startIcon={<Save></Save>}>SAVE CHANGE</Button>
+              <Button onClick={onSaveData} color="success" variant="contained" startIcon={<Save></Save>}>SAVE CHANGE</Button>
               <Button onClick={onUndo} color="info" variant="contained" startIcon={<Undo></Undo>}>UNDO</Button>
               {update().redo && <Button onClick={onRedo} color="info" variant="contained" startIcon={<Redo></Redo>}>REDO</Button>
               }
