@@ -1,4 +1,4 @@
-import { createSignal, createEffect, For, onCleanup } from 'solid-js';
+import {  For } from 'solid-js';
 
 // Definisikan fungsi komponen di luar fungsi utama
 const RenderData = ({ refData, checkData, checkItems, setCheckAll, setCheck, onCopy, mode, saved, CheckboxItems, FormControlLabel, ContentCopy, IconButton, Tags, b, k }) => {

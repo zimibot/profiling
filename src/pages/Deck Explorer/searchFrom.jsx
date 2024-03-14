@@ -63,56 +63,52 @@ export const SearchForm = () => {
     const [loading, setLoading] = createSignal()
 
     function convertToInternationalFormat(number) {
-        if (number.startsWith(0)) {
-            return 62 + number.substring(1);
-        } else if (number.startsWith(62)) {
+        if (number.startsWith('0')) {
+            return '62' + number.substring(1);
+        } else if (number.startsWith('62')) {
             return number;
         } else {
-            console.error('Invalid MSISDN format');
             return null;
         }
     }
 
-
     const onSubmit = async (d) => {
         d.preventDefault();
         if (group.errors?.isMissing) {
-            return false
+            Swal.fire('Error', 'Please fill in the required fields.', 'error');
+            return false;
         }
-        setLoading(true)
+        setLoading(true);
         group.markSubmitted(true);
         let { search } = group.value;
 
-        search = convertToInternationalFormat(search) ? convertToInternationalFormat(search) : search
+        search = convertToInternationalFormat(search) || search;
 
-        update(d => ({ ...d, search }))
         try {
-            let type = items().chois.value
-            let data = { search, type, path: `/deck-explorer/search-result/database-information/${search}` }
-            let postLogin = await OnSearch(data)
-            let dataSearch = postLogin.data.items
-            update(d => ({ ...d, dataSearch, terkait: dataSearch.terkait }))
-            localStorage.setItem("dataSearch", JSON.stringify(dataSearch))
-            localStorage.setItem("typeSearch", items().chois.label)
-            notify({ title: "Search", text: `${search} Success` })
+            let type = items().chois.value;
+            let data = { search, type, path: `/deck-explorer/search-result/database-information/${search}` };
+            let postLogin = await OnSearch(data);
+            let dataSearch = postLogin.data.items;
+
+            if (!dataSearch) {
+                throw new Error('No data found');
+            }
+
+            update(d => ({ ...d, dataSearch, terkait: dataSearch.terkait }));
+            localStorage.setItem("dataSearch", JSON.stringify(dataSearch));
+            localStorage.setItem("typeSearch", items().chois.label);
+            Swal.fire('Success', `${search} search was successful.`, 'success');
+
             setTimeout(() => {
-                setLoading(false)
-                navi(`/deck-explorer/search-result/database-information/${search}`)
+                setLoading(false);
+                navi(`/deck-explorer/search-result/database-information/${search}`);
             }, 300);
 
         } catch (error) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Oops...',
-                text: error?.response?.data?.message,
-            })
-
-            setLoading(false)
-
+            Swal.fire('Error', error?.response?.data?.message || 'An unexpected error occurred.', 'error');
+            setLoading(false);
         }
-
-
-    }
+    };
 
 
 

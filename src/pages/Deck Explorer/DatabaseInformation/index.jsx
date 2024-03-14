@@ -23,12 +23,12 @@ import {
   Close,
   CoPresent,
   ContentCopy,
-  CopyAll,
 } from "@suid/icons-material";
 import { Drawer } from "@suid/material";
 import { api } from "../../../helper/_helper.api";
 import RenderData from "./renderData";
 import { Loading } from "../../../component/loading";
+import Swal from "sweetalert2";
 
 const DatabaseInformation = () => {
   const [__, { update }] = useAppState();
@@ -199,29 +199,36 @@ const DatabaseInformation = () => {
       isErrorMsg: false,
     });
   });
-
   const onCopy = (text) => {
     // Buat sebuah area teks sementara
     const tempElement = document.createElement("div");
     tempElement.textContent = text;
     document.body.appendChild(tempElement);
-
+  
     // Seleksi teks dalam area teks sementara
     const selection = window.getSelection();
     const range = document.createRange();
     range.selectNodeContents(tempElement);
     selection.removeAllRanges();
     selection.addRange(range);
-
+  
     // Salin teks ke clipboard
     document.execCommand("copy");
-
+  
     // Hapus area teks sementara
     document.body.removeChild(tempElement);
-
-    // Beri pesan pemberitahuan
-    alert("The text has been copied successfully");
+  
+    // Beri pesan pemberitahuan dengan Swal
+    Swal.fire({
+      title: 'Success!',
+      text: 'The text has been copied successfully',
+      icon: 'success',
+      timer: 3000,
+      timerProgressBar: true,
+      confirmButtonText: 'OK'
+    });
   };
+  
 
   const onAdd = () => {
     const check = checkData().map((d) => {
