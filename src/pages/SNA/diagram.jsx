@@ -1,5 +1,17 @@
+import { Download, Redo, Save, Undo } from "@suid/icons-material";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from "@suid/material";
 import * as go from "gojs";
 import { createEffect, createSignal } from "solid-js";
+import { jsPDF } from "jspdf";
+import { Tags } from "../../component/tags";
+import { createFormControl, createFormGroup } from "solid-forms";
 
 export const Diagram = ({ data }) => {
   let myDiagram, $
@@ -7,6 +19,21 @@ export const Diagram = ({ data }) => {
     data: null,
     column: []
   })
+
+  const [update, setUpdate] = createSignal({
+    model: false,
+    redo: false,
+    export: false
+  })
+
+  const group = createFormGroup({
+    resolution: createFormControl("", {
+      required: true,
+    }),
+    mode: createFormControl("", {
+      required: true,
+    }),
+  });
 
 
 
@@ -253,22 +280,149 @@ export const Diagram = ({ data }) => {
       setPreview()
     });
 
-    myDiagram.model = new go.GraphLinksModel(nodes, uniqueLinkData);
+    myDiagram.addModelChangedListener(function (e) {
+      if (e.isTransactionFinished) { // Periksa apakah transaksi telah selesai
+        // Mendapatkan semua perubahan yang terjadi selama transaksi
+        var txn = e.object; // Transaksi
+
+
+
+        if (txn?.name === "Initial Layout") {
+          setUpdate(a => ({
+            ...a,
+            model: false
+          }))
+        } else {
+          setUpdate(a => ({
+            ...a,
+            redo: myDiagram.commandHandler.canRedo(),
+            model: myDiagram.commandHandler.canUndo()
+          }))
+        }
+
+      }
+    });
+
+    var currentPage = 1; // Contoh, halaman yang ingin ditampilkan
+    var pageSize = 100; // Jumlah node/link per halaman
+
+
+    function getDataByPage(data, pageNumber, pageSize) {
+      const start = (pageNumber - 1) * pageSize;
+      const end = start + pageSize;
+      return data.slice(start, end);
+    }
+
+    var nodesToShow = getDataByPage(nodes, currentPage, pageSize);
+    var linksToShow = getDataByPage(uniqueLinkData, currentPage, pageSize);
+
+    myDiagram.model = new go.GraphLinksModel(nodesToShow, linksToShow);
   }
 
 
   createEffect(() => {
     init();
+
+    // var diagramModelJson = myDiagram.model.toJson();
+
+    // console.log(diagramModelJson)
+
   });
+
+  const onRedo = () => {
+    if (myDiagram.commandHandler.canRedo()) {
+      myDiagram.commandHandler.redo();
+    }
+
+  }
+
+  const onUndo = () => {
+    if (myDiagram.commandHandler.canUndo()) {
+      myDiagram.commandHandler.undo();
+    } else {
+      setUpdate(a => ({ ...a, model: false }))
+    }
+    myDiagram.commandHandler.undo();
+  }
+
+  function calculateDynamicScale(desiredWidth = 3840, desiredHeight = 2160) {
+    var nodeCount = myDiagram.model.nodeDataArray.length;
+    var bounds = myDiagram.documentBounds;
+    var averageAreaPerNode = (bounds.width * bounds.height) / nodeCount; // Asumsi kesederhanaan
+    var desiredArea = desiredWidth * desiredHeight;
+    var scale = Math.sqrt(desiredArea / (nodeCount * averageAreaPerNode)); // Akar kuadrat untuk menyesuaikan area
+
+    return scale;
+  }
+
+  function exportDiagramToFullHDPNG(resolution, name) {
+    myDiagram.makeImageData({
+      scale: calculateDynamicScale(resolution.width, resolution.height),
+      background: "white",
+      maxSize: new go.Size(Infinity, Infinity),
+      returnType: "blob",
+      callback: function (blob) {
+        // Buat URL dari blob dan trigger download atau tampilkan di UI
+        var url = window.URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = `Diagram - ${name}.png`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }
+    });
+  }
+
+
+  function exportDiagramToHighResPDF(resolution, name) {
+    myDiagram.makeImageData({
+      scale: calculateDynamicScale(resolution.width, resolution.height),
+      background: "white",
+      maxSize: new go.Size(Infinity, Infinity),  // Sesuaikan untuk batas ukuran gambar
+      returnType: "blob",
+      callback: function (blob) {
+        // Proses blob untuk konversi ke base64 atau langsung ke PDF seperti sebelumnya
+        var reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = function () {
+          var base64data = reader.result;
+          var pdf = new jsPDF({
+            orientation: 'landscape',
+            unit: 'px',
+            format: [resolution.width, resolution.height] // Atur ukuran dokumen PDF sesuai target resolusi
+          });
+          pdf.addImage(base64data, 'PNG', 0, 0, resolution.width, resolution.height);
+          pdf.save(`Diagram - ${name}.pdf`);
+        }
+      }
+    });
+  }
+
 
   createEffect(() => {
     console.log(preview())
   })
+
+  const onExport = (e) => {
+    e.preventDefault()
+    const value = group.value
+    const resolution = value.resolution.split("x")
+    console.log(resolution)
+    if (value.mode === "pdf") {
+      exportDiagramToHighResPDF({ width: resolution[0], height: resolution[1] }, value.resolution)
+    } else {
+      exportDiagramToFullHDPNG({ width: resolution[0], height: resolution[1] }, value.resolution)
+    }
+  }
+
+
   return (
     <div className="w-full h-full">
       <div id="myDiagramDiv" className="w-full h-full"></div>
-      {preview() && preview().data && !preview().data.root && <div className="p-4 absolute left-0 top-0 z-10">
-        <div className="bg-primarry-2 min-w-52  max-h-64 overflow-auto">
+      <div className="p-4 absolute left-0 top-0 z-10 flex gap-3">
+        {preview() && preview().data && !preview().data.root && <div className="bg-primarry-2 min-w-52  max-h-64 overflow-auto">
           <div className=" bg-blue-500 p-2 sticky top-0">INFORMATION</div>
           <div>
             {preview().column.map(a => {
@@ -283,9 +437,73 @@ export const Diagram = ({ data }) => {
             })}
 
           </div>
+        </div>}
+        <div>
+          {update().model &&
+            <>
+              <Button color="success" variant="contained" startIcon={<Save></Save>}>SAVE CHANGE</Button>
+              <Button onClick={onUndo} color="info" variant="contained" startIcon={<Undo></Undo>}>UNDO</Button>
+              {update().redo && <Button onClick={onRedo} color="info" variant="contained" startIcon={<Redo></Redo>}>REDO</Button>
+              }
+            </>
+          }
+          <Button onClick={() => setUpdate(a => ({ ...a, export: true }))} color="secondary" variant="contained" startIcon={<Download></Download>}>EXPORT</Button>
         </div>
-      </div>}
 
+      </div>
+
+      <Dialog
+        open={update().export}
+        onClose={() => {
+          setUpdate(a => ({ ...a, export: false }))
+        }}
+        fullWidth
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        sx={{
+          '.MuiPaper-root': {
+            bgcolor: "#111"
+          }
+        }}
+      >
+        <form onSubmit={onExport}>
+
+          <DialogTitle id="alert-dialog-title">
+            {"SETTINGS EXPORT"}
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description" sx={{
+              color: "white"
+            }}>
+              <div className="grid gap-4">
+                <div>
+                  <Tags label={"RESOLUTION"}></Tags>
+                  <select value={group.controls.resolution.value} required={group.controls.resolution.isRequired} onChange={(e) => group.controls.resolution.setValue(e.target.value)} className="bg-primarry-2 w-full p-2">
+                    <option value="">Select Resolution</option>
+                    <option value="1280x720">HD - 1280x720</option>
+                    <option value="1920x1080">Full HD - 1920x1080</option>
+                    <option value="2560x1440">2K - 2560x1440</option>
+                    <option value="3840x2160">4K - 3840x2160</option>
+                    <option value="7680x4320">8K - 7680x4320</option>
+                  </select>
+                </div>
+                <div>
+                  <Tags label={"MODE"}></Tags>
+                  <select value={group.controls.mode.value} required={group.controls.mode.isRequired} onChange={(e) => group.controls.mode.setValue(e.target.value)} className="bg-primarry-2 w-full p-2">
+                    <option value="">Select Mode</option>
+                    <option value={"pdf"}>PDF</option>
+                    <option value={"image"}>IMAGE</option>
+                  </select>
+                </div>
+              </div>
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setUpdate(a => ({ ...a, export: false }))} color="error">Cancel</Button>
+            <Button type="submit">Download</Button>
+          </DialogActions>
+        </form>
+      </Dialog>
     </div>
   );
 };

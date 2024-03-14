@@ -55,6 +55,8 @@ const Connection = () => {
     })))
   }
 
+  let onSave 
+
   createEffect(() => {
     console.log(currentData())
   })
@@ -93,7 +95,7 @@ const Connection = () => {
 
         <CardBox className={`flex-1 flex flex-col relative`} title={"Connection"}>
           {currentData() ? <div className="flex flex-col flex-1">
-            <Diagram data={currentData}></Diagram>
+            <Diagram onSave={onSave} data={currentData}></Diagram>
           </div> : <div className="absolute w-full h-full left-0 top-0 flex items-center justify-center">
             <div>
               Data not select</div></div>}
@@ -105,6 +107,7 @@ const Connection = () => {
                   Connection
                 </Button>
               </Link>
+
             </div>
           </div>
         </CardBox>

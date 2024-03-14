@@ -94,6 +94,7 @@
     "electron-updater": "^6.1.4",
     "gojs": "^2.3.14",
     "jquery": "^3.7.1",
+    "jspdf": "^2.5.1",
     "leaflet": "^1.9.4",
     "leaflet-control-geocoder": "^2.4.0",
     "leaflet-semicircle": "^2.0.4",
