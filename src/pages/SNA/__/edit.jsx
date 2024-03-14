@@ -63,12 +63,19 @@ const EditConnection = () => {
 
     createEffect(() => {
         const id = location.split("/").pop()
-        api().get(`/deck-explorer/sna-data?id=${id}`).then(a => {
-            console.log(a)
+        api().get(`/deck-explorer/sna-data?id=${id}`).then(d => {
+            group.controls.multipleFiles.setValue(d.data.items.filesData)
+            group.controls.title.setValue(d.data.items.title)
+            group.controls.description.setValue(d.data.items.description)
+            group.controls.root.setValue(d.data.items.config.root)
+            group.controls.parent.setValue(d.data.items.config.parent)
+            setListFiles(a => ({ ...a, multipleFiles: d.data.items.filesData }))
+
         })
     })
 
     createEffect(() => {
+        console.log(onListFIles())
         if (onListFIles().multipleFilesOriginal.length !== 0) {
             group.controls.multipleFiles.setValue(onListFIles().multipleFilesOriginal)
             group.controls.multipleFiles.markRequired(false)
