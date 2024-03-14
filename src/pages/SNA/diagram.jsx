@@ -435,7 +435,6 @@ export const Diagram = ({ data }) => {
     api().put(`/deck-explorer/sna-update?id=${data().id}`, {
       modelData: data2
     }).then(response => {
-      // Tampilkan notifikasi sukses
       Swal.fire({
         title: 'Success!',
         text: 'Data has been saved successfully.',
@@ -447,8 +446,6 @@ export const Diagram = ({ data }) => {
         myDiagram.model = go.Model.fromJson(response.data.items.modelData)
         layout(false)
       }
-
-
 
     }).catch(error => {
       // Tampilkan notifikasi error

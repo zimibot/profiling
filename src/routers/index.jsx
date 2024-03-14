@@ -60,6 +60,12 @@ export const route = [
               import("../pages/SNA/__/add")
             ),
           },
+          {
+            path: "edit/:id",
+            component: lazy(() =>
+              import("../pages/SNA/__/edit")
+            ),
+          },
         ]
       },
       {

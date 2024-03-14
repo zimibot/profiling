@@ -1,7 +1,7 @@
 import { Add, ArrowLeft, ArrowRight, Check, CheckBox, CheckBoxOutlineBlank, Close, Delete, Search, Settings, Upload } from "@suid/icons-material";
 import { createEffect, createSignal, onCleanup } from "solid-js";
 import { Box, Button, Chip, Drawer, FormControl, IconButton, InputBase, MenuItem, OutlinedInput, Select } from "@suid/material";
-import { useNavigate } from "@solidjs/router";
+import { useLocation, useNavigate } from "@solidjs/router";
 import ContainerPages from "../..";
 import { CardBox } from "../../../component/cardBox";
 import { createFormControl, createFormGroup } from "solid-forms";
@@ -12,6 +12,7 @@ import { api } from "../../../helper/_helper.api";
 const EditConnection = () => {
 
     const navi = useNavigate()
+    const location = useLocation().pathname
     const [onShowConfig, setonShowConfig] = createSignal(false)
     const [search, setsearch] = createSignal(null)
     const [onMinimze, setMinimize] = createSignal(false)
@@ -59,6 +60,13 @@ const EditConnection = () => {
             required: true,
         }),
     });
+
+    createEffect(() => {
+        const id = location.split("/").pop()
+        api().get(`/deck-explorer/sna-data?id=${id}`).then(a => {
+            console.log(a)
+        })
+    })
 
     createEffect(() => {
         if (onListFIles().multipleFilesOriginal.length !== 0) {
@@ -401,7 +409,7 @@ const EditConnection = () => {
 
 
 
-  
+
 
     const onConfig = () => {
         if (onListFIles().column.length <= 0) {
@@ -614,8 +622,8 @@ const EditConnection = () => {
                                                 </select>
                                             </div>
                                         </div>
-                                        
-                                    
+
+
                                     </div>
                                 </div>
                             </form>
