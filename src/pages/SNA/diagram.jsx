@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@suid/material";
 import * as go from "gojs";
-import { createEffect, createSignal } from "solid-js";
+import { createEffect, createSignal, onCleanup, onMount } from "solid-js";
 import { jsPDF } from "jspdf";
 import { Tags } from "../../component/tags";
 import { createFormControl, createFormGroup } from "solid-forms";
@@ -25,7 +25,8 @@ export const Diagram = ({ data }) => {
   const [update, setUpdate] = createSignal({
     model: false,
     redo: false,
-    export: false
+    export: false,
+    isload: false
   })
 
   const group = createFormGroup({
@@ -36,9 +37,6 @@ export const Diagram = ({ data }) => {
       required: true,
     }),
   });
-
-
-
 
 
 
@@ -53,13 +51,12 @@ export const Diagram = ({ data }) => {
       });
   })
 
-  createEffect(() => {
 
-    let isInitial = data()?.modelData ? false : true
 
+  const layout = (status) => {
     myDiagram.layout = $(go.ForceDirectedLayout, {
-      isInitial,
-      isOngoing: false,
+      isInitial: status,
+      isOngoing: status,
       defaultSpringLength: 100,
       defaultElectricalCharge: 200,
       epsilonDistance: 1,
@@ -67,12 +64,9 @@ export const Diagram = ({ data }) => {
       infinityDistance: 1000,
       arrangementSpacing: new go.Size(100, 100)
     })
-
-  })
+  }
 
   function init() {
-
-
     myDiagram.nodeTemplate =
       $(go.Node, "Auto",
         new go.Binding("location", "loc", go.Point.parse).makeTwoWay(go.Point.stringify),
@@ -222,6 +216,34 @@ export const Diagram = ({ data }) => {
         )
       );
 
+    myDiagram.addDiagramListener("BackgroundSingleClicked", function (e) {
+      setPreview()
+    });
+
+    myDiagram.addModelChangedListener(function (e) {
+      if (e.isTransactionFinished) { // Periksa apakah transaksi telah selesai
+        // Mendapatkan semua perubahan yang terjadi selama transaksi
+        var txn = e.object; // Transaksi
+
+        if (txn?.name === "Initial Layout") {
+          setUpdate(a => ({
+            ...a,
+            model: false
+          }))
+        } else {
+          setUpdate(a => ({
+            ...a,
+            redo: myDiagram.commandHandler.canRedo(),
+            model: myDiagram.commandHandler.canUndo()
+          }))
+        }
+
+      }
+    });
+
+
+
+
 
 
     function isValidPhoneNumber(phoneNumber) {
@@ -253,6 +275,8 @@ export const Diagram = ({ data }) => {
       }
     });
 
+
+
     // Konversi data menjadi format yang dibutuhkan untuk link
     let linkData = filteredData.map(a => ({
       items: a,
@@ -267,6 +291,7 @@ export const Diagram = ({ data }) => {
 
     // Menghapus duplikat dari data node berdasarkan 'ANUMBER'
     const uniqueNodeData = [...new Map(filteredData.map(item => [item[data().config.root], item])).values()];
+
 
     // Membuat array node unik dengan menambahkan 'totaluniq'
     let nodes = uniqueNodeData.map(a => ({
@@ -291,30 +316,6 @@ export const Diagram = ({ data }) => {
     });
 
     // Menetapkan model dengan data node dan link yang unik
-    myDiagram.addDiagramListener("BackgroundSingleClicked", function (e) {
-      setPreview()
-    });
-
-    myDiagram.addModelChangedListener(function (e) {
-      if (e.isTransactionFinished) { // Periksa apakah transaksi telah selesai
-        // Mendapatkan semua perubahan yang terjadi selama transaksi
-        var txn = e.object; // Transaksi
-
-        if (txn?.name === "Initial Layout") {
-          setUpdate(a => ({
-            ...a,
-            model: false
-          }))
-        } else {
-          setUpdate(a => ({
-            ...a,
-            redo: myDiagram.commandHandler.canRedo(),
-            model: myDiagram.commandHandler.canUndo()
-          }))
-        }
-
-      }
-    });
 
     var currentPage = 1; // Contoh, halaman yang ingin ditampilkan
     var pageSize = 100; // Jumlah node/link per halaman
@@ -329,20 +330,20 @@ export const Diagram = ({ data }) => {
     var nodesToShow = getDataByPage(nodes, currentPage, pageSize);
     var linksToShow = getDataByPage(uniqueLinkData, currentPage, pageSize);
 
-    if (data()?.modelData) {
-      myDiagram.model = go.Model.fromJson(data().modelData);
-    } else {
-      myDiagram.model = new go.GraphLinksModel(nodesToShow, linksToShow);
-    }
+
+
+
+    layout(!data()?.modelData)
+
+    myDiagram.model = data()?.modelData ? go.Model.fromJson(data().modelData) : new go.GraphLinksModel(nodesToShow, linksToShow);
+
   }
-
-
-
 
   createEffect(() => {
     init();
-
   });
+
+
 
 
 
@@ -441,6 +442,14 @@ export const Diagram = ({ data }) => {
         icon: 'success',
         confirmButtonText: 'OK'
       })
+
+      if (!data().modelData) {
+        myDiagram.model = go.Model.fromJson(response.data.items.modelData)
+        layout(false)
+      }
+
+
+
     }).catch(error => {
       // Tampilkan notifikasi error
       Swal.fire({

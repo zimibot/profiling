@@ -30,6 +30,7 @@ const Connection = () => {
   const [onMinimze, setMinimize] = createSignal(false)
   const [data, setData] = createSignal()
   const [currentData, setCurrentData] = createSignal()
+
   const onShow = () => {
     setMinimize(a => !a)
   }
