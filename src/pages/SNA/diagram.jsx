@@ -324,7 +324,7 @@ export const Diagram = ({ data }) => {
   createEffect(() => {
     init();
 
-
+    console.log(data())
     // var diagramModelJson = myDiagram.model.toJson();
 
     // console.log(diagramModelJson)
@@ -416,7 +416,7 @@ export const Diagram = ({ data }) => {
 
   const onSaveData = () => {
     const data2 = myDiagram.model.toJson()
-    api().put(`/deck-explorer/sna-update?id=${data().config._id}`, {
+    api().put(`/deck-explorer/sna-update?id=${data().id}`, {
       modelData: data2
     }).then(a => {
       console.log(a)

@@ -46,6 +46,7 @@ const Connection = () => {
       setCurrentData({
         data: a.data,
         config,
+        id
       })
     })
 
