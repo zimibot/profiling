@@ -94,7 +94,7 @@ export const Diagram = ({ data }) => {
             ),
           click: function (e, node) { // Tambahkan event handler click pada node
             api().get(`/deck-explorer/sna-data-more?type=person&keyword=${node.data.key}`).then(a => {
-              console.log(a)
+              console.log(a.data.items)
             })
             e.diagram.commandHandler.scrollToPart(node); // Memfokuskan view pada node yang diklik
             // Opsional: Centang view ke node yang diklik
