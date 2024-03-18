@@ -87,6 +87,25 @@ export const Diagram = ({ data, myDiagram, $ }) => {
 
   }
 
+  const FormatData = (person_data) => {
+
+    let data2 = [];
+
+    person_data.forEach(person => {
+      // Loop melalui setiap properti di objek person
+      for (let prop in person) {
+        // Cek jika nilai properti adalah array dan tidak kosong, ambil elemen pertama
+        if (Array.isArray(person[prop]) && person[prop].length) {
+          data2.push({ key: person[prop][0] });
+        } else if (!Array.isArray(person[prop])) { // Jika bukan array, langsung gunakan nilainya
+          data2.push({ key: person[prop] });
+        }
+      }
+    });
+
+    console.log(data2)
+  }
+
   function init() {
     myDiagram.nodeTemplate =
       $(go.Node, "Auto",
@@ -102,6 +121,13 @@ export const Diagram = ({ data, myDiagram, $ }) => {
           click: function (e, node) { // Tambahkan event handler click pada node
             api().get(`/deck-explorer/sna-data-more?type=person&keyword=${node.data.key}`).then(a => {
               console.log(a.data.items)
+
+              let items = a.data.items.person_data
+
+              if (items) {
+                FormatData(items)
+              }
+
             })
             e.diagram.commandHandler.scrollToPart(node); // Memfokuskan view pada node yang diklik
             // Opsional: Centang view ke node yang diklik
