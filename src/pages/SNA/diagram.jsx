@@ -136,7 +136,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
             }
 
             if (clickedNode.data.rootType === "person") {
-              api().get(`/deck-explorer/sna-data-more?type=${clickedNode.data.type}&keyword=${node.data.key}`).then(a => {
+              api().get(`/deck-explorer/sna-data-more?type=${clickedNode.data.rootType}&keyword=${node.data.key}`).then(a => {
                 let items = a.data.items.person_data;
 
                 if (items && items.length > 0) {
