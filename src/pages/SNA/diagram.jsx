@@ -162,10 +162,10 @@ export const Diagram = ({ data, myDiagram, $ }) => {
                   if (uniqueItems.length > 0) {
                     // Logic to handle successful data retrieval
                     FormatData(uniqueItems, node.data.key, clickedNode);
+                  } else {
+                    myDiagram.model.setDataProperty(clickedNode.data, "color", "red");
                   }
-                }).catch(() => {
-                  myDiagram.model.setDataProperty(clickedNode.data, "color", "red");
-                });
+                })
               });
 
               Promise.all(promises).then(() => {
