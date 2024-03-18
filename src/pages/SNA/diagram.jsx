@@ -154,10 +154,14 @@ export const Diagram = ({ data, myDiagram, $ }) => {
               let promises = typeData.map(s => {
                 return api().get(`/deck-explorer/sna-data-more?type=${s}&keyword=${node.data.key}`).then(a => {
                   let items = s === "reg_data" ? a.data.items.reg_data : a.data.items.person_data;
-
-                  if (items && items.length > 0) {
+              
+                  // Menghapus duplikat berdasarkan properti 'key'
+                  const uniqueItems = Array.from(new Set(items.map(item => JSON.stringify(item))))
+                                           .map(item => JSON.parse(item));
+              
+                  if (uniqueItems.length > 0) {
                     // Logic to handle successful data retrieval
-                    FormatData(items, node.data.key, clickedNode);
+                    FormatData(uniqueItems, node.data.key, clickedNode);
                   } else {
                     myDiagram.model.setDataProperty(clickedNode.data, "color", "red");
                   }
