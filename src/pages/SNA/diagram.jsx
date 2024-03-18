@@ -94,7 +94,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
     location.y += 150;
     person_data.forEach(person => {
       // Loop melalui setiap properti di objek person
-      
+
       for (let prop in person) {
         if (prop !== "msisdn" || prop !== "NO_PESERTA" || prop !== "INSTANSI" | prop !== "TANGGAL") {
           myDiagram.model.setDataProperty(clickedNode.data, "color", "#44aacc");
@@ -130,7 +130,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
           //     $(go.TextBlock, { margin: 4, width: 140 },
           //       new go.Binding("text", "", data => "tester"))
           //   ),
-          click: function (e, node) { // Tambahkan event handler click pada node
+          click: function (e, node) {
             var clickedNode = node.part; // Dapatkan node yang diklik
 
             // Cek apakah node sudah memiliki children yang dimuat
@@ -145,73 +145,52 @@ export const Diagram = ({ data, myDiagram, $ }) => {
                 title: 'Loading...',
                 text: 'Please wait.',
                 allowOutsideClick: false,
-                onBeforeOpen: () => {
+                didOpen: () => {
                   Swal.showLoading()
                 }
               });
 
-              let typeData = ["person", "reg_data"]
-
-              typeData.map(s => {
-                api().get(`/deck-explorer/sna-data-more?type=${s}&keyword=${node.data.key}`).then(a => {
+              let typeData = ["person", "reg_data"];
+              let promises = typeData.map(s => {
+                return api().get(`/deck-explorer/sna-data-more?type=${s}&keyword=${node.data.key}`).then(a => {
                   let items = s === "reg_data" ? a.data.items.reg_data : a.data.items.person_data;
 
                   if (items && items.length > 0) {
-                    // Marking that children for this node have been loaded
-                    clickedNode.data.childrenLoaded = true;
-
-                    // Updating the model to ensure the new properties are saved
-                    myDiagram.model.setDataProperty(clickedNode.data, "childrenLoaded", true);
-
-                    // Formatting and adding the children data to the diagram
+                    // Logic to handle successful data retrieval
                     FormatData(items, node.data.key, clickedNode);
-
-                    // Closing the swal loading indicator
-                    Swal.close();
-
-                    // Displaying a success notification
-                    // Swal.fire({
-                    //   title: 'Success!',
-                    //   text: 'Data has been loaded successfully.',
-                    //   icon: 'success',
-                    //   confirmButtonText: 'OK'
-                    // });
                   } else {
                     myDiagram.model.setDataProperty(clickedNode.data, "color", "red");
-
-                    // Closing the swal loading indicator
-                    Swal.close();
-
-                    // Displaying an error notification as there's no data
-                    // Swal.fire({
-                    //   title: 'Error!',
-                    //   text: 'No data to display.',
-                    //   icon: 'error',
-                    //   confirmButtonText: 'OK'
-                    // });
                   }
                 }).catch(() => {
                   myDiagram.model.setDataProperty(clickedNode.data, "color", "red");
-
-                  // Closing the swal loading indicator
-                  Swal.close();
-
-                  // Displaying an error notification due to request failure
-                  Swal.fire({
-                    title: 'Error!',
-                    text: 'Failed to load data.',
-                    icon: 'error',
-                    confirmButtonText: 'OK'
-                  });
                 });
-              })
+              });
 
-
-
-
-
+              Promise.all(promises).then(() => {
+                clickedNode.data.childrenLoaded = true;
+                myDiagram.model.setDataProperty(clickedNode.data, "childrenLoaded", true);
+                Swal.close(); // Close the loading swal here
+                // Display a notification after all requests are done
+                Swal.fire({
+                  title: 'Success!',
+                  text: 'All data has been loaded successfully.',
+                  icon: 'success',
+                  confirmButtonText: 'OK'
+                });
+              }).catch(() => {
+                // Close the loading swal here if there was an error
+                Swal.close();
+                // Display an error notification if any request failed
+                Swal.fire({
+                  title: 'Error!',
+                  text: 'Failed to load some or all data.',
+                  icon: 'error',
+                  confirmButtonText: 'OK'
+                });
+              });
             }
-            e.diagram.commandHandler.scrollToPart(node); // Memfokuskan view pada node yang diklik
+
+            e.diagram.commandHandler.scrollToPart(node); // Focus view on the clicked node
             e.diagram.centerRect(node.actualBounds);
           }
 
