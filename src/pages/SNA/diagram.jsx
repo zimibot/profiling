@@ -90,7 +90,6 @@ export const Diagram = ({ data, myDiagram, $ }) => {
 
   const FormatData = (person_data, root, clickedNode) => {
 
-    let data2 = [];
     var location = clickedNode.location.copy();
     location.x += 150; // Sesuaikan lokasi x dan y baru sesuai kebutuhan
     location.y += 150;
@@ -102,25 +101,16 @@ export const Diagram = ({ data, myDiagram, $ }) => {
         if (Array.isArray(person[prop])) {
           // Jika properti adalah array, iterasi setiap elemennya
           person[prop].forEach(element => {
-
-
-
-
             // Tambahkan node baru ke model
-            myDiagram.model.addLinkData({ from: element, color: "#4aa232", to: root });
-            myDiagram.model.addNodeData({ key: element, color: "#4aa232", loc: go.Point.stringify(location), rootdistance: 1 });
-            data2.push({ from: element, to: root });
-
+            myDiagram.model.addLinkData({ from: element, color: "#4aa232", to: root, });
+            myDiagram.model.addNodeData({ key: element, color: "#4aa232", loc: go.Point.stringify(location), rootdistance: 1, close: true });
           });
         } else {
-          myDiagram.model.addLinkData({ from: element, color: "#4aa232", to: root });
-          myDiagram.model.addNodeData({ key: element, color: "#4aa232", loc: go.Point.stringify(location), rootdistance: 1 });
-          data2.push({ from: person[prop], to: root });
+          myDiagram.model.addLinkData({ from: element, color: "#4aa232", to: root, });
+          myDiagram.model.addNodeData({ key: element, color: "#4aa232", loc: go.Point.stringify(location), rootdistance: 1, close: true });
         }
       }
     });
-
-    console.log(data2)
   }
 
   function init() {
@@ -136,24 +126,32 @@ export const Diagram = ({ data, myDiagram, $ }) => {
           //       new go.Binding("text", "", data => "tester"))
           //   ),
           click: function (e, node) { // Tambahkan event handler click pada node
-
             var clickedNode = node.part; // Dapatkan node yang diklik
 
+            // Cek apakah node sudah memiliki children yang dimuat
+            if (clickedNode.data.childrenLoaded) {
+              console.log("Children already loaded for node", node.data.key);
+              return; // Jangan memanggil API jika children sudah dimuat
+            }
+
             api().get(`/deck-explorer/sna-data-more?type=person&keyword=${node.data.key}`).then(a => {
+              let items = a.data.items.person_data;
 
-              let items = a.data.items.person_data
+              if (items && items.length > 0) {
+                // Menandai bahwa children untuk node ini telah dimuat
+                clickedNode.data.childrenLoaded = true;
 
-              if (items) {
+                // Pembaruan model untuk memastikan properti baru tersimpan
+                myDiagram.model.updateData(clickedNode.data);
 
-                console.log(items)
-                FormatData(items, node.data.key, clickedNode)
+                // Format dan tambahkan data children ke diagram
+                FormatData(items, node.data.key, clickedNode);
               }
-
-            })
+            });
             e.diagram.commandHandler.scrollToPart(node); // Memfokuskan view pada node yang diklik
-            // Opsional: Centang view ke node yang diklik
             e.diagram.centerRect(node.actualBounds);
           }
+
         },
         $(go.Shape, "Circle",
           {
