@@ -87,7 +87,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
 
   }
 
-  const FormatData = (person_data) => {
+  const FormatData = (person_data, root) => {
 
     let data2 = [];
 
@@ -96,9 +96,9 @@ export const Diagram = ({ data, myDiagram, $ }) => {
       for (let prop in person) {
         // Cek jika nilai properti adalah array dan tidak kosong, ambil elemen pertama
         if (Array.isArray(person[prop]) && person[prop].length) {
-          data2.push({ key: person[prop][0] });
+          data2.push({ from: root, to: person[prop][0] });
         } else if (!Array.isArray(person[prop])) { // Jika bukan array, langsung gunakan nilainya
-          data2.push({ key: person[prop] });
+          data2.push({ from: root, to: person[prop] });
         }
       }
     });
@@ -125,7 +125,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
               let items = a.data.items.person_data
 
               if (items) {
-                FormatData(items)
+                FormatData(items, node.data.key)
               }
 
             })
@@ -361,6 +361,8 @@ export const Diagram = ({ data, myDiagram, $ }) => {
 
     var nodesToShow = nodes;
     var linksToShow = uniqueLinkData;
+
+    console.log(nodesToShow, linksToShow)
 
     setItmes(() => ({
       node: nodesToShow,
