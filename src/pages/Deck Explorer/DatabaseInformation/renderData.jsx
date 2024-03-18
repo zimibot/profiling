@@ -1,4 +1,4 @@
-import { ZoomIn } from '@suid/icons-material';
+import { ImageAspectRatio, ZoomIn, ZoomInMap, ZoomOutMap } from '@suid/icons-material';
 import { For } from 'solid-js';
 
 // Definisikan fungsi komponen di luar fungsi utama
@@ -13,18 +13,34 @@ const RenderData = ({ refData, checkData, checkItems, setCheckAll, setCheck, onC
       // Hapus elemen <div> yang sudah ada
       existingElement.remove();
     }
+
     let element = document.createElement("div");
-    let element_2 = document.createElement("div")
+    let element_2 = document.createElement("div");
+    let closeButton = document.createElement("button");
     let img = document.createElement("img");
 
     element.setAttribute("id", "zoomDiv"); // Menetapkan id untuk referensi
     element.classList = "fixed w-full h-full top-0 left-0 z-50 bg-primarry-1 bg-opacity-80 flex justify-center items-center"
-    element.appendChild(element_2)
+    element.appendChild(element_2);
+
+    element_2.classList = "relative";
+    element_2.appendChild(closeButton);
+
+    closeButton.classList = "absolute bg-red-500 right-0 top-0 p-2";
+    closeButton.textContent = "CLOSE";
+    closeButton.setAttribute("id", "closeBtn");
+
+    // Menambahkan event listener ke tombol close
+    closeButton.addEventListener('click', () => {
+      element.remove(); // Menghapus elemen zoomDiv dari dokumen ketika tombol close diklik
+    });
+
     img.setAttribute("src", src);
     img.setAttribute("alt", "Deskripsi gambar");
     element_2.appendChild(img);
     document.body.appendChild(element);
   }
+
   return <div ref={refData} className={`bg-[#1e1e1e] p-2 ${k === 0 ? " col-span-full" : checkData().length === 2 ? "col-span-full" : ""}`}>
     <div className="border border-primarry-2 px-4 bg-primarry-1  z-50 flex justify-between items-center">
       <Tags label={<span>DATA FROM <b>{b.label}</b></span>}></Tags>
@@ -41,7 +57,7 @@ const RenderData = ({ refData, checkData, checkItems, setCheckAll, setCheck, onC
     <For each={b.data}>
       {(x) => {
         return (
-          <div className={`flex gap-4 relative border-b ${mode() === "dark" ? "border-[#333]" : "border-[#aaa]"} py-2 `}>
+          <div className={`flex  gap-4 relative border-b ${mode() === "dark" ? "border-[#333]" : "border-[#aaa]"} py-2 `}>
             <div className="flex gap-4 items-start flex-1 relative">
               <div className={`${mode() === "dark" ? "text-[#aaa]" : "text-[#444]"} sticky top-[10px] whitespace-nowrap w-[200px] z-10 px-4 pt-2`}> {x.total_data === 1 ? "" : `[${x.total_data}]`} {x.label}</div>
               <div className="flex-1 ">
@@ -67,7 +83,7 @@ const RenderData = ({ refData, checkData, checkItems, setCheckAll, setCheck, onC
                           <IconButton title={"COPY CONTENT"} onClick={() => onCopy(d.label)} color="primary" size="small">
                             <ContentCopy fontSize="small"></ContentCopy>
                           </IconButton> : <IconButton onClick={() => onZoom(d.label)} color="primary" size="small">
-                            <ZoomIn fontSize="small"></ZoomIn>
+                            <ZoomOutMap fontSize="small"></ZoomOutMap>
                           </IconButton>
                         }
 
