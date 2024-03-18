@@ -102,13 +102,13 @@ export const Diagram = ({ data, myDiagram, $ }) => {
           person[prop].forEach(element => {
 
             var location = clickedNode.location.copy();
-            location.x += 300; // Sesuaikan lokasi x dan y baru sesuai kebutuhan
-            location.y += 300;
+            location.x += 100; // Sesuaikan lokasi x dan y baru sesuai kebutuhan
+            location.y += 100;
 
 
             // Tambahkan node baru ke model
-            myDiagram.model.addNodeData({ key: element, loc: go.Point.stringify(location) });
             myDiagram.model.addLinkData({ from: element, to: root });
+            myDiagram.model.addNodeData({ key: element, loc: go.Point.stringify(location) });
             data2.push({ from: element, to: root });
 
           });
