@@ -91,6 +91,10 @@ export const Diagram = ({ data, myDiagram, $ }) => {
   const FormatData = (person_data, root, clickedNode) => {
 
     let data2 = [];
+    var location = clickedNode.location.copy();
+    location.x += 150; // Sesuaikan lokasi x dan y baru sesuai kebutuhan
+    location.y += 150;
+
 
     person_data.forEach(person => {
       // Loop melalui setiap properti di objek person
@@ -100,26 +104,21 @@ export const Diagram = ({ data, myDiagram, $ }) => {
           person[prop].forEach(element => {
 
 
-            var location = clickedNode.location.copy();
-            location.x += 150; // Sesuaikan lokasi x dan y baru sesuai kebutuhan
-            location.y += 150;
 
 
             // Tambahkan node baru ke model
-            myDiagram.model.addLinkData({ from: element,color: "#4aa232", to: root });
+            myDiagram.model.addLinkData({ from: element, color: "#4aa232", to: root });
             myDiagram.model.addNodeData({ key: element, color: "#4aa232", loc: go.Point.stringify(location), rootdistance: 1 });
             data2.push({ from: element, to: root });
 
           });
         } else {
-          myDiagram.model.addLinkData({ from: element,color: "#4aa232", to: root });
+          myDiagram.model.addLinkData({ from: element, color: "#4aa232", to: root });
           myDiagram.model.addNodeData({ key: element, color: "#4aa232", loc: go.Point.stringify(location), rootdistance: 1 });
           data2.push({ from: person[prop], to: root });
-
         }
       }
     });
-
 
     console.log(data2)
   }
