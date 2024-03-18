@@ -161,9 +161,9 @@ export const Diagram = ({ data, myDiagram, $ }) => {
                     if (mainType === "reg_data") {
                       const uniqueMap = new Map(items.map(item => [item.PENCARIAN, item]));
                       uniqueData = Array.from(uniqueMap.values());
-                    } else {
-                      uniqueData = items
-                    }
+                    } 
+
+                    uniqueData = items
                     // Removing duplicate based on 'key'
                   
 
