@@ -105,12 +105,12 @@ export const Diagram = ({ data, myDiagram, $ }) => {
             // If the property is an array, iterate each element
             person[prop].forEach(element => {
               // Add new node to model
-              myDiagram.model.addLinkData({ from: element, color, type: "person", to: root, childrenLoaded: false });
+              myDiagram.model.addLinkData({ from: element, color, type: "person", rootType, to: root, childrenLoaded: false });
               myDiagram.model.addNodeData({ key: element, color, type: "person", rootType: rootType, loc: go.Point.stringify(location), childrenLoaded: false });
             });
           } else {
             // Add single property as node and link
-            myDiagram.model.addLinkData({ from: person[prop], color, type: "person", to: root, childrenLoaded: false });
+            myDiagram.model.addLinkData({ from: person[prop], color, type: "person", rootType, to: root, childrenLoaded: false });
             myDiagram.model.addNodeData({ key: person[prop], color, type: "person", rootType: rootType, loc: go.Point.stringify(location), childrenLoaded: false });
           }
         }
@@ -158,6 +158,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
                   .then(a => {
                     let items = mainType === "reg_data" ? a.data.items.reg_data : a.data.items.person_data;
                     let uniqueData
+
                     if (mainType === "reg_data") {
                       const uniqueMap = new Map(items.map(item => [item.PENCARIAN, item]));
                       uniqueData = Array.from(uniqueMap.values());
@@ -168,13 +169,11 @@ export const Diagram = ({ data, myDiagram, $ }) => {
 
 
 
-                    console.log(uniqueData)
 
                     if (uniqueData.length > 0) {
                       // Logic to handle successful data retrieval
                       FormatData(uniqueData, node.data.key, clickedNode, mainType);
 
-                      console.log(mainType)
 
                       return true; // Indicate success
                     } else {
@@ -293,8 +292,13 @@ export const Diagram = ({ data, myDiagram, $ }) => {
 
     const Tolltip = () => ({
       toolTip:
+
         $("ToolTip",
+
           $(go.TextBlock, { margin: 2, width: 200 },
+            new go.Binding("visible", "type", function (type) {
+              return type !== "person"; // Panel hanya terlihat jika type bukan "person"
+            }),
             new go.Binding("text", "", (data) => {
               return `
                     From: ${data.to}
@@ -362,15 +366,13 @@ export const Diagram = ({ data, myDiagram, $ }) => {
             return `rgb(96, 165, ${blueIntensity})`;
           })),
         $(go.Panel, "Auto", // Menggunakan Panel "Auto" untuk menambahkan "padding"
-          new go.Binding("visible", "type", function (type) {
-            return type !== "person"; // Panel hanya terlihat jika type bukan "person"
-          }),
+
           {
             toolTip:
               Tolltip().toolTip,
             segmentIndex: 0,
-            segmentFraction: 0.5,
-            segmentOrientation: go.Link.OrientUpright,
+            segmentFraction: 2,
+            segmentOrientation: go.Link.OrientUpright45,
           },
           $(go.Shape, "Rectangle", // Shape untuk background, bisa disesuaikan
             {
@@ -385,7 +387,10 @@ export const Diagram = ({ data, myDiagram, $ }) => {
               stroke: "white",
               margin: 4
             },
-            new go.Binding("text", "totaluniqFrom", (data) => `${data}x`))
+            new go.Binding("text", "", (data) => {
+              console.log(data.totaluniqFrom)
+              return data.totaluniqFrom ? data.totaluniqFrom : data.rootType
+            }))
         )
       );
 
