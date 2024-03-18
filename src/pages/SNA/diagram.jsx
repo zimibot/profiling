@@ -165,11 +165,9 @@ export const Diagram = ({ data, myDiagram, $ }) => {
                       FormatData(uniqueItems, node.data.key, clickedNode);
                       return true; // Indicate success
                     } else {
-                      myDiagram.model.setDataProperty(clickedNode.data, "color", "red");
                       return false; // Indicate failure but not a fetch error
                     }
                   }).catch(() => {
-                    myDiagram.model.setDataProperty(clickedNode.data, "color", "red");
                     return false; // Indicate fetch error
                   });
               });
@@ -201,6 +199,8 @@ export const Diagram = ({ data, myDiagram, $ }) => {
                 } else {
                   // No requests were successful
                   // Display an error notification if all requests failed
+                  myDiagram.model.setDataProperty(clickedNode.data, "color", "red");
+
                   Swal.fire({
                     title: 'Error!',
                     text: 'Failed to load any data.',
