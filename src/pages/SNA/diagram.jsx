@@ -89,6 +89,10 @@ export const Diagram = ({ data, myDiagram, $ }) => {
   }
 
   const FormatData = (person_data, root, clickedNode, rootType = "other") => {
+
+    console.log(rootType)
+    const color = rootType === "person" ? "#4aa232" : "#245ac2"
+
     var location = clickedNode.location.copy();
     location.x += 150; // Adjust the new x and y location as needed
     location.y += 150;
@@ -103,13 +107,13 @@ export const Diagram = ({ data, myDiagram, $ }) => {
             // If the property is an array, iterate each element
             person[prop].forEach(element => {
               // Add new node to model
-              myDiagram.model.addLinkData({ from: element, color: "#4aa232", type: "person", to: root, childrenLoaded: false });
-              myDiagram.model.addNodeData({ key: element, color: "#4aa232", type: "person", rootType: rootType, loc: go.Point.stringify(location), childrenLoaded: false });
+              myDiagram.model.addLinkData({ from: element, color, type: "person", to: root, childrenLoaded: false });
+              myDiagram.model.addNodeData({ key: element, color, type: "person", rootType: rootType, loc: go.Point.stringify(location), childrenLoaded: false });
             });
           } else {
             // Add single property as node and link
-            myDiagram.model.addLinkData({ from: person[prop], color: "#4aa232", type: "person", to: root, childrenLoaded: false });
-            myDiagram.model.addNodeData({ key: person[prop], color: "#4aa232", type: "person", rootType: rootType, loc: go.Point.stringify(location), childrenLoaded: false });
+            myDiagram.model.addLinkData({ from: person[prop], color, type: "person", to: root, childrenLoaded: false });
+            myDiagram.model.addNodeData({ key: person[prop], color, type: "person", rootType: rootType, loc: go.Point.stringify(location), childrenLoaded: false });
           }
         }
       }
@@ -151,18 +155,22 @@ export const Diagram = ({ data, myDiagram, $ }) => {
               });
 
               let typeData = ["person", "reg_data"];
-              let promises = typeData.map(s => {
-                return api().get(`/deck-explorer/sna-data-more?type=${s}&keyword=${node.data.key}`)
+              let promises = typeData.map(mainType => {
+                return api().get(`/deck-explorer/sna-data-more?type=${mainType}&keyword=${node.data.key}`)
                   .then(a => {
-                    let items = s === "reg_data" ? a.data.items.reg_data : a.data.items.person_data;
+                    let items = mainType === "reg_data" ? a.data.items.reg_data : a.data.items.person_data;
 
                     // Removing duplicate based on 'key'
                     const uniqueItems = Array.from(new Set(items.map(item => JSON.stringify(item))))
                       .map(item => JSON.parse(item));
 
+
                     if (uniqueItems.length > 0) {
                       // Logic to handle successful data retrieval
-                      FormatData(uniqueItems, node.data.key, clickedNode);
+                      FormatData(uniqueItems, node.data.key, clickedNode, mainType);
+
+                      console.log(mainType)
+
                       return true; // Indicate success
                     } else {
                       return false; // Indicate failure but not a fetch error
