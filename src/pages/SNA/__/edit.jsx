@@ -64,12 +64,14 @@ const EditConnection = () => {
     createEffect(() => {
         const id = location.split("/").pop()
         api().get(`/deck-explorer/sna-data?id=${id}`).then(d => {
+            const itemsFirst = d.data.items.filesData[0]
+            setdisplay(itemsFirst.url)
             group.controls.multipleFiles.setValue(d.data.items.filesData)
             group.controls.title.setValue(d.data.items.title)
             group.controls.description.setValue(d.data.items.description)
             group.controls.root.setValue(d.data.items.config.root)
             group.controls.parent.setValue(d.data.items.config.parent)
-            setListFiles(a => ({ ...a, multipleFiles: d.data.items.filesData }))
+            setListFiles(a => ({ ...a, multipleFiles: d.data.items.filesData, multipleFilesOriginal: d.data.items.originalFiles }))
 
         })
     })
