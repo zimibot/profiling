@@ -383,7 +383,6 @@ export const Diagram = ({ data, myDiagram, $ }) => {
               margin: 4
             },
             new go.Binding("text", "", (data) => {
-              console.log(data.totaluniqFrom)
               return data.totaluniqFrom ? data.totaluniqFrom : data.rootType
             }))
         )
