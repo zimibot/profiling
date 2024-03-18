@@ -89,8 +89,6 @@ export const Diagram = ({ data, myDiagram, $ }) => {
   }
 
   const FormatData = (person_data, root, clickedNode, rootType = "other") => {
-
-    console.log(rootType)
     const color = rootType === "person" ? "#4aa232" : "#245ac2"
 
     var location = clickedNode.location.copy();
@@ -164,6 +162,8 @@ export const Diagram = ({ data, myDiagram, $ }) => {
                     const uniqueItems = Array.from(new Set(items.map(item => JSON.stringify(item))))
                       .map(item => JSON.parse(item));
 
+
+                      console.log(uniqueItems)
 
                     if (uniqueItems.length > 0) {
                       // Logic to handle successful data retrieval
