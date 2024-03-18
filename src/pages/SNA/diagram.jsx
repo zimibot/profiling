@@ -78,7 +78,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
       isInitial: status,
       isOngoing: status,
       defaultSpringLength: 100,
-      defaultElectricalCharge: 200,
+      defaultElectricalCharge: 500,
       epsilonDistance: 1,
       maxIterations: 200,
       infinityDistance: 1000,
@@ -306,7 +306,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
       }
     });
 
-
+    myDiagram.layout.invalidateLayout();
 
   }
 
