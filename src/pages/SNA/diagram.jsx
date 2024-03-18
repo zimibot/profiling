@@ -106,14 +106,14 @@ export const Diagram = ({ data, myDiagram, $ }) => {
 
 
             // Tambahkan node baru ke model
-            myDiagram.model.addLinkData({ from: element, to: root });
+            myDiagram.model.addLinkData({ from: element,color: "#4aa232", to: root });
             myDiagram.model.addNodeData({ key: element, color: "#4aa232", loc: go.Point.stringify(location), rootdistance: 1 });
             data2.push({ from: element, to: root });
 
           });
         } else {
-          // Jika bukan array, langsung gunakan nilainya
-          // myDiagram.model.addLinkData({ from: element, to: root });
+          myDiagram.model.addLinkData({ from: element,color: "#4aa232", to: root });
+          myDiagram.model.addNodeData({ key: element, color: "#4aa232", loc: go.Point.stringify(location), rootdistance: 1 });
           data2.push({ from: person[prop], to: root });
 
         }
