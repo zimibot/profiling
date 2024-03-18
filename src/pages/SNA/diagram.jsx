@@ -93,8 +93,9 @@ export const Diagram = ({ data }) => {
                 new go.Binding("text", "", data => "tester"))
             ),
           click: function (e, node) { // Tambahkan event handler click pada node
-          
-           
+            api().get(`/deck-explorer/sna-data-more?type=person&keyword=${node.data.key}`).then(a => {
+              console.log(a)
+            })
             e.diagram.commandHandler.scrollToPart(node); // Memfokuskan view pada node yang diklik
             // Opsional: Centang view ke node yang diklik
             e.diagram.centerRect(node.actualBounds);
@@ -471,7 +472,7 @@ export const Diagram = ({ data }) => {
     <div className="w-full h-full">
       <div id="myDiagramDiv" className="w-full h-full"></div>
       <div className="p-4 absolute left-0 top-0 z-10 flex gap-3">
-       
+
         <div>
           {update().model &&
             <>
