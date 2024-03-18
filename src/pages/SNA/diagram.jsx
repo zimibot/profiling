@@ -107,8 +107,8 @@ export const Diagram = ({ data, myDiagram, $ }) => {
 
 
             // Tambahkan node baru ke model
-            myDiagram.model.addLinkData({ from: element, to: root, color: "#46a5ff", });
-            myDiagram.model.addNodeData({ key: element, loc: go.Point.stringify(location) });
+            myDiagram.model.addLinkData({ from: element, to: root });
+            myDiagram.model.addNodeData({ key: element, color: "#46a5ff", loc: go.Point.stringify(location) });
             data2.push({ from: element, to: root });
 
           });
