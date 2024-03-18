@@ -157,17 +157,22 @@ export const Diagram = ({ data, myDiagram, $ }) => {
                 return api().get(`/deck-explorer/sna-data-more?type=${mainType}&keyword=${node.data.key}`)
                   .then(a => {
                     let items = mainType === "reg_data" ? a.data.items.reg_data : a.data.items.person_data;
-
+                    let uniqueData
+                    if (mainType === "reg_data") {
+                      const uniqueMap = new Map(items.map(item => [item.PENCARIAN, item]));
+                      uniqueData = Array.from(uniqueMap.values());
+                    } else {
+                      uniqueData = items
+                    }
                     // Removing duplicate based on 'key'
-                    const uniqueItems = Array.from(new Set(items.map(item => JSON.stringify(item))))
-                      .map(item => JSON.parse(item));
+                  
 
 
-                      console.log(uniqueItems)
+                    console.log(uniqueData)
 
                     if (uniqueItems.length > 0) {
                       // Logic to handle successful data retrieval
-                      FormatData(uniqueItems, node.data.key, clickedNode, mainType);
+                      FormatData(uniqueData, node.data.key, clickedNode, mainType);
 
                       console.log(mainType)
 
