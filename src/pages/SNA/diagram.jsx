@@ -17,10 +17,6 @@ import Swal from "sweetalert2";
 
 export const Diagram = ({ data }) => {
   let myDiagram, $
-  const [preview, setPreview] = createSignal({
-    data: null,
-    column: []
-  })
 
   const [update, setUpdate] = createSignal({
     model: false,
@@ -46,8 +42,26 @@ export const Diagram = ({ data }) => {
       $(go.Diagram, "myDiagramDiv", { // ID dari DIV tempat diagram akan ditampilkan
         "undoManager.isEnabled": true, // enable undo & redo
         "animationManager.isEnabled": true,
+        "zoomToFit": true,
         "animationManager.initialAnimationStyle": go.AnimationManager.AnimateLocations, // Animasi perubahan lokasi
-        "animationManager.duration": 800 // Durasi animasi dalam milidetik
+        "animationManager.duration": 800,
+        // "ViewportBoundsChanged": function (e) {
+        //   // Mengubah ukuran node dan font berdasarkan skala saat ini
+        //   var scale = e.diagram.scale;
+        //   myDiagram.nodes.each(function (node) {
+        //     var shape = node.findObject("SHAPE");
+        //     var text = node.findObject("TEXT");
+        //     if (shape && text) {
+        //       // Atur ulang ukuran dan stroke sesuai skala
+        //       var inverseScale = Math.max(1 / scale, 0.5); // Batasi nilai minimal untuk mencegah terlalu besar
+        //       shape.width = 150 * inverseScale;
+        //       shape.height = 150 * inverseScale;
+        //       shape.strokeWidth = 2 * inverseScale;
+        //       // Sesuaikan ukuran font
+        //       text.font = `${12 * inverseScale}px sans-serif`;
+        //     }
+        //   });
+        // }
       });
   })
 
@@ -79,15 +93,8 @@ export const Diagram = ({ data }) => {
                 new go.Binding("text", "", data => "tester"))
             ),
           click: function (e, node) { // Tambahkan event handler click pada node
-            let column = []
-            for (const key in node.data.items) {
-              column.push(key)
-            }
-            setPreview({
-              data: node.data,
-              column
-            })
-
+          
+           
             e.diagram.commandHandler.scrollToPart(node); // Memfokuskan view pada node yang diklik
             // Opsional: Centang view ke node yang diklik
             e.diagram.centerRect(node.actualBounds);
@@ -95,6 +102,7 @@ export const Diagram = ({ data }) => {
         },
         $(go.Shape, "Circle",
           {
+            name: "SHAPE",
             strokeWidth: 2,
             fill: "#333",
             // Menambahkan binding untuk width dan height berdasarkan totaluniqFrom
@@ -102,7 +110,7 @@ export const Diagram = ({ data }) => {
           new go.Binding("fill", "color"),
         ),
         $(go.TextBlock,
-          { margin: 5, stroke: "white" },
+          { margin: 5, stroke: "white", name: "TEXT", },
           new go.Binding("text", "key")
         ),
         // Menambahkan TreeExpanderButton dengan visibility binding berdasarkan properti 'root'
@@ -216,9 +224,9 @@ export const Diagram = ({ data }) => {
         )
       );
 
-    myDiagram.addDiagramListener("BackgroundSingleClicked", function (e) {
-      setPreview()
-    });
+    // myDiagram.addDiagramListener("BackgroundSingleClicked", function (e) {
+    //   setPreview()
+    // });
 
     myDiagram.addModelChangedListener(function (e) {
       if (e.isTransactionFinished) { // Periksa apakah transaksi telah selesai
@@ -463,22 +471,7 @@ export const Diagram = ({ data }) => {
     <div className="w-full h-full">
       <div id="myDiagramDiv" className="w-full h-full"></div>
       <div className="p-4 absolute left-0 top-0 z-10 flex gap-3">
-        {preview() && preview().data && !preview().data.root && <div className="bg-primarry-2 min-w-52  max-h-64 overflow-auto">
-          <div className=" bg-blue-500 p-2 sticky top-0">INFORMATION</div>
-          <div>
-            {preview().column.map(a => {
-              return <div className="p-2 flex justify-between text-sm">
-                <div>
-                  {a}
-                </div>
-                <div className="text-blue-300">
-                  {a === "DURATION" ? preview().data.totalDuration : preview().data.items[a]}
-                </div>
-              </div>
-            })}
-
-          </div>
-        </div>}
+       
         <div>
           {update().model &&
             <>

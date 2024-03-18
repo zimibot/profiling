@@ -27,9 +27,8 @@ export default function MenuTabs() {
     <div className="text-sm font-medium text-center sm:flex sm:justify-end lg:justify-start">
       <ul className="flex">
         <li
-          className={`${
-            mode() === "dark" ? " bg-primarry-1" : "bg-gray-200"
-          } flex items-center`}
+          className={`${mode() === "dark" ? " bg-primarry-1" : "bg-gray-200"
+            } flex items-center`}
         >
           <a
             href="#"
@@ -51,9 +50,8 @@ export default function MenuTabs() {
         </li>
         <ul className="flex flex-1 whitespace-nowrap ">
           <li
-            className={`${
-              mode() === "dark" ? " bg-primarry-1" : "bg-gray-200"
-            } flex items-center`}
+            className={`${mode() === "dark" ? " bg-primarry-1" : "bg-gray-200"
+              } flex items-center`}
           >
             <Link
               href="/deck-explorer"
@@ -63,9 +61,8 @@ export default function MenuTabs() {
             </Link>
           </li>
           <li
-            className={`${
-              mode() === "dark" ? " bg-primarry-1" : "bg-gray-200"
-            } flex items-center`}
+            className={`${mode() === "dark" ? " bg-primarry-1" : "bg-gray-200"
+              } flex items-center`}
           >
             <Link
               href="/deck-explorer/direct-tracking"
@@ -83,9 +80,8 @@ export default function MenuTabs() {
             </Link>
           </li>
           <li
-            className={`${
-              mode() === "dark" ? " bg-primarry-1" : "bg-gray-200"
-            } flex items-center`}
+            className={`${mode() === "dark" ? " bg-primarry-1" : "bg-gray-200"
+              } flex items-center`}
           >
             <Link
               href="/deck-explorer/system-settings"
