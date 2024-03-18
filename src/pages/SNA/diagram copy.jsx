@@ -78,9 +78,8 @@ export const Diagram = ({ data, myDiagram, $ }) => {
       isInitial: status,
       isOngoing: status,
       defaultSpringLength: 100,
-      defaultElectricalCharge: 200,
+      defaultElectricalCharge: 500,
       epsilonDistance: 1,
-      defaultElectricalCharge: 100,
       maxIterations: 200,
       infinityDistance: 1000,
       arrangementSpacing: new go.Size(100, 100)
@@ -92,6 +91,9 @@ export const Diagram = ({ data, myDiagram, $ }) => {
 
     let data2 = [];
 
+
+
+
     person_data.forEach(person => {
       // Loop melalui setiap properti di objek person
       for (let prop in person) {
@@ -99,15 +101,14 @@ export const Diagram = ({ data, myDiagram, $ }) => {
           // Jika properti adalah array, iterasi setiap elemennya
           person[prop].forEach(element => {
 
-
             var location = clickedNode.location.copy();
-            location.x += 150; // Sesuaikan lokasi x dan y baru sesuai kebutuhan
-            location.y += 150;
+            location.x += 100; // Sesuaikan lokasi x dan y baru sesuai kebutuhan
+            location.y += 100;
 
 
             // Tambahkan node baru ke model
             myDiagram.model.addLinkData({ from: element, to: root });
-            myDiagram.model.addNodeData({ key: element, color: "#4aa232", loc: go.Point.stringify(location), rootdistance: 1 });
+            myDiagram.model.addNodeData({ key: element, color: "#4aa232", loc: go.Point.stringify(location) });
             data2.push({ from: element, to: root });
 
           });
@@ -174,10 +175,16 @@ export const Diagram = ({ data, myDiagram, $ }) => {
           {
             alignment: go.Spot.Bottom, alignmentFocus: go.Spot.Top,
             click: (e, obj) => {
-              var node = obj.part;  // get the Node containing this Button
-              if (node === null) return;
-              e.handled = true;
-              expandNode(node);
+              var clickedNode = obj.part; // Mendapatkan node tempat TreeExpanderButton diklik
+              if (clickedNode !== null) {
+                var clickedKey = clickedNode.data.key; // Key dari node yang diklik
+
+                e.diagram.nodes.each(function (n) {
+                  if (n.data.key !== clickedKey) {
+                    n.visible = !n.visible; // Toggle visibility berdasarkan kondisi yang ditentukan
+                  }
+                });
+              }
             }
           }, // Menyesuaikan posisi tombol
           // Binding untuk menentukan visibilitas berdasarkan properti 'root'
@@ -222,31 +229,6 @@ export const Diagram = ({ data, myDiagram, $ }) => {
             }))
         )
     })
-
-    
-    function expandNode(node) {
-      var diagram = node.diagram;
-      diagram.startTransaction("CollapseExpandTree");
-      // this behavior is specific to this incrementalTree sample:
-      var data = node.data;
-      if (!data.everExpanded) {
-        // only create children once per node
-        diagram.model.setDataProperty(data, "everExpanded", true);
-        // var numchildren = createSubTree(data);
-        // if (numchildren === 0) {  // now known no children: don't need Button!
-        //   node.findObject('TREEBUTTON').visible = false;
-        // }
-      }
-      // this behavior is generic for most expand/collapse tree buttons:
-      if (node.isTreeExpanded) {
-        diagram.commandHandler.collapseTree(node);
-      } else {
-        diagram.commandHandler.expandTree(node);
-      }
-
-      diagram.commitTransaction("CollapseExpandTree");
-     
-    }
 
     // Template untuk link dengan strokeWidth yang menyesuaikan berdasarkan totaluniq
     myDiagram.linkTemplate =
@@ -299,6 +281,9 @@ export const Diagram = ({ data, myDiagram, $ }) => {
         )
       );
 
+    // myDiagram.addDiagramListener("BackgroundSingleClicked", function (e) {
+    //   setPreview()
+    // });
 
     myDiagram.addModelChangedListener(function (e) {
       if (e.isTransactionFinished) { // Periksa apakah transaksi telah selesai
@@ -321,11 +306,14 @@ export const Diagram = ({ data, myDiagram, $ }) => {
       }
     });
 
-
+    myDiagram.layout.invalidateLayout();
 
   }
 
   createEffect(() => {
+
+
+
     function isValidPhoneNumber(phoneNumber) {
       // Contoh regex yang mengecek apakah string diawali dengan '62' atau '081' atau '082'
       // dan diikuti oleh angka lainnya
@@ -371,14 +359,12 @@ export const Diagram = ({ data, myDiagram, $ }) => {
     const uniqueNodeData = [...new Map(filteredData.map(item => [item[data().config.root], item])).values()];
 
 
-
     // Membuat array node unik dengan menambahkan 'totaluniq'
     let nodes = uniqueNodeData.map(a => ({
       key: a[data().config.root],
       color: "#46a5ff",
       items: a,
       root: true,
-      everExpanded: false,
       totalDuration: totalDurationPerBNumber.get(a[data().config.parent]),
       totaluniq: aNumberCounts.get(a[data().config.root]) // Total kemunculan ANUMBER di rawData
     }));
@@ -388,7 +374,6 @@ export const Diagram = ({ data, myDiagram, $ }) => {
       if (!nodes.some(node => node.key === link.from)) {
         nodes.push({
           key: link.from,
-          everExpanded: false,
           items: link.items,
           totaluniq: bNumberCounts.get(link.from),
           totalDuration: totalDurationPerBNumber.get(link.from),
@@ -397,9 +382,14 @@ export const Diagram = ({ data, myDiagram, $ }) => {
     });
 
 
+    var nodesToShow = nodes;
+    var linksToShow = uniqueLinkData;
+
+    console.log(nodesToShow, linksToShow)
+
     setItmes(() => ({
-      node: nodes,
-      linkData: uniqueLinkData,
+      node: nodesToShow,
+      linkData: linksToShow,
       modelData: data().modelData
     }))
 
@@ -420,7 +410,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
         layout(false)
       } else {
         layout(true)
-        myDiagram.model = new go.GraphLinksModel(items().node, items().linkData)
+        myDiagram.model = new go.TreeModel(items().node, items().linkData)
       }
     }, 200);
 
