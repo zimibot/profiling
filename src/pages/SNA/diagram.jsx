@@ -95,7 +95,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
     person_data.forEach(person => {
       // Loop melalui setiap properti di objek person
       for (let prop in person) {
-        if (prop !== "msisdn") {
+        if (prop !== "msisdn" || prop !== "NO_PESERTA" || prop !== "INSTANSI" | prop !== "TANGGAL") {
           myDiagram.model.setDataProperty(clickedNode.data, "color", "#44aacc");
 
           if (Array.isArray(person[prop])) {
