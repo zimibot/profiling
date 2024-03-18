@@ -98,16 +98,19 @@ export const Diagram = ({ data, myDiagram, $ }) => {
     person_data.forEach(person => {
       // Loop melalui setiap properti di objek person
       for (let prop in person) {
-        if (Array.isArray(person[prop])) {
-          // Jika properti adalah array, iterasi setiap elemennya
-          person[prop].forEach(element => {
-            // Tambahkan node baru ke model
-            myDiagram.model.addLinkData({ from: element, color: "#4aa232", to: root, childrenLoaded: false, });
-            myDiagram.model.addNodeData({ key: element, color: "#4aa232", loc: go.Point.stringify(location), rootdistance: 1, childrenLoaded: false, });
-          });
-        } else {
-          myDiagram.model.addLinkData({ from: person[prop], color: "#4aa232", to: root, childrenLoaded: false, });
-          myDiagram.model.addNodeData({ key: person[prop], color: "#4aa232", loc: go.Point.stringify(location), rootdistance: 1, childrenLoaded: false, });
+        if (prop !== "msisdn") {
+          if (Array.isArray(person[prop])) {
+            // Jika properti adalah array, iterasi setiap elemennya
+            person[prop].forEach(element => {
+              // Tambahkan node baru ke model
+              myDiagram.model.addLinkData({ from: element, color: "#4aa232", type: "person", to: root, childrenLoaded: false, });
+              myDiagram.model.addNodeData({ key: element, color: "#4aa232", type: "person", loc: go.Point.stringify(location), rootdistance: 1, childrenLoaded: false, });
+            });
+          } else {
+
+            myDiagram.model.addLinkData({ from: person[prop], color: "#4aa232", type: "person", to: root, childrenLoaded: false, });
+            myDiagram.model.addNodeData({ key: person[prop], color: "#4aa232", type: "person", loc: go.Point.stringify(location), rootdistance: 1, childrenLoaded: false, });
+          }
         }
       }
     });
