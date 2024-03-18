@@ -49,8 +49,8 @@ export const Diagram = ({ data, myDiagram, $ }) => {
         "undoManager.isEnabled": true, // enable undo & redo
         "animationManager.isEnabled": true,
         "zoomToFit": true,
-        // "animationManager.initialAnimationStyle": go.AnimationManager.AnimateLocations, // Animasi perubahan lokasi
-        // "animationManager.duration": 800,
+        "animationManager.initialAnimationStyle": go.AnimationManager.AnimateLocations, // Animasi perubahan lokasi
+        "animationManager.duration": 800,
         // "ViewportBoundsChanged": function (e) {
         //   // Mengubah ukuran node dan font berdasarkan skala saat ini
         //   var scale = e.diagram.scale;
@@ -102,12 +102,12 @@ export const Diagram = ({ data, myDiagram, $ }) => {
           // Jika properti adalah array, iterasi setiap elemennya
           person[prop].forEach(element => {
             // Tambahkan node baru ke model
-            myDiagram.model.addLinkData({ from: element, color: "#4aa232", to: root, });
-            myDiagram.model.addNodeData({ key: element, color: "#4aa232", loc: go.Point.stringify(location), rootdistance: 1, close: true });
+            myDiagram.model.addLinkData({ from: element, color: "#4aa232", to: root, childrenLoaded: false, });
+            myDiagram.model.addNodeData({ key: element, color: "#4aa232", loc: go.Point.stringify(location), rootdistance: 1, childrenLoaded: false, });
           });
         } else {
-          myDiagram.model.addLinkData({ from: element, color: "#4aa232", to: root, });
-          myDiagram.model.addNodeData({ key: element, color: "#4aa232", loc: go.Point.stringify(location), rootdistance: 1, close: true });
+          myDiagram.model.addLinkData({ from: person[prop], color: "#4aa232", to: root, childrenLoaded: false, });
+          myDiagram.model.addNodeData({ key: person[prop], color: "#4aa232", loc: go.Point.stringify(location), rootdistance: 1, childrenLoaded: false, });
         }
       }
     });
@@ -142,7 +142,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
                 clickedNode.data.childrenLoaded = true;
 
                 // Pembaruan model untuk memastikan properti baru tersimpan
-                myDiagram.model.updateData(clickedNode.data);
+                myDiagram.model.setDataProperty(clickedNode.data, "childrenLoaded", true);
 
                 // Format dan tambahkan data children ke diagram
                 FormatData(items, node.data.key, clickedNode);
