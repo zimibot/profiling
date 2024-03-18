@@ -135,6 +135,8 @@ export const Diagram = ({ data, myDiagram, $ }) => {
               return; // Jangan memanggil API jika children sudah dimuat
             }
 
+            console.log("load")
+
 
             api().get(`/deck-explorer/sna-data-more?type=person&keyword=${node.data.key}`).then(a => {
               let items = a.data.items.person_data;
