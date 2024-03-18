@@ -89,12 +89,10 @@ export const Diagram = ({ data, myDiagram, $ }) => {
   }
 
   const FormatData = (person_data, root, clickedNode) => {
-
     var location = clickedNode.location.copy();
     location.x += 150; // Sesuaikan lokasi x dan y baru sesuai kebutuhan
     location.y += 150;
-
-
+    myDiagram.model.setDataProperty(clickedNode.data, "color", "red");
     person_data.forEach(person => {
       // Loop melalui setiap properti di objek person
       for (let prop in person) {
@@ -103,13 +101,13 @@ export const Diagram = ({ data, myDiagram, $ }) => {
             // Jika properti adalah array, iterasi setiap elemennya
             person[prop].forEach(element => {
               // Tambahkan node baru ke model
-              myDiagram.model.addLinkData({ from: element, color: "#4aa232", type: "person", to: root, childrenLoaded: false, });
-              myDiagram.model.addNodeData({ key: element, color: "#4aa232", type: "person", loc: go.Point.stringify(location), rootdistance: 1, childrenLoaded: false, });
+              myDiagram.model.addLinkData({ from: element, color: "#4aa232", type: "person", group: root, to: root, childrenLoaded: false, });
+              myDiagram.model.addNodeData({ key: element, color: "#4aa232", type: "person", group: root, loc: go.Point.stringify(location), childrenLoaded: false, });
             });
           } else {
 
-            myDiagram.model.addLinkData({ from: person[prop], color: "#4aa232", type: "person", to: root, childrenLoaded: false, });
-            myDiagram.model.addNodeData({ key: person[prop], color: "#4aa232", type: "person", loc: go.Point.stringify(location), rootdistance: 1, childrenLoaded: false, });
+            myDiagram.model.addLinkData({ from: person[prop], color: "#4aa232", group: root, type: "person", to: root, childrenLoaded: false, });
+            myDiagram.model.addNodeData({ key: person[prop], color: "#4aa232", group: root, type: "person", loc: go.Point.stringify(location), rootdistance: 1, childrenLoaded: false, });
           }
         }
       }
@@ -136,6 +134,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
               console.log("Children already loaded for node", node.data.key);
               return; // Jangan memanggil API jika children sudah dimuat
             }
+
 
             api().get(`/deck-explorer/sna-data-more?type=person&keyword=${node.data.key}`).then(a => {
               let items = a.data.items.person_data;
@@ -278,6 +277,9 @@ export const Diagram = ({ data, myDiagram, $ }) => {
             return `rgb(96, 165, ${blueIntensity})`;
           })),
         $(go.Panel, "Auto", // Menggunakan Panel "Auto" untuk menambahkan "padding"
+          new go.Binding("visible", "type", function (type) {
+            return type !== "person"; // Panel hanya terlihat jika type bukan "person"
+          }),
           {
             toolTip:
               Tolltip().toolTip,
