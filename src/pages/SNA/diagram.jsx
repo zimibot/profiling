@@ -153,28 +153,22 @@ export const Diagram = ({ data, myDiagram, $ }) => {
               });
 
               let typeData = ["person", "reg_data"];
+              function removeDuplicates(items, key) {
+                const uniqueMap = new Map(items.map(item => [item[key], item]));
+                return Array.from(uniqueMap.values());
+              }
+
               let promises = typeData.map(mainType => {
                 return api().get(`/deck-explorer/sna-data-more?type=${mainType}&keyword=${node.data.key}`)
-                  .then(a => {
-                    let items = mainType === "reg_data" ? a.data.items.reg_data : a.data.items.person_data;
-                    let uniqueData
+                  .then(response => {
+                    let items = response.data.items[mainType === "reg_data" ? "reg_data" : "person_data"];
 
-                    if (mainType === "reg_data") {
-                      const uniqueMap = new Map(items.map(item => [item.PENCARIAN, item]));
-                      uniqueData = Array.from(uniqueMap.values());
-                    } else {
-                      uniqueData = items
-                    }
-                    // Removing duplicate based on 'key'
-
-
-
+                    // Hanya hapus duplikat untuk "reg_data"
+                    let uniqueData = mainType === "reg_data" ? removeDuplicates(items, 'PENCARIAN') : items;
 
                     if (uniqueData.length > 0) {
                       // Logic to handle successful data retrieval
                       FormatData(uniqueData, node.data.key, clickedNode, mainType);
-
-
                       return true; // Indicate success
                     } else {
                       return false; // Indicate failure but not a fetch error
@@ -183,6 +177,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
                     return false; // Indicate fetch error
                   });
               });
+
 
               Promise.all(promises).then((results) => {
                 clickedNode.data.childrenLoaded = true;
