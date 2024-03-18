@@ -87,32 +87,31 @@ export const Diagram = ({ data, myDiagram, $ }) => {
     })
 
   }
-
   const FormatData = (person_data, root, clickedNode, rootType = "other") => {
     const color = rootType === "person" ? "#4aa232" : "#245ac2"
-
-    var location = clickedNode.location.copy();
-    location.x += 150; // Adjust the new x and y location as needed
-    location.y += 150;
+    let angle = 0; // Sudut awal
+    const radius = 150; // Jarak dari pusat node induk
 
     person_data.forEach(person => {
-      // Loop through each property in the person object
       for (let prop in person) {
-        // Ensure prop is not one of the excluded properties
         if (prop !== "msisdn" && prop !== "NO_PESERTA" && prop !== "INSTANSI" && prop !== "TANGGAL") {
           myDiagram.model.setDataProperty(clickedNode.data, "color", "#44aacc");
+
+          // Menghitung lokasi baru berdasarkan sudut dan radius
+          var location = new go.Point(clickedNode.location.x + Math.cos(angle) * radius, clickedNode.location.y + Math.sin(angle) * radius);
+
           if (Array.isArray(person[prop])) {
-            // If the property is an array, iterate each element
             person[prop].forEach(element => {
-              // Add new node to model
               myDiagram.model.addLinkData({ from: element, color, type: "person", rootType, to: root, childrenLoaded: false });
               myDiagram.model.addNodeData({ key: element, color, type: "person", rootType: rootType, loc: go.Point.stringify(location), childrenLoaded: false });
             });
           } else {
-            // Add single property as node and link
             myDiagram.model.addLinkData({ from: person[prop], color, type: "person", rootType, to: root, childrenLoaded: false });
             myDiagram.model.addNodeData({ key: person[prop], color, type: "person", rootType: rootType, loc: go.Point.stringify(location), childrenLoaded: false });
           }
+
+          // Menyesuaikan sudut untuk node berikutnya
+          angle += Math.PI / 4; // Misalnya, menambahkan 45 derajat (dalam radian) untuk setiap node
         }
       }
     });
