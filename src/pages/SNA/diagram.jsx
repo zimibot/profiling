@@ -161,16 +161,16 @@ export const Diagram = ({ data, myDiagram, $ }) => {
                     if (mainType === "reg_data") {
                       const uniqueMap = new Map(items.map(item => [item.PENCARIAN, item]));
                       uniqueData = Array.from(uniqueMap.values());
-                    } 
-
-                    uniqueData = items
+                    } else {
+                      uniqueData = items
+                    }
                     // Removing duplicate based on 'key'
-                  
+
 
 
                     console.log(uniqueData)
 
-                    if (uniqueItems.length > 0) {
+                    if (uniqueData.length > 0) {
                       // Logic to handle successful data retrieval
                       FormatData(uniqueData, node.data.key, clickedNode, mainType);
 
