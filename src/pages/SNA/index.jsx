@@ -31,10 +31,12 @@ const Connection = () => {
   const [onMinimze, setMinimize] = createSignal(false)
   const [data, setData] = createSignal()
   const [currentData, setCurrentData] = createSignal()
+  const [isLoading, setIsloading] = createSignal(false)
 
   const onShow = () => {
     setMinimize(a => !a)
   }
+
 
   createEffect(() => {
     api().get("/deck-explorer/sna-data").then(a => {
@@ -44,7 +46,9 @@ const Connection = () => {
   })
 
   const onSelect = (id, config, modelData) => {
+    setIsloading(true)
     api().get(`/deck-explorer/sna-data-id?id=${id}`).then(a => {
+      setIsloading(false)
       setCurrentData({
         data: a.data,
         config,
@@ -61,9 +65,6 @@ const Connection = () => {
 
   let onSave
 
-  createEffect(() => {
-    console.log(currentData())
-  })
   return (
     <ContainerPages>
       <div className="flex flex-1 pt-4 gap-2">
@@ -109,7 +110,7 @@ const Connection = () => {
         </div>
 
         <CardBox className={`flex-1 flex flex-col relative`} title={"Connection"}>
-          {currentData() ? <div className="flex flex-col flex-1">
+          {isLoading() ? <div><Loading></Loading></div> : currentData() ? <div className="flex flex-col flex-1">
             <Diagram onSave={onSave} data={currentData}></Diagram>
           </div> : <div className="absolute w-full h-full left-0 top-0 flex items-center justify-center">
             <div>

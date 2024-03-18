@@ -15,14 +15,19 @@ import { createFormControl, createFormGroup } from "solid-forms";
 import { api } from "../../helper/_helper.api";
 import Swal from "sweetalert2";
 
-export const Diagram = ({ data }) => {
-  let myDiagram, $
+export const Diagram = ({ data, myDiagram, $ }) => {
+
 
   const [update, setUpdate] = createSignal({
     model: false,
     redo: false,
     export: false,
     isload: false
+  })
+
+  const [items, setItmes] = createSignal({
+    node: [],
+    linkData: []
   })
 
   const group = createFormGroup({
@@ -40,11 +45,12 @@ export const Diagram = ({ data }) => {
     $ = go.GraphObject.make; // untuk mendefinisikan template
     myDiagram =
       $(go.Diagram, "myDiagramDiv", { // ID dari DIV tempat diagram akan ditampilkan
+        initialContentAlignment: go.Spot.Center,
         "undoManager.isEnabled": true, // enable undo & redo
         "animationManager.isEnabled": true,
         "zoomToFit": true,
-        "animationManager.initialAnimationStyle": go.AnimationManager.AnimateLocations, // Animasi perubahan lokasi
-        "animationManager.duration": 800,
+        // "animationManager.initialAnimationStyle": go.AnimationManager.AnimateLocations, // Animasi perubahan lokasi
+        // "animationManager.duration": 800,
         // "ViewportBoundsChanged": function (e) {
         //   // Mengubah ukuran node dan font berdasarkan skala saat ini
         //   var scale = e.diagram.scale;
@@ -78,6 +84,7 @@ export const Diagram = ({ data }) => {
       infinityDistance: 1000,
       arrangementSpacing: new go.Size(100, 100)
     })
+
   }
 
   function init() {
@@ -87,11 +94,11 @@ export const Diagram = ({ data }) => {
         {
           locationObjectName: "PORT",
           locationSpot: go.Spot.Top, // location point is the middle top of the PORT
-          toolTip:
-            $("ToolTip",
-              $(go.TextBlock, { margin: 4, width: 140 },
-                new go.Binding("text", "", data => "tester"))
-            ),
+          // toolTip:
+          //   $("ToolTip",
+          //     $(go.TextBlock, { margin: 4, width: 140 },
+          //       new go.Binding("text", "", data => "tester"))
+          //   ),
           click: function (e, node) { // Tambahkan event handler click pada node
             api().get(`/deck-explorer/sna-data-more?type=person&keyword=${node.data.key}`).then(a => {
               console.log(a.data.items)
@@ -252,6 +259,9 @@ export const Diagram = ({ data }) => {
 
 
 
+  }
+
+  createEffect(() => {
 
 
 
@@ -283,8 +293,6 @@ export const Diagram = ({ data }) => {
         totalDurationPerBNumber.set(item[data().config.parent], currentDuration + parseInt(item.DURATION, 10));
       }
     });
-
-
 
     // Konversi data menjadi format yang dibutuhkan untuk link
     let linkData = filteredData.map(a => ({
@@ -324,29 +332,37 @@ export const Diagram = ({ data }) => {
       }
     });
 
-    // Menetapkan model dengan data node dan link yang unik
 
-    var currentPage = 1; // Contoh, halaman yang ingin ditampilkan
-    var pageSize = 100; // Jumlah node/link per halaman
+    var nodesToShow = nodes;
+    var linksToShow = uniqueLinkData;
 
+    setItmes(() => ({
+      node: nodesToShow,
+      linkData: linksToShow,
+      modelData: data().modelData
+    }))
 
-    function getDataByPage(data, pageNumber, pageSize) {
-      const start = (pageNumber - 1) * pageSize;
-      const end = start + pageSize;
-      return data.slice(start, end);
-    }
+    onCleanup(() => {
+      setItmes(() => ({
+        node: [],
+        linkData: [],
+        modelData: null
+      }))
+    })
+  })
 
-    var nodesToShow = getDataByPage(nodes, currentPage, pageSize);
-    var linksToShow = getDataByPage(uniqueLinkData, currentPage, pageSize);
+  createEffect(() => {
+    setTimeout(() => {
+      if (items()?.modelData) {
+        myDiagram.model = go.Model.fromJson(items().modelData);
+        layout(false)
+      } else {
+        layout(true)
+        myDiagram.model = new go.GraphLinksModel(items().node, items().linkData)
+      }
+    }, 200);
 
-
-
-
-    layout(!data()?.modelData)
-
-    myDiagram.model = data()?.modelData ? go.Model.fromJson(data().modelData) : new go.GraphLinksModel(nodesToShow, linksToShow);
-
-  }
+  })
 
   createEffect(() => {
     init();
@@ -451,10 +467,6 @@ export const Diagram = ({ data }) => {
         confirmButtonText: 'OK'
       })
 
-      if (!data().modelData) {
-        myDiagram.model = go.Model.fromJson(response.data.items.modelData)
-        layout(false)
-      }
 
     }).catch(error => {
       // Tampilkan notifikasi error
