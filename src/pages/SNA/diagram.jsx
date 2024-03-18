@@ -97,7 +97,6 @@ export const Diagram = ({ data, myDiagram, $ }) => {
       for (let prop in person) {
         if (prop !== "msisdn" || prop !== "NO_PESERTA" || prop !== "INSTANSI" | prop !== "TANGGAL") {
           myDiagram.model.setDataProperty(clickedNode.data, "color", "#44aacc");
-
           if (Array.isArray(person[prop])) {
             // Jika properti adalah array, iterasi setiap elemennya
             person[prop].forEach(element => {
@@ -108,7 +107,6 @@ export const Diagram = ({ data, myDiagram, $ }) => {
 
 
           } else {
-
             myDiagram.model.addLinkData({ from: person[prop], color: "#4aa232", group: root, type: "person", to: root, childrenLoaded: false, });
             myDiagram.model.addNodeData({ key: person[prop], color: "#4aa232", group: root, type: "person", rootType: rootType, loc: go.Point.stringify(location), rootdistance: 1, childrenLoaded: false, });
           }
@@ -171,12 +169,12 @@ export const Diagram = ({ data, myDiagram, $ }) => {
                     Swal.close();
 
                     // Displaying a success notification
-                    Swal.fire({
-                      title: 'Success!',
-                      text: 'Data has been loaded successfully.',
-                      icon: 'success',
-                      confirmButtonText: 'OK'
-                    });
+                    // Swal.fire({
+                    //   title: 'Success!',
+                    //   text: 'Data has been loaded successfully.',
+                    //   icon: 'success',
+                    //   confirmButtonText: 'OK'
+                    // });
                   } else {
                     myDiagram.model.setDataProperty(clickedNode.data, "color", "red");
 
