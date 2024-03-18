@@ -152,44 +152,74 @@ export const Diagram = ({ data, myDiagram, $ }) => {
 
               let typeData = ["person", "reg_data"];
               let promises = typeData.map(s => {
-                return api().get(`/deck-explorer/sna-data-more?type=${s}&keyword=${node.data.key}`).then(a => {
-                  let items = s === "reg_data" ? a.data.items.reg_data : a.data.items.person_data;
+                return api().get(`/deck-explorer/sna-data-more?type=${s}&keyword=${node.data.key}`)
+                  .then(a => {
+                    let items = s === "reg_data" ? a.data.items.reg_data : a.data.items.person_data;
 
-                  // Menghapus duplikat berdasarkan properti 'key'
-                  const uniqueItems = Array.from(new Set(items.map(item => JSON.stringify(item))))
-                    .map(item => JSON.parse(item));
+                    // Removing duplicate based on 'key'
+                    const uniqueItems = Array.from(new Set(items.map(item => JSON.stringify(item))))
+                      .map(item => JSON.parse(item));
 
-                  if (uniqueItems.length > 0) {
-                    // Logic to handle successful data retrieval
-                    FormatData(uniqueItems, node.data.key, clickedNode);
-                  } else {
+                    if (uniqueItems.length > 0) {
+                      // Logic to handle successful data retrieval
+                      FormatData(uniqueItems, node.data.key, clickedNode);
+                      return true; // Indicate success
+                    } else {
+                      myDiagram.model.setDataProperty(clickedNode.data, "color", "red");
+                      return false; // Indicate failure but not a fetch error
+                    }
+                  }).catch(() => {
                     myDiagram.model.setDataProperty(clickedNode.data, "color", "red");
-                  }
-                })
+                    return false; // Indicate fetch error
+                  });
               });
 
-              Promise.all(promises).then(() => {
+              Promise.all(promises).then((results) => {
                 clickedNode.data.childrenLoaded = true;
                 myDiagram.model.setDataProperty(clickedNode.data, "childrenLoaded", true);
                 Swal.close(); // Close the loading swal here
-                // Display a notification after all requests are done
-                Swal.fire({
-                  title: 'Success!',
-                  text: 'All data has been loaded successfully.',
-                  icon: 'success',
-                  confirmButtonText: 'OK'
-                });
+
+                // Check how many promises were resolved successfully
+                const successCount = results.filter(result => result === true).length;
+
+                if (successCount === promises.length) {
+                  // All requests were successful
+                  Swal.fire({
+                    title: 'Success!',
+                    text: 'All data has been loaded successfully.',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                  });
+                } else if (successCount > 0) {
+                  // Some requests were successful
+                  Swal.fire({
+                    title: 'Partial Success!',
+                    text: 'Some data has been loaded successfully.',
+                    icon: 'warning',
+                    confirmButtonText: 'OK'
+                  });
+                } else {
+                  // No requests were successful
+                  // Display an error notification if all requests failed
+                  Swal.fire({
+                    title: 'Error!',
+                    text: 'Failed to load any data.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                  });
+                }
               }).catch(() => {
-                // Close the loading swal here if there was an error
+                // This catch block should not be hit since we're handling all rejects,
+                // but it's here as a safety net.
                 Swal.close();
-                // Display an error notification if any request failed
                 Swal.fire({
-                  title: 'Error!',
-                  text: 'Failed to load some or all data.',
+                  title: 'Unexpected Error!',
+                  text: 'An unexpected error occurred.',
                   icon: 'error',
                   confirmButtonText: 'OK'
                 });
               });
+
             }
 
             e.diagram.commandHandler.scrollToPart(node); // Focus view on the clicked node
