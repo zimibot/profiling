@@ -87,9 +87,12 @@ export const Diagram = ({ data, myDiagram, $ }) => {
 
   }
 
-  const FormatData = (person_data, root) => {
+  const FormatData = (person_data, root, clickedNode) => {
 
     let data2 = [];
+
+
+
 
     person_data.forEach(person => {
       // Loop melalui setiap properti di objek person
@@ -97,14 +100,22 @@ export const Diagram = ({ data, myDiagram, $ }) => {
         if (Array.isArray(person[prop])) {
           // Jika properti adalah array, iterasi setiap elemennya
           person[prop].forEach(element => {
-            data2.push({ from: element, to: root });
+
+            var location = clickedNode.location.copy();
+            location.x += 300; // Sesuaikan lokasi x dan y baru sesuai kebutuhan
+            location.y += 300;
+
+
+            // Tambahkan node baru ke model
+            myDiagram.model.addNodeData({ key: element, loc: go.Point.stringify(location) });
             myDiagram.model.addLinkData({ from: element, to: root });
+            data2.push({ from: element, to: root });
 
           });
         } else {
           // Jika bukan array, langsung gunakan nilainya
+          // myDiagram.model.addLinkData({ from: element, to: root });
           data2.push({ from: person[prop], to: root });
-          myDiagram.model.addLinkData({ from: element, to: root });
 
         }
       }
@@ -129,24 +140,15 @@ export const Diagram = ({ data, myDiagram, $ }) => {
           click: function (e, node) { // Tambahkan event handler click pada node
 
             var clickedNode = node.part; // Dapatkan node yang diklik
-            if (clickedNode !== null) {
-              var nextKey = myDiagram.model.nodeDataArray.length + 1;
-              var location = clickedNode.location.copy();
-              location.x += 100; // Sesuaikan lokasi x dan y baru sesuai kebutuhan
-              location.y += 100;
-
-
-              // Tambahkan node baru ke model
-              // myDiagram.model.addNodeData({ key: nextKey, name: "Node " + nextKey, loc: go.Point.stringify(location) });
-            }
 
             api().get(`/deck-explorer/sna-data-more?type=person&keyword=${node.data.key}`).then(a => {
-              console.log(a.data.items)
 
               let items = a.data.items.person_data
 
               if (items) {
-                FormatData(items, node.data.key)
+
+                console.log(items)
+                FormatData(items, node.data.key, clickedNode)
               }
 
             })
