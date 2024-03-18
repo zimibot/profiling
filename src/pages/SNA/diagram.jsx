@@ -98,13 +98,18 @@ export const Diagram = ({ data, myDiagram, $ }) => {
           // Jika properti adalah array, iterasi setiap elemennya
           person[prop].forEach(element => {
             data2.push({ from: element, to: root });
+            myDiagram.model.addLinkData({ from: element, to: root });
+
           });
         } else {
           // Jika bukan array, langsung gunakan nilainya
-          data2.push({ from: person[prop], to: root });
+          // data2.push({ from: person[prop], to: root });
+          myDiagram.model.addLinkData({ from: element, to: root });
+
         }
       }
     });
+
 
     console.log(data2)
   }
@@ -122,6 +127,19 @@ export const Diagram = ({ data, myDiagram, $ }) => {
           //       new go.Binding("text", "", data => "tester"))
           //   ),
           click: function (e, node) { // Tambahkan event handler click pada node
+
+            var clickedNode = node.part; // Dapatkan node yang diklik
+            if (clickedNode !== null) {
+                var nextKey = myDiagram.model.nodeDataArray.length + 1;
+                var location = clickedNode.location.copy();
+                location.x += 100; // Sesuaikan lokasi x dan y baru sesuai kebutuhan
+                location.y += 100;
+             
+
+                // Tambahkan node baru ke model
+                // myDiagram.model.addNodeData({ key: nextKey, name: "Node " + nextKey, loc: go.Point.stringify(location) });
+            }
+
             api().get(`/deck-explorer/sna-data-more?type=person&keyword=${node.data.key}`).then(a => {
               console.log(a.data.items)
 
