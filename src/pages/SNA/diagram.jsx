@@ -223,7 +223,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
         )
     })
 
-    
+
     function expandNode(node) {
       var diagram = node.diagram;
       diagram.startTransaction("CollapseExpandTree");
@@ -245,7 +245,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
       }
 
       diagram.commitTransaction("CollapseExpandTree");
-     
+
     }
 
     // Template untuk link dengan strokeWidth yang menyesuaikan berdasarkan totaluniq
@@ -256,9 +256,12 @@ export const Diagram = ({ data, myDiagram, $ }) => {
             cursor: "pointer",
             toolTip: Tolltip().toolTip
           },
-          new go.Binding("stroke", "totaluniqFrom", function (total) {
-            // Menghitung intensitas biru berdasarkan totaluniqFrom
-            const blueIntensity = Math.min(255, 100 + total * 15);
+          new go.Binding("stroke", "", function (data) {
+            // Jika color ada di data, gunakan itu sebagai warna stroke
+            if (data.color) return data.color;
+
+            // Jika tidak, hitung warna berdasarkan totaluniqFrom
+            const blueIntensity = Math.min(255, 100 + data.totaluniqFrom * 15);
             return `rgb(96, 165, ${blueIntensity})`;
           }),
           new go.Binding("strokeWidth", "totaluniqFrom", function (total) {
