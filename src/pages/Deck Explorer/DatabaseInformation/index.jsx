@@ -204,20 +204,20 @@ const DatabaseInformation = () => {
     const tempElement = document.createElement("div");
     tempElement.textContent = text;
     document.body.appendChild(tempElement);
-  
+
     // Seleksi teks dalam area teks sementara
     const selection = window.getSelection();
     const range = document.createRange();
     range.selectNodeContents(tempElement);
     selection.removeAllRanges();
     selection.addRange(range);
-  
+
     // Salin teks ke clipboard
     document.execCommand("copy");
-  
+
     // Hapus area teks sementara
     document.body.removeChild(tempElement);
-  
+
     // Beri pesan pemberitahuan dengan Swal
     Swal.fire({
       title: 'Success!',
@@ -228,7 +228,7 @@ const DatabaseInformation = () => {
       confirmButtonText: 'OK'
     });
   };
-  
+
 
   const onAdd = () => {
     const check = checkData().map((d) => {
@@ -564,7 +564,7 @@ const DatabaseInformation = () => {
                 <IconButton
                   key={page}
                   onClick={() => changePage(page)}
-                  color={activePage() === page ? "secondary" : "primary"}
+                  color={activePage() === page ? "warning" : "primary"}
                   size="small"
                   sx={{ padding: "0 10px" }}
                 >
@@ -813,7 +813,7 @@ const DatabaseInformation = () => {
                                           },
                                         }}
                                         control={() => (
-                                          <Radio class="tester" />
+                                          <Radio />
                                         )}
                                         label={
                                           <div className="w-full px-2 py-2 flex gap-2 flex-col ">

@@ -1,10 +1,30 @@
-import {  For } from 'solid-js';
+import { ZoomIn } from '@suid/icons-material';
+import { For } from 'solid-js';
 
 // Definisikan fungsi komponen di luar fungsi utama
 const RenderData = ({ refData, checkData, checkItems, setCheckAll, setCheck, onCopy, mode, saved, CheckboxItems, FormControlLabel, ContentCopy, IconButton, Tags, b, k }) => {
   // Kembalikan hasil pemetaan data ke elemen yang diperlukan
 
+  const onZoom = (src) => {
+    // Membuat elemen <div> baru
 
+    let existingElement = document.getElementById("zoomDiv");
+    if (existingElement) {
+      // Hapus elemen <div> yang sudah ada
+      existingElement.remove();
+    }
+    let element = document.createElement("div");
+    let element_2 = document.createElement("div")
+    let img = document.createElement("img");
+
+    element.setAttribute("id", "zoomDiv"); // Menetapkan id untuk referensi
+    element.classList = "fixed w-full h-full top-0 left-0 z-50 bg-primarry-1 bg-opacity-80 flex justify-center items-center"
+    element.appendChild(element_2)
+    img.setAttribute("src", src);
+    img.setAttribute("alt", "Deskripsi gambar");
+    element_2.appendChild(img);
+    document.body.appendChild(element);
+  }
   return <div ref={refData} className={`bg-[#1e1e1e] p-2 ${k === 0 ? " col-span-full" : checkData().length === 2 ? "col-span-full" : ""}`}>
     <div className="border border-primarry-2 px-4 bg-primarry-1  z-50 flex justify-between items-center">
       <Tags label={<span>DATA FROM <b>{b.label}</b></span>}></Tags>
@@ -28,13 +48,13 @@ const RenderData = ({ refData, checkData, checkItems, setCheckAll, setCheck, onC
                 <div className="gap-2 flex px-4 items-center flex-wrap">
                   {x.data.map((d) => {
                     return (
-                      <div title={d.label} className="flex items-center gap-2">
+                      <div className="flex items-center gap-2">
                         <FormControlLabel
                           class={`pl-4 !m-0 ${mode() === "dark" ? ` ${saved().isErrorMsg ? "border-red-500 text-red-500" : "border-[#454545] bg-[#2C2C2C]"}` : saved().isErrorMsg ? "border-red-500 text-red-500" : "bg-gray-200 text-[#444] border-[#aaa]"} pr-2 py-1 flex gap-4 border-[0] max-w-sm`}
                           checked={d.active}
                           onChange={(c) => checkItems(b.id, d.id, c.target.checked)}
                           label={
-                            <div className={` relative ${x.label === "ID CARD PHOTO" ? "hover:z-50  hover:scale-[2.5] transition-all" : ""}`}>
+                            <div title={d.label} className={` relative ${x.label === "ID CARD PHOTO" ? "" : ""}`}>
                               <div className={x.label !== "ID CARD PHOTO" ? "" : "z-50"}>
                                 {x.label !== "ID CARD PHOTO" ? d.label : <div><img className="w-20" src={d.label} /></div>}
                               </div>
@@ -43,11 +63,14 @@ const RenderData = ({ refData, checkData, checkItems, setCheckAll, setCheck, onC
                           labelPlacement="end"
                           control={<CheckboxItems />}
                         />
-                        {x.label !== "ID CARD PHOTO" &&
-                          <IconButton onClick={() => onCopy(d.label)} color="primary" size="small">
+                        {x.label !== "ID CARD PHOTO" ?
+                          <IconButton title={"COPY CONTENT"} onClick={() => onCopy(d.label)} color="primary" size="small">
                             <ContentCopy fontSize="small"></ContentCopy>
+                          </IconButton> : <IconButton onClick={() => onZoom(d.label)} color="primary" size="small">
+                            <ZoomIn fontSize="small"></ZoomIn>
                           </IconButton>
                         }
+
                       </div>
                     );
                   })}
