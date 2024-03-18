@@ -49,8 +49,8 @@ export const Diagram = ({ data, myDiagram, $ }) => {
         "undoManager.isEnabled": true, // enable undo & redo
         "animationManager.isEnabled": true,
         "zoomToFit": true,
-        // "animationManager.initialAnimationStyle": go.AnimationManager.AnimateLocations, // Animasi perubahan lokasi
-        // "animationManager.duration": 800,
+        "animationManager.initialAnimationStyle": go.AnimationManager.AnimateLocations, // Animasi perubahan lokasi
+        "animationManager.duration": 800,
         // "ViewportBoundsChanged": function (e) {
         //   // Mengubah ukuran node dan font berdasarkan skala saat ini
         //   var scale = e.diagram.scale;
@@ -91,9 +91,6 @@ export const Diagram = ({ data, myDiagram, $ }) => {
 
     let data2 = [];
 
-
-
-
     person_data.forEach(person => {
       // Loop melalui setiap properti di objek person
       for (let prop in person) {
@@ -107,22 +104,21 @@ export const Diagram = ({ data, myDiagram, $ }) => {
 
 
             // Tambahkan node baru ke model
-            myDiagram.model.addLinkData({ from: element, to: root });
-            myDiagram.model.addNodeData({ key: element, color: "#4aa232", loc: go.Point.stringify(location) });
+            myDiagram.model.addLinkData({ from: element, color: "#4aa232", to: root });
+            myDiagram.model.addNodeData({ key: element, color: "#4aa232", });
             data2.push({ from: element, to: root });
 
           });
         } else {
           // Jika bukan array, langsung gunakan nilainya
-          // myDiagram.model.addLinkData({ from: element, to: root });
+          myDiagram.model.addNodeData({ key: element, color: "#4aa232", });
+          myDiagram.model.addLinkData({ from: element, color: "#4aa232", to: root });
           data2.push({ from: person[prop], to: root });
 
         }
       }
     });
 
-
-    console.log(data2)
   }
 
   function init() {
@@ -238,24 +234,35 @@ export const Diagram = ({ data, myDiagram, $ }) => {
             cursor: "pointer",
             toolTip: Tolltip().toolTip
           },
-          new go.Binding("stroke", "totaluniqFrom", function (total) {
-            // Menghitung intensitas biru berdasarkan totaluniqFrom
-            const blueIntensity = Math.min(255, 100 + total * 15);
+
+
+          new go.Binding("stroke", "", function (data) {
+            // Jika color ada di data, gunakan itu sebagai warna stroke
+            if (data.color) return data.color;
+
+            // Jika tidak, hitung warna berdasarkan totaluniqFrom
+            const blueIntensity = Math.min(255, 100 + data.totaluniqFrom * 15);
             return `rgb(96, 165, ${blueIntensity})`;
           }),
           new go.Binding("strokeWidth", "totaluniqFrom", function (total) {
             return Math.max(2, total / 3);
-          })),
+          })
+        ),
         $(go.Shape, // Ini untuk arrowhead
           {
             fromArrow: "OpenTriangle",
-            stroke: null,
-            fill: "rgb(96, 165, 255)"
+            stroke: null
           },
-          new go.Binding("fill", "totaluniqFrom", function (total) {
-            const blueIntensity = Math.min(255, 100 + total * 15);
+          // Menggabungkan warna spesifik dengan gradien untuk fill
+          new go.Binding("fill", "", function (data) {
+            // Jika color ada di data, gunakan itu sebagai warna fill
+            if (data.color) return data.color;
+
+            // Jika tidak, hitung warna berdasarkan totaluniqFrom
+            const blueIntensity = Math.min(255, 100 + data.totaluniqFrom * 15);
             return `rgb(96, 165, ${blueIntensity})`;
-          })),
+          })
+        ),
         $(go.Panel, "Auto", // Menggunakan Panel "Auto" untuk menambahkan "padding"
           {
             toolTip:
