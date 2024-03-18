@@ -352,6 +352,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
   })
 
   createEffect(() => {
+    console.log(items())
     setTimeout(() => {
       if (items()?.modelData) {
         myDiagram.model = go.Model.fromJson(items().modelData);
