@@ -103,13 +103,13 @@ export const Diagram = ({ data, myDiagram, $ }) => {
             // If the property is an array, iterate each element
             person[prop].forEach(element => {
               // Add new node to model
-              myDiagram.model.addLinkData({ from: element, color: "#4aa232", type: "person",  to: root, childrenLoaded: false });
-              myDiagram.model.addNodeData({ key: element, color: "#4aa232", type: "person",  rootType: rootType, loc: go.Point.stringify(location), childrenLoaded: false });
+              myDiagram.model.addLinkData({ from: element, color: "#4aa232", type: "person", to: root, childrenLoaded: false });
+              myDiagram.model.addNodeData({ key: element, color: "#4aa232", type: "person", rootType: rootType, loc: go.Point.stringify(location), childrenLoaded: false });
             });
           } else {
             // Add single property as node and link
-            myDiagram.model.addLinkData({ from: person[prop], color: "#4aa232",  type: "person", to: root, childrenLoaded: false });
-            myDiagram.model.addNodeData({ key: person[prop], color: "#4aa232",  type: "person", rootType: rootType, loc: go.Point.stringify(location), childrenLoaded: false });
+            myDiagram.model.addLinkData({ from: person[prop], color: "#4aa232", type: "person", to: root, childrenLoaded: false });
+            myDiagram.model.addNodeData({ key: person[prop], color: "#4aa232", type: "person", rootType: rootType, loc: go.Point.stringify(location), childrenLoaded: false });
           }
         }
       }
@@ -154,16 +154,14 @@ export const Diagram = ({ data, myDiagram, $ }) => {
               let promises = typeData.map(s => {
                 return api().get(`/deck-explorer/sna-data-more?type=${s}&keyword=${node.data.key}`).then(a => {
                   let items = s === "reg_data" ? a.data.items.reg_data : a.data.items.person_data;
-              
+
                   // Menghapus duplikat berdasarkan properti 'key'
                   const uniqueItems = Array.from(new Set(items.map(item => JSON.stringify(item))))
-                                           .map(item => JSON.parse(item));
-              
+                    .map(item => JSON.parse(item));
+
                   if (uniqueItems.length > 0) {
                     // Logic to handle successful data retrieval
                     FormatData(uniqueItems, node.data.key, clickedNode);
-                  } else {
-                    myDiagram.model.setDataProperty(clickedNode.data, "color", "red");
                   }
                 }).catch(() => {
                   myDiagram.model.setDataProperty(clickedNode.data, "color", "red");
