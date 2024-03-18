@@ -90,7 +90,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
   const FormatData = (person_data, root, clickedNode, rootType = "other") => {
     const color = rootType === "person" ? "#4aa232" : "#245ac2"
     let angle = 0; // Sudut awal
-    const radius = 150; // Jarak dari pusat node induk
+    const radius = 360; // Jarak dari pusat node induk
 
     person_data.forEach(person => {
       for (let prop in person) {
