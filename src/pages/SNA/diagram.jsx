@@ -90,26 +90,26 @@ export const Diagram = ({ data, myDiagram, $ }) => {
 
   const FormatData = (person_data, root, clickedNode, rootType = "other") => {
     var location = clickedNode.location.copy();
-    location.x += 150; // Sesuaikan lokasi x dan y baru sesuai kebutuhan
+    location.x += 150; // Adjust the new x and y location as needed
     location.y += 150;
-    person_data.forEach(person => {
-      // Loop melalui setiap properti di objek person
 
+    person_data.forEach(person => {
+      // Loop through each property in the person object
       for (let prop in person) {
-        if (prop !== "msisdn" || prop !== "NO_PESERTA" || prop !== "INSTANSI" | prop !== "TANGGAL") {
+        // Ensure prop is not one of the excluded properties
+        if (prop !== "msisdn" && prop !== "NO_PESERTA" && prop !== "INSTANSI" && prop !== "TANGGAL") {
           myDiagram.model.setDataProperty(clickedNode.data, "color", "#44aacc");
           if (Array.isArray(person[prop])) {
-            // Jika properti adalah array, iterasi setiap elemennya
+            // If the property is an array, iterate each element
             person[prop].forEach(element => {
-              // Tambahkan node baru ke model
-              myDiagram.model.addLinkData({ from: element, color: "#4aa232", type: "person", group: root, to: root, childrenLoaded: false, });
-              myDiagram.model.addNodeData({ key: element, color: "#4aa232", type: "person", group: root, rootType: rootType, loc: go.Point.stringify(location), childrenLoaded: false, });
+              // Add new node to model
+              myDiagram.model.addLinkData({ from: element, color: "#4aa232", type: "person", group: root, to: root, childrenLoaded: false });
+              myDiagram.model.addNodeData({ key: element, color: "#4aa232", type: "person", group: root, rootType: rootType, loc: go.Point.stringify(location), childrenLoaded: false });
             });
-
-
           } else {
-            myDiagram.model.addLinkData({ from: person[prop], color: "#4aa232", group: root, type: "person", to: root, childrenLoaded: false, });
-            myDiagram.model.addNodeData({ key: person[prop], color: "#4aa232", group: root, type: "person", rootType: rootType, loc: go.Point.stringify(location), rootdistance: 1, childrenLoaded: false, });
+            // Add single property as node and link
+            myDiagram.model.addLinkData({ from: person[prop], color: "#4aa232", group: root, type: "person", to: root, childrenLoaded: false });
+            myDiagram.model.addNodeData({ key: person[prop], color: "#4aa232", group: root, type: "person", rootType: rootType, loc: go.Point.stringify(location), childrenLoaded: false });
           }
         }
       }
