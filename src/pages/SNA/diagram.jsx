@@ -87,35 +87,51 @@ export const Diagram = ({ data, myDiagram, $ }) => {
     })
 
   }
-  const FormatData = (person_data, root, clickedNode, rootType = "other") => {
-    const color = rootType === "person" ? "#4aa232" : "#245ac2"
+  const FormatData = (person_data, root, clickedNode, rootType = "other", nameType) => {
+    const color = rootType === "person" ? "#4aa232" : "#245ac2";
     let angle = 0; // Sudut awal
     const radius = 360; // Jarak dari pusat node induk
+    const angleIncrement = (2 * Math.PI) / person_data.length; // Distribusi node secara merata dalam lingkaran
 
     person_data.forEach(person => {
       for (let prop in person) {
-        if (prop !== "msisdn" && prop !== "NO_PESERTA" && prop !== "INSTANSI" && prop !== "TANGGAL") {
-          myDiagram.model.setDataProperty(clickedNode.data, "color", "#44aacc");
+        if (["msisdn", "NO_PESERTA", "INSTANSI", "TANGGAL"].indexOf(prop) === -1) {
+
 
           // Menghitung lokasi baru berdasarkan sudut dan radius
           var location = new go.Point(clickedNode.location.x + Math.cos(angle) * radius, clickedNode.location.y + Math.sin(angle) * radius);
 
+          // Menyiapkan data untuk node dan link
+          let newData = {
+            from: person[prop],
+            to: root,
+            color,
+            type: "person",
+            nameType: prop, // Menggunakan nameType sebagai kunci properti dinamis
+            childrenLoaded: false,
+            everExpanded: false
+          };
+
           if (Array.isArray(person[prop])) {
             person[prop].forEach(element => {
-              myDiagram.model.addLinkData({ from: element, color, type: "person", rootType, to: root, childrenLoaded: false });
-              myDiagram.model.addNodeData({ key: element, color, type: "person", rootType: rootType, loc: go.Point.stringify(location), childrenLoaded: false });
+              myDiagram.model.addLinkData({ ...newData, from: element });
+              myDiagram.model.addNodeData({ key: element, ...newData, loc: go.Point.stringify(location) });
             });
           } else {
-            myDiagram.model.addLinkData({ from: person[prop], color, type: "person", rootType, to: root, childrenLoaded: false });
-            myDiagram.model.addNodeData({ key: person[prop], color, type: "person", rootType: rootType, loc: go.Point.stringify(location), childrenLoaded: false });
+            myDiagram.model.addLinkData(newData);
+            myDiagram.model.addNodeData({ key: person[prop], ...newData, loc: go.Point.stringify(location) });
           }
 
+          myDiagram.model.setDataProperty(clickedNode.data, "everExpanded", true);
+          myDiagram.model.setDataProperty(clickedNode.data, "color", "#44aacc");
+
           // Menyesuaikan sudut untuk node berikutnya
-          angle += Math.PI / 4; // Misalnya, menambahkan 45 derajat (dalam radian) untuk setiap node
+          angle += angleIncrement; // Menggunakan peningkatan sudut yang dihitung untuk distribusi merata
         }
       }
     });
-  }
+  };
+
 
 
 
@@ -165,9 +181,12 @@ export const Diagram = ({ data, myDiagram, $ }) => {
                     // Hanya hapus duplikat untuk "reg_data"
                     let uniqueData = mainType === "reg_data" ? removeDuplicates(items, 'PENCARIAN') : items;
 
+                    let nameType = mainType === "reg_data" ? "PERSONAL-ID" : "PERSONAL"
+
+
                     if (uniqueData.length > 0) {
                       // Logic to handle successful data retrieval
-                      FormatData(uniqueData, node.data.key, clickedNode, mainType);
+                      FormatData(uniqueData, node.data.key, clickedNode, mainType, nameType);
                       return true; // Indicate success
                     } else {
                       return false; // Indicate failure but not a fetch error
@@ -260,7 +279,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
           // Binding untuk menentukan visibilitas berdasarkan properti 'root'
           new go.Binding("visible", "", function (node) {
             // Mengecek apakah properti 'root' dari data node adalah true
-            return node.data.root === true;
+            return node.data.root === true || node.data.everExpanded;
           }).ofObject(),
 
         ),
@@ -309,25 +328,43 @@ export const Diagram = ({ data, myDiagram, $ }) => {
     function expandNode(node) {
       var diagram = node.diagram;
       diagram.startTransaction("CollapseExpandTree");
-      // this behavior is specific to this incrementalTree sample:
+
       var data = node.data;
-      if (!data.everExpanded) {
-        // only create children once per node
+      if (!data.everExpanded && !node.isTreeExpanded) {
+        // Mark the node as ever expanded on first expansion
         diagram.model.setDataProperty(data, "everExpanded", true);
-        // var numchildren = createSubTree(data);
-        // if (numchildren === 0) {  // now known no children: don't need Button!
-        //   node.findObject('TREEBUTTON').visible = false;
-        // }
       }
-      // this behavior is generic for most expand/collapse tree buttons:
+
       if (node.isTreeExpanded) {
+        // Collapse the tree at this node
         diagram.commandHandler.collapseTree(node);
+
+        // Hide children nodes
+        setChildrenVisibility(node, false);
       } else {
+        // Expand the tree at this node
         diagram.commandHandler.expandTree(node);
+
+        // Show children nodes
+        setChildrenVisibility(node, true);
       }
 
       diagram.commitTransaction("CollapseExpandTree");
+    }
 
+    function setChildrenVisibility(node, isVisible) {
+      var diagram = node.diagram;
+      var key = node.data.key;
+      // Iterate through all nodes to find and update the visibility of children
+      diagram.nodes.each(function (n) {
+        if (n.data.parent === key) {
+          // Use 'isVisible' property or direct visibility setting as per your requirement
+          diagram.model.setDataProperty(n.data, "isVisible", isVisible);
+
+          // Alternatively, if using direct visibility setting without binding:
+          // n.visible = isVisible;
+        }
+      });
     }
 
     // Template untuk link dengan strokeWidth yang menyesuaikan berdasarkan totaluniq
@@ -382,7 +419,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
               margin: 4
             },
             new go.Binding("text", "", (data) => {
-              return data.totaluniqFrom ? data.totaluniqFrom : data.rootType
+              return data.totaluniqFrom ? data.totaluniqFrom : data.nameType
             }))
         )
       );
@@ -618,7 +655,6 @@ export const Diagram = ({ data, myDiagram, $ }) => {
         icon: 'success',
         confirmButtonText: 'OK'
       })
-
 
     }).catch(error => {
       // Tampilkan notifikasi error
