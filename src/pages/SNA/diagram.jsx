@@ -102,12 +102,12 @@ export const Diagram = ({ data, myDiagram, $ }) => {
             person[prop].forEach(element => {
               // Tambahkan node baru ke model
               myDiagram.model.addLinkData({ from: element, color: "#4aa232", type: "person", group: root, to: root, childrenLoaded: false, });
-              myDiagram.model.addNodeData({ key: element, color: "#4aa232", type: "person", group: root, loc: go.Point.stringify(location), childrenLoaded: false, });
+              myDiagram.model.addNodeData({ key: element, color: "#4aa232", type: "person", group: root, rootType: "other", loc: go.Point.stringify(location), childrenLoaded: false, });
             });
           } else {
 
             myDiagram.model.addLinkData({ from: person[prop], color: "#4aa232", group: root, type: "person", to: root, childrenLoaded: false, });
-            myDiagram.model.addNodeData({ key: person[prop], color: "#4aa232", group: root, type: "person", loc: go.Point.stringify(location), rootdistance: 1, childrenLoaded: false, });
+            myDiagram.model.addNodeData({ key: person[prop], color: "#4aa232", group: root, type: "person", rootType: "other", loc: go.Point.stringify(location), rootdistance: 1, childrenLoaded: false, });
           }
         }
       }
@@ -135,7 +135,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
               return; // Jangan memanggil API jika children sudah dimuat
             }
 
-            if (clickedNode.data.type === "person") {
+            if (clickedNode.data.rootType === "person") {
               api().get(`/deck-explorer/sna-data-more?type=${clickedNode.data.type}&keyword=${node.data.key}`).then(a => {
                 let items = a.data.items.person_data;
 
@@ -390,7 +390,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
       items: a,
       root: true,
       everExpanded: false,
-      type: "person",
+      rootType: "person",
       totalDuration: totalDurationPerBNumber.get(a[data().config.parent]),
       totaluniq: aNumberCounts.get(a[data().config.root]) // Total kemunculan ANUMBER di rawData
     }));
@@ -402,7 +402,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
           key: link.from,
           everExpanded: false,
           items: link.items,
-          type: "person",
+          rootType: "person",
           totaluniq: bNumberCounts.get(link.from),
           totalDuration: totalDurationPerBNumber.get(link.from),
         });
