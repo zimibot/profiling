@@ -88,26 +88,29 @@ export const Diagram = ({ data, myDiagram, $ }) => {
 
   }
 
-  const FormatData = (person_data, root, clickedNode) => {
+  const FormatData = (person_data, root, clickedNode, rootType = "other") => {
     var location = clickedNode.location.copy();
     location.x += 150; // Sesuaikan lokasi x dan y baru sesuai kebutuhan
     location.y += 150;
-    myDiagram.model.setDataProperty(clickedNode.data, "color", "red");
     person_data.forEach(person => {
       // Loop melalui setiap properti di objek person
       for (let prop in person) {
         if (prop !== "msisdn") {
+          myDiagram.model.setDataProperty(clickedNode.data, "color", "#44aacc");
+
           if (Array.isArray(person[prop])) {
             // Jika properti adalah array, iterasi setiap elemennya
             person[prop].forEach(element => {
               // Tambahkan node baru ke model
               myDiagram.model.addLinkData({ from: element, color: "#4aa232", type: "person", group: root, to: root, childrenLoaded: false, });
-              myDiagram.model.addNodeData({ key: element, color: "#4aa232", type: "person", group: root, rootType: "other", loc: go.Point.stringify(location), childrenLoaded: false, });
+              myDiagram.model.addNodeData({ key: element, color: "#4aa232", type: "person", group: root, rootType: rootType, loc: go.Point.stringify(location), childrenLoaded: false, });
             });
+
+
           } else {
 
             myDiagram.model.addLinkData({ from: person[prop], color: "#4aa232", group: root, type: "person", to: root, childrenLoaded: false, });
-            myDiagram.model.addNodeData({ key: person[prop], color: "#4aa232", group: root, type: "person", rootType: "other", loc: go.Point.stringify(location), rootdistance: 1, childrenLoaded: false, });
+            myDiagram.model.addNodeData({ key: person[prop], color: "#4aa232", group: root, type: "person", rootType: rootType, loc: go.Point.stringify(location), rootdistance: 1, childrenLoaded: false, });
           }
         }
       }
@@ -148,6 +151,8 @@ export const Diagram = ({ data, myDiagram, $ }) => {
 
                   // Format dan tambahkan data children ke diagram
                   FormatData(items, node.data.key, clickedNode);
+                } else {
+                  myDiagram.model.setDataProperty(clickedNode.data, "color", "red");
                 }
               });
             }
