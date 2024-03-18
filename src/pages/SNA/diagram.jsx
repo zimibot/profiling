@@ -94,6 +94,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
     location.y += 150;
     person_data.forEach(person => {
       // Loop melalui setiap properti di objek person
+      
       for (let prop in person) {
         if (prop !== "msisdn" || prop !== "NO_PESERTA" || prop !== "INSTANSI" | prop !== "TANGGAL") {
           myDiagram.model.setDataProperty(clickedNode.data, "color", "#44aacc");
@@ -182,12 +183,12 @@ export const Diagram = ({ data, myDiagram, $ }) => {
                     Swal.close();
 
                     // Displaying an error notification as there's no data
-                    Swal.fire({
-                      title: 'Error!',
-                      text: 'No data to display.',
-                      icon: 'error',
-                      confirmButtonText: 'OK'
-                    });
+                    // Swal.fire({
+                    //   title: 'Error!',
+                    //   text: 'No data to display.',
+                    //   icon: 'error',
+                    //   confirmButtonText: 'OK'
+                    // });
                   }
                 }).catch(() => {
                   myDiagram.model.setDataProperty(clickedNode.data, "color", "red");
