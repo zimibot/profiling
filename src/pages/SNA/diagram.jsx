@@ -135,23 +135,27 @@ export const Diagram = ({ data, myDiagram, $ }) => {
               return; // Jangan memanggil API jika children sudah dimuat
             }
 
-            console.log("load")
+            if (clickedNode.data.type === "person") {
+              api().get(`/deck-explorer/sna-data-more?type=${clickedNode.data.type}&keyword=${node.data.key}`).then(a => {
+                let items = a.data.items.person_data;
+
+                if (items && items.length > 0) {
+                  // Menandai bahwa children untuk node ini telah dimuat
+                  clickedNode.data.childrenLoaded = true;
+
+                  // Pembaruan model untuk memastikan properti baru tersimpan
+                  myDiagram.model.setDataProperty(clickedNode.data, "childrenLoaded", true);
+
+                  // Format dan tambahkan data children ke diagram
+                  FormatData(items, node.data.key, clickedNode);
+                }
+              });
+            }
 
 
-            api().get(`/deck-explorer/sna-data-more?type=person&keyword=${node.data.key}`).then(a => {
-              let items = a.data.items.person_data;
 
-              if (items && items.length > 0) {
-                // Menandai bahwa children untuk node ini telah dimuat
-                clickedNode.data.childrenLoaded = true;
 
-                // Pembaruan model untuk memastikan properti baru tersimpan
-                myDiagram.model.setDataProperty(clickedNode.data, "childrenLoaded", true);
 
-                // Format dan tambahkan data children ke diagram
-                FormatData(items, node.data.key, clickedNode);
-              }
-            });
             e.diagram.commandHandler.scrollToPart(node); // Memfokuskan view pada node yang diklik
             e.diagram.centerRect(node.actualBounds);
           }
@@ -386,6 +390,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
       items: a,
       root: true,
       everExpanded: false,
+      type: "person",
       totalDuration: totalDurationPerBNumber.get(a[data().config.parent]),
       totaluniq: aNumberCounts.get(a[data().config.root]) // Total kemunculan ANUMBER di rawData
     }));
@@ -397,6 +402,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
           key: link.from,
           everExpanded: false,
           items: link.items,
+          type: "person",
           totaluniq: bNumberCounts.get(link.from),
           totalDuration: totalDurationPerBNumber.get(link.from),
         });
