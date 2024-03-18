@@ -94,11 +94,14 @@ export const Diagram = ({ data, myDiagram, $ }) => {
     person_data.forEach(person => {
       // Loop melalui setiap properti di objek person
       for (let prop in person) {
-        // Cek jika nilai properti adalah array dan tidak kosong, ambil elemen pertama
-        if (Array.isArray(person[prop]) && person[prop].length) {
-          data2.push({ from: root, to: person[prop][0] });
-        } else if (!Array.isArray(person[prop])) { // Jika bukan array, langsung gunakan nilainya
-          data2.push({ from: root, to: person[prop] });
+        if (Array.isArray(person[prop])) {
+          // Jika properti adalah array, iterasi setiap elemennya
+          person[prop].forEach(element => {
+            data2.push({ from: element, to: root });
+          });
+        } else {
+          // Jika bukan array, langsung gunakan nilainya
+          data2.push({ from: person[prop], to: root });
         }
       }
     });
