@@ -117,6 +117,8 @@ export const Diagram = ({ data, myDiagram, $ }) => {
     });
   }
 
+
+
   function init() {
     myDiagram.nodeTemplate =
       $(go.Node, "Auto",
@@ -139,28 +141,77 @@ export const Diagram = ({ data, myDiagram, $ }) => {
             }
 
             if (clickedNode.data.rootType === "person") {
-              api().get(`/deck-explorer/sna-data-more?type=${clickedNode.data.rootType}&keyword=${node.data.key}`).then(a => {
-                let items = a.data.items.person_data;
-
-                if (items && items.length > 0) {
-                  // Menandai bahwa children untuk node ini telah dimuat
-                  clickedNode.data.childrenLoaded = true;
-
-                  // Pembaruan model untuk memastikan properti baru tersimpan
-                  myDiagram.model.setDataProperty(clickedNode.data, "childrenLoaded", true);
-
-                  // Format dan tambahkan data children ke diagram
-                  FormatData(items, node.data.key, clickedNode);
-                } else {
-                  myDiagram.model.setDataProperty(clickedNode.data, "color", "red");
+              // Displaying a swal loading indicator before starting the request
+              Swal.fire({
+                title: 'Loading...',
+                text: 'Please wait.',
+                allowOutsideClick: false,
+                onBeforeOpen: () => {
+                  Swal.showLoading()
                 }
               });
+
+              let typeData = ["person", "reg_data"]
+
+              typeData.map(s => {
+                api().get(`/deck-explorer/sna-data-more?type=${s}&keyword=${node.data.key}`).then(a => {
+                  let items = s === "reg_data" ? a.data.items.reg_data : a.data.items.person_data;
+
+                  if (items && items.length > 0) {
+                    // Marking that children for this node have been loaded
+                    clickedNode.data.childrenLoaded = true;
+
+                    // Updating the model to ensure the new properties are saved
+                    myDiagram.model.setDataProperty(clickedNode.data, "childrenLoaded", true);
+
+                    // Formatting and adding the children data to the diagram
+                    FormatData(items, node.data.key, clickedNode);
+
+                    // Closing the swal loading indicator
+                    Swal.close();
+
+                    // Displaying a success notification
+                    Swal.fire({
+                      title: 'Success!',
+                      text: 'Data has been loaded successfully.',
+                      icon: 'success',
+                      confirmButtonText: 'OK'
+                    });
+                  } else {
+                    myDiagram.model.setDataProperty(clickedNode.data, "color", "red");
+
+                    // Closing the swal loading indicator
+                    Swal.close();
+
+                    // Displaying an error notification as there's no data
+                    Swal.fire({
+                      title: 'Error!',
+                      text: 'No data to display.',
+                      icon: 'error',
+                      confirmButtonText: 'OK'
+                    });
+                  }
+                }).catch(() => {
+                  myDiagram.model.setDataProperty(clickedNode.data, "color", "red");
+
+                  // Closing the swal loading indicator
+                  Swal.close();
+
+                  // Displaying an error notification due to request failure
+                  Swal.fire({
+                    title: 'Error!',
+                    text: 'Failed to load data.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                  });
+                });
+              })
+
+
+
+
+
             }
-
-
-
-
-
             e.diagram.commandHandler.scrollToPart(node); // Memfokuskan view pada node yang diklik
             e.diagram.centerRect(node.actualBounds);
           }
