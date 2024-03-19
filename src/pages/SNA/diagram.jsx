@@ -184,11 +184,10 @@ export const Diagram = ({ data, myDiagram, $ }) => {
 
                     let nameType = mainType === "reg_data" ? "PERSONAL-ID" : "PERSONAL";
 
-                    console.log(uniqueData)
                     if (uniqueData.length > 0) {
                       // Logika untuk menangani pengambilan data yang berhasil
                       FormatData(uniqueData, node.data.key, clickedNode, mainType, nameType);
-
+                      setUpdate(a => ({ ...a, model: true }))
                       // Jika uniqueData hanya berisi msisdn
                       if (uniqueData.length === 1 && uniqueData.some(data => data.hasOwnProperty('msisdn'))) {
                         myDiagram.model.setDataProperty(clickedNode.data, "color", "red");
