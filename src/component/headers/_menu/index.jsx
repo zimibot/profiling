@@ -4,13 +4,15 @@ import { mode } from "../../../helper/_helper.theme"
 import MenuTabs from "./menu"
 import logo from "../../../assets/images/logo_light.svg"
 import { createEffect } from "solid-js"
-import { api } from "../../../helper/_helper.api"
+import axios from "axios";
 
 export const Menu = () => {
     const [appStore] = useAppState()
 
     createEffect(() => {
-        api().get("")
+        axios.get("http://localhost:3000/refresh").then(a => {
+
+        })
     })
 
     return (
