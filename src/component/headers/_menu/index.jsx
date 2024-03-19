@@ -3,9 +3,15 @@ import { useAppState } from "../../../helper/_helper.context"
 import { mode } from "../../../helper/_helper.theme"
 import MenuTabs from "./menu"
 import logo from "../../../assets/images/logo_light.svg"
+import { createEffect } from "solid-js"
+import { api } from "../../../helper/_helper.api"
 
 export const Menu = () => {
     const [appStore] = useAppState()
+
+    createEffect(() => {
+        api().get("")
+    })
 
     return (
         <div className={`p-3 sticky top-0 z-10 ${mode() === "dark" ? "bg-[#0D0D0D]" : ""}`}>
