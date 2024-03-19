@@ -1,5 +1,5 @@
 import { createEffect, lazy, Suspense } from "solid-js";
-import { Router, useRoutes, hashIntegration, Outlet } from "@solidjs/router";
+import { Router, useRoutes, hashIntegration, Outlet,  } from "@solidjs/router";
 import { Loading } from "../component/loading";
 import { Menu } from "../component/headers/_menu";
 

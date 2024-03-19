@@ -43,8 +43,6 @@ const Connection = () => {
 
       setData(a.data.items)
     })
-
-    isLoading()
   })
 
   const onSelect = (id, config, modelData) => {

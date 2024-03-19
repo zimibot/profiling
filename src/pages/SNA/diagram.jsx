@@ -9,12 +9,14 @@ import {
   Drawer,
 } from "@suid/material";
 import * as go from "gojs";
-import { createEffect, createSignal, onCleanup, onMount } from "solid-js";
+import { createEffect, createSignal, onCleanup, } from "solid-js";
 import { jsPDF } from "jspdf";
 import { Tags } from "../../component/tags";
 import { createFormControl, createFormGroup } from "solid-forms";
 import { api } from "../../helper/_helper.api";
 import Swal from "sweetalert2";
+import { useBeforeLeave } from "@solidjs/router";
+
 
 export const Diagram = ({ data, myDiagram, $ }) => {
 
@@ -39,6 +41,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
       required: true,
     }),
   });
+
 
 
 
@@ -108,7 +111,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
             to: root,
             color,
             type: "person",
-            nameType: prop, // Menggunakan nameType sebagai kunci properti dinamis
+            nameType, // Menggunakan nameType sebagai kunci properti dinamis
             childrenLoaded: false,
             everExpanded: false
           };
@@ -168,91 +171,73 @@ export const Diagram = ({ data, myDiagram, $ }) => {
                 }
               });
 
-              let typeData = ["person", "reg_data"];
+
               function removeDuplicates(items, key) {
                 const uniqueMap = new Map(items.map(item => [item[key], item]));
                 return Array.from(uniqueMap.values());
               }
 
-              let promises = typeData.map(mainType => {
-                return api().get(`/deck-explorer/sna-data-more?type=${mainType}&keyword=${node.data.key}`)
-                  .then(response => {
-                    let items = response.data.items[mainType === "reg_data" ? "reg_data" : "person_data"];
+              // Fungsi untuk memproses tiap tipe data
+              async function processData(type, nodeKey) {
+                try {
+                  const response = await api().get(`/deck-explorer/sna-data-more?type=${type}&keyword=${nodeKey}`);
+                  let items = response.data.items[type === "reg_data" ? "reg_data" : "person_data"];
+                  let uniqueData = type === "reg_data" ? removeDuplicates(items, 'PENCARIAN') : items;
 
-                    // Menghapus duplikat untuk "reg_data"
-                    let uniqueData = mainType === "reg_data" ? removeDuplicates(items, 'PENCARIAN') : items;
+                  if (uniqueData.length > 0) {
+                    let nameType = type === "reg_data" ? "PERSONAL-ID" : "PERSONAL";
+                    FormatData(uniqueData, nodeKey, clickedNode, type, nameType);
+                    setUpdate(a => ({ ...a, model: true }));
+                    return true; // Data ditemukan dan diproses
+                  } else {
+                    return false; // Data tidak ditemukan
+                  }
+                } catch (error) {
+                  return false; // Terjadi error fetch
+                }
+              }
 
-                    let nameType = mainType === "reg_data" ? "PERSONAL-ID" : "PERSONAL";
+              // Fungsi utama untuk mengatur proses data
+              async function handleDataProcessing() {
+                const regDataResult = await processData("reg_data", node.data.key);
+                if (!regDataResult) {
+                  // Jika tidak ada data reg_data, coba proses person_data
+                  const personDataResult = await processData("person_data", node.data.key);
+                  if (!personDataResult) {
+                    // Jika tidak ada data person_data, tandai sebagai kegagalan
+                    markAsFailure();
+                  } else {
+                    markAsSuccess(); // person_data berhasil diproses
+                  }
+                } else {
+                  markAsSuccess(); // reg_data berhasil diproses
+                }
+              }
 
-                    if (uniqueData.length > 0) {
-                      // Logika untuk menangani pengambilan data yang berhasil
-                      FormatData(uniqueData, node.data.key, clickedNode, mainType, nameType);
-                      setUpdate(a => ({ ...a, model: true }))
-                      // Jika uniqueData hanya berisi msisdn
-                      // if (uniqueData.length === 1 && uniqueData.some(data => data.hasOwnProperty('msisdn'))) {
-                      //   myDiagram.model.setDataProperty(clickedNode.data, "color", "red");
-
-                      //   // Menampilkan notifikasi SweetAlert2
-                      //   Swal.fire({
-                      //     title: 'Error!',
-                      //     text: 'Failed to load any data.',
-                      //     icon: 'error',
-                      //     confirmButtonText: 'OK'
-                      //   });
-                      // }
-
-                      return true; // Menandakan sukses
-                    } else {
-                      return false; // Menandakan kegagalan tapi bukan karena error fetch
-                    }
-                  }).catch(() => {
-                    return false; // Menandakan error fetch
-                  });
-              });
-
-
-
-
-              Promise.all(promises).then((results) => {
+              // Menandai sukses atau kegagalan
+              function markAsSuccess() {
                 clickedNode.data.childrenLoaded = true;
                 myDiagram.model.setDataProperty(clickedNode.data, "childrenLoaded", true);
-                Swal.close(); // Close the loading swal here
+                Swal.fire({
+                  title: 'Success!',
+                  text: 'Data has been loaded successfully.',
+                  icon: 'success',
+                  confirmButtonText: 'OK'
+                });
+              }
 
-                // Check how many promises were resolved successfully
-                const successCount = results.filter(result => result === true).length;
+              function markAsFailure() {
+                myDiagram.model.setDataProperty(clickedNode.data, "color", "red");
+                Swal.fire({
+                  title: 'Error!',
+                  text: 'Failed to load any data.',
+                  icon: 'error',
+                  confirmButtonText: 'OK'
+                });
+              }
 
-                if (successCount === promises.length) {
-                  // All requests were successful
-                  Swal.fire({
-                    title: 'Success!',
-                    text: 'All data has been loaded successfully.',
-                    icon: 'success',
-                    confirmButtonText: 'OK'
-                  });
-                } else if (successCount > 0) {
-                  // Some requests were successful
-                  // Swal.fire({
-                  //   title: 'Partial Success!',
-                  //   text: 'Some data has been loaded successfully.',
-                  //   icon: 'warning',
-                  //   confirmButtonText: 'OK'
-                  // });
-                } else {
-                  // No requests were successful
-                  // Display an error notification if all requests failed
-                  myDiagram.model.setDataProperty(clickedNode.data, "color", "red");
-
-                  Swal.fire({
-                    title: 'Error!',
-                    text: 'Failed to load any data.',
-                    icon: 'error',
-                    confirmButtonText: 'OK'
-                  });
-                }
-              }).catch(() => {
-                // This catch block should not be hit since we're handling all rejects,
-                // but it's here as a safety net.
-                Swal.close();
+              // Memulai proses data
+              handleDataProcessing().catch(() => {
                 Swal.fire({
                   title: 'Unexpected Error!',
                   text: 'An unexpected error occurred.',
@@ -260,6 +245,8 @@ export const Diagram = ({ data, myDiagram, $ }) => {
                   confirmButtonText: 'OK'
                 });
               });
+
+
 
             }
 
@@ -667,7 +654,6 @@ export const Diagram = ({ data, myDiagram, $ }) => {
     e.preventDefault()
     const value = group.value
     const resolution = value.resolution.split("x")
-    console.log(resolution)
     if (value.mode === "pdf") {
       exportDiagramToHighResPDF({ width: resolution[0], height: resolution[1] }, value.resolution)
     } else {
@@ -675,28 +661,32 @@ export const Diagram = ({ data, myDiagram, $ }) => {
     }
   }
 
-  const onSaveData = () => {
-    const data2 = myDiagram.model.toJson();
-    api().put(`/deck-explorer/sna-update?id=${data().id}`, {
-      modelData: data2
-    }).then(response => {
-      Swal.fire({
-        title: 'Success!',
-        text: 'Data has been saved successfully.',
-        icon: 'success',
-        confirmButtonText: 'OK'
-      })
 
-    }).catch(error => {
-      // Tampilkan notifikasi error
-      Swal.fire({
-        title: 'Error!',
-        text: 'Failed to save data.',
-        icon: 'error',
-        confirmButtonText: 'OK'
-      })
-    });
-  }
+
+  useBeforeLeave(() => {
+    if (update().model) {
+      const data2 = myDiagram.model.toJson();
+      api().put(`/deck-explorer/sna-update?id=${data().id}`, {
+        modelData: data2
+      }).then(response => {
+        Swal.fire({
+          title: 'Success!',
+          text: 'Data has been saved successfully.',
+          icon: 'success',
+          confirmButtonText: 'OK'
+        })
+
+      }).catch(error => {
+        // Tampilkan notifikasi error
+        Swal.fire({
+          title: 'Error!',
+          text: 'Failed to save data.',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        })
+      });
+    }
+  })
 
 
   return (
@@ -707,7 +697,6 @@ export const Diagram = ({ data, myDiagram, $ }) => {
         <div>
           {update().model &&
             <>
-              <Button onClick={onSaveData} color="success" variant="contained" startIcon={<Save></Save>}>SAVE CHANGE</Button>
               <Button onClick={onUndo} color="info" variant="contained" startIcon={<Undo></Undo>}>UNDO</Button>
               {update().redo && <Button onClick={onRedo} color="info" variant="contained" startIcon={<Redo></Redo>}>REDO</Button>
               }
@@ -770,6 +759,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
           </DialogActions>
         </form>
       </Dialog>
+
     </div>
   );
 };
