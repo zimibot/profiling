@@ -66,11 +66,13 @@ const EditConnection = () => {
         api().get(`/deck-explorer/sna-data?id=${id}`).then(d => {
             const itemsFirst = d.data.items.filesData[0]
             setdisplay(itemsFirst.url)
-            group.controls.multipleFiles.setValue(d.data.items.filesData)
+            // group.controls.multipleFiles.setValue(d.data.items.filesData)
             group.controls.title.setValue(d.data.items.title)
             group.controls.description.setValue(d.data.items.description)
-            group.controls.root.setValue(d.data.items.config.root)
-            group.controls.parent.setValue(d.data.items.config.parent)
+            setTimeout(() => {
+                group.controls.root.setValue(d.data.items.config.root)
+                group.controls.parent.setValue(d.data.items.config.parent)
+            }, 400);
             setListFiles(a => ({ ...a, multipleFiles: d.data.items.filesData, multipleFilesOriginal: d.data.items.originalFiles }))
 
         })
@@ -446,7 +448,6 @@ const EditConnection = () => {
 
 
     const onSubmit = (e) => {
-        console.log("submit");
         e.preventDefault();
 
         const form = new FormData();
@@ -460,6 +461,8 @@ const EditConnection = () => {
         form.append("description", value.description);
         form.append("root", value.root);
         form.append("parent", value.parent);
+
+        console.log(value.multipleFiles)
 
         for (let i = 0; i < value.multipleFiles.length; i++) {
             form.append('file', value.multipleFiles[i]);

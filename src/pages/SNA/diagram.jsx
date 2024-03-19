@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Drawer,
 } from "@suid/material";
 import * as go from "gojs";
 import { createEffect, createSignal, onCleanup, onMount } from "solid-js";
@@ -178,23 +179,39 @@ export const Diagram = ({ data, myDiagram, $ }) => {
                   .then(response => {
                     let items = response.data.items[mainType === "reg_data" ? "reg_data" : "person_data"];
 
-                    // Hanya hapus duplikat untuk "reg_data"
+                    // Menghapus duplikat untuk "reg_data"
                     let uniqueData = mainType === "reg_data" ? removeDuplicates(items, 'PENCARIAN') : items;
 
-                    let nameType = mainType === "reg_data" ? "PERSONAL-ID" : "PERSONAL"
+                    let nameType = mainType === "reg_data" ? "PERSONAL-ID" : "PERSONAL";
 
-
+                    console.log(uniqueData)
                     if (uniqueData.length > 0) {
-                      // Logic to handle successful data retrieval
+                      // Logika untuk menangani pengambilan data yang berhasil
                       FormatData(uniqueData, node.data.key, clickedNode, mainType, nameType);
-                      return true; // Indicate success
+
+                      // Jika uniqueData hanya berisi msisdn
+                      if (uniqueData.length === 1 && uniqueData.some(data => data.hasOwnProperty('msisdn'))) {
+                        myDiagram.model.setDataProperty(clickedNode.data, "color", "red");
+
+                        // Menampilkan notifikasi SweetAlert2
+                        Swal.fire({
+                          title: 'Error!',
+                          text: 'Failed to load any data.',
+                          icon: 'error',
+                          confirmButtonText: 'OK'
+                        });
+                      }
+
+                      return true; // Menandakan sukses
                     } else {
-                      return false; // Indicate failure but not a fetch error
+                      return false; // Menandakan kegagalan tapi bukan karena error fetch
                     }
                   }).catch(() => {
-                    return false; // Indicate fetch error
+                    return false; // Menandakan error fetch
                   });
               });
+
+
 
 
               Promise.all(promises).then((results) => {
@@ -215,12 +232,12 @@ export const Diagram = ({ data, myDiagram, $ }) => {
                   });
                 } else if (successCount > 0) {
                   // Some requests were successful
-                  Swal.fire({
-                    title: 'Partial Success!',
-                    text: 'Some data has been loaded successfully.',
-                    icon: 'warning',
-                    confirmButtonText: 'OK'
-                  });
+                  // Swal.fire({
+                  //   title: 'Partial Success!',
+                  //   text: 'Some data has been loaded successfully.',
+                  //   icon: 'warning',
+                  //   confirmButtonText: 'OK'
+                  // });
                 } else {
                   // No requests were successful
                   // Display an error notification if all requests failed
@@ -555,6 +572,21 @@ export const Diagram = ({ data, myDiagram, $ }) => {
 
   createEffect(() => {
     init();
+    function adjustNodeLocations() {
+      myDiagram.nodes.each(function (node) {
+        // Periksa apakah data node memiliki informasi lokasi yang disimpan
+        if (node.data.location) {
+          // Jika ya, sesuaikan lokasi node
+          var loc = go.Point.parse(node.data.location); // Pastikan lokasi adalah format yang benar
+          node.location = loc;
+        }
+      });
+    }
+
+    // Panggil adjustNodeLocations setelah diagram selesai melakukan layout
+    myDiagram.addDiagramListener("LayoutCompleted", function (e) {
+      adjustNodeLocations();
+    });
   });
 
 
@@ -669,9 +701,9 @@ export const Diagram = ({ data, myDiagram, $ }) => {
 
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full relative">
       <div id="myDiagramDiv" className="w-full h-full"></div>
-      <div className="p-4 absolute left-0 top-0 z-10 flex gap-3">
+      <div className="absolute left-0 top-0 z-10 flex gap-3">
 
         <div>
           {update().model &&
@@ -686,6 +718,7 @@ export const Diagram = ({ data, myDiagram, $ }) => {
         </div>
 
       </div>
+
 
       <Dialog
         open={update().export}
@@ -702,7 +735,6 @@ export const Diagram = ({ data, myDiagram, $ }) => {
         }}
       >
         <form onSubmit={onExport}>
-
           <DialogTitle id="alert-dialog-title">
             {"SETTINGS EXPORT"}
           </DialogTitle>
