@@ -189,17 +189,17 @@ export const Diagram = ({ data, myDiagram, $ }) => {
                       FormatData(uniqueData, node.data.key, clickedNode, mainType, nameType);
                       setUpdate(a => ({ ...a, model: true }))
                       // Jika uniqueData hanya berisi msisdn
-                      if (uniqueData.length === 1 && uniqueData.some(data => data.hasOwnProperty('msisdn'))) {
-                        myDiagram.model.setDataProperty(clickedNode.data, "color", "red");
+                      // if (uniqueData.length === 1 && uniqueData.some(data => data.hasOwnProperty('msisdn'))) {
+                      //   myDiagram.model.setDataProperty(clickedNode.data, "color", "red");
 
-                        // Menampilkan notifikasi SweetAlert2
-                        Swal.fire({
-                          title: 'Error!',
-                          text: 'Failed to load any data.',
-                          icon: 'error',
-                          confirmButtonText: 'OK'
-                        });
-                      }
+                      //   // Menampilkan notifikasi SweetAlert2
+                      //   Swal.fire({
+                      //     title: 'Error!',
+                      //     text: 'Failed to load any data.',
+                      //     icon: 'error',
+                      //     confirmButtonText: 'OK'
+                      //   });
+                      // }
 
                       return true; // Menandakan sukses
                     } else {
