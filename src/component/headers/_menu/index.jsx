@@ -6,11 +6,14 @@ import logo from "../../../assets/images/logo_light.svg"
 import { createEffect } from "solid-js"
 import axios from "axios";
 import { useBeforeLeave } from "@solidjs/router"
+import { api } from "../../../helper/_helper.api"
 
 export const Menu = () => {
     const [appStore] = useAppState()
 
-
+    createEffect(() => {
+        api().post("/deck-explorer/cropt_image")
+    })
 
     useBeforeLeave(() => {
         axios.get("http://localhost:3000/refresh", {
