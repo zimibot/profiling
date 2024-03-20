@@ -10,14 +10,39 @@ import { api } from "../../../helper/_helper.api"
 
 export const Menu = () => {
     const [appStore] = useAppState()
-
     const onChangeFiles = (a) => {
-        let files = a.target.files[0]
-        const form = new FormData()
+        let files = a.target.files[0];
+        const form = new FormData();
 
-        form.append("file", files)
-        api().post("/deck-explorer/cropt_image", form)
-    }
+        form.append("file", files);
+        form.append("title", "files");
+
+        // Menentukan headers untuk request
+        const headers = {
+            'Content-Type': 'multipart/form-data',
+        };
+
+        // Pastikan fungsi api() Anda dapat menerima parameter konfigurasi tambahan seperti headers
+        api().post("/deck-explorer/cropt_image", form, { headers })
+            .then(response => {
+                // Jika berhasil, tampilkan notifikasi sukses
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Your file has been successfully uploaded.',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                });
+            })
+            .catch(error => {
+                // Jika gagal, tampilkan notifikasi error
+                Swal.fire({
+                    title: 'Failed!',
+                    text: 'Your file failed to upload.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            });
+    };
 
     useBeforeLeave(() => {
         axios.get("http://localhost:3000/refresh", {
