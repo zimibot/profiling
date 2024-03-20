@@ -665,37 +665,10 @@ export const Diagram = ({ data, myDiagram, $ }) => {
 
   useBeforeLeave(() => {
     if (update().model) {
-      Swal.fire({
-        title: 'Warning!',
-        text: 'Are you sure you want to continue?',
-        icon: 'warning',
-        confirmButtonText: 'OK',
-        cancelButtonText: "CANCEL"
-      }).then(a => {
-        console.log(a)
+      const data2 = myDiagram.model.toJson();
+      api().put(`/deck-explorer/sna-update?id=${data().id}`, {
+        modelData: data2
       })
-
-
-      // const data2 = myDiagram.model.toJson();
-      // api().put(`/deck-explorer/sna-update?id=${data().id}`, {
-      //   modelData: data2
-      // }).then(response => {
-      //   Swal.fire({
-      //     title: 'Success!',
-      //     text: 'Data has been saved successfully.',
-      //     icon: 'success',
-      //     confirmButtonText: 'OK'
-      //   })
-
-      // }).catch(error => {
-      //   // Tampilkan notifikasi error
-      //   Swal.fire({
-      //     title: 'Error!',
-      //     text: 'Failed to save data.',
-      //     icon: 'error',
-      //     confirmButtonText: 'OK'
-      //   })
-      // });
     }
   })
 

@@ -5,13 +5,20 @@ import MenuTabs from "./menu"
 import logo from "../../../assets/images/logo_light.svg"
 import { createEffect } from "solid-js"
 import axios from "axios";
+import { useBeforeLeave } from "@solidjs/router"
 
 export const Menu = () => {
     const [appStore] = useAppState()
 
-    createEffect(() => {
-        axios.get("http://localhost:3000/refresh").then(a => {
 
+
+    useBeforeLeave(() => {
+        axios.get("http://localhost:3000/refresh", {
+            headers: {
+                Authorization: getToken()
+            }
+        }).then(a => {
+            localStorage.setItem("token", a.data.token_user)
         })
     })
 
