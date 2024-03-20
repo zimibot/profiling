@@ -2,8 +2,7 @@ import { Navigate, useLocation } from "@solidjs/router";
 import BreadcrumbsPages from "../component/breadcrumbs";
 import { useAppState } from "../helper/_helper.context";
 import { createEffect } from "solid-js";
-import Swal from "sweetalert2";
-import { api } from "../helper/_helper.api";
+
 const ContainerPages = (props) => {
   const [appStore, { update }] = useAppState();
 

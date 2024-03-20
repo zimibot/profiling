@@ -10,53 +10,19 @@ import { api } from "../../../helper/_helper.api"
 
 export const Menu = () => {
     const [appStore] = useAppState()
-    const onChangeFiles = (a) => {
-        let files = a.target.files[0];
-        const form = new FormData();
 
-        form.append("file", files);
-        form.append("title", "files");
-
-        // Menentukan headers untuk request
-        const headers = {
-            'Content-Type': 'multipart/form-data',
-        };
-
-        // Pastikan fungsi api() Anda dapat menerima parameter konfigurasi tambahan seperti headers
-        api().post("/deck-explorer/cropt_image", form, { headers })
-            .then(response => {
-                // Jika berhasil, tampilkan notifikasi sukses
-                Swal.fire({
-                    title: 'Success!',
-                    text: 'Your file has been successfully uploaded.',
-                    icon: 'success',
-                    confirmButtonText: 'OK'
-                });
-            })
-            .catch(error => {
-                // Jika gagal, tampilkan notifikasi error
-                Swal.fire({
-                    title: 'Failed!',
-                    text: 'Your file failed to upload.',
-                    icon: 'error',
-                    confirmButtonText: 'OK'
-                });
-            });
-    };
-
-    useBeforeLeave(() => {
-        axios.get("http://localhost:3000/refresh", {
-            headers: {
-                Authorization: getToken()
-            }
-        }).then(a => {
-            localStorage.setItem("token", a.data.token_user)
-        })
-    })
+    // useBeforeLeave(() => {
+    //     axios.get("http://localhost:3000/refresh", {
+    //         headers: {
+    //             Authorization: getToken()
+    //         }
+    //     }).then(a => {
+    //         localStorage.setItem("token", a.data.token_user)
+    //     })
+    // })
 
     return (
         <div className={`p-3 sticky top-0 z-10 ${mode() === "dark" ? "bg-[#0D0D0D]" : ""}`}>
-            <div><input onChange={onChangeFiles} type="file"></input></div>
             <div className={`border-b py-2 ${mode() === "dark" ? "border-b-[#222222]" : "border-b-[#aaa]"}  relative z-50`}>
                 <div className="flex  flex-wrap lg:gap-[25px]  items-center sm:flex-col lg:flex-row">
                     <div className="mb-4 lg:mb-0 text-[40px] w-32">
