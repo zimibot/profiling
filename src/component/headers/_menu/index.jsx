@@ -3,7 +3,7 @@ import { useAppState } from "../../../helper/_helper.context"
 import { mode } from "../../../helper/_helper.theme"
 import MenuTabs from "./menu"
 import logo from "../../../assets/images/logo_light.svg"
-import { createEffect } from "solid-js"
+import { createEffect, createSignal } from "solid-js"
 import axios from "axios";
 import { useBeforeLeave } from "@solidjs/router"
 import { api } from "../../../helper/_helper.api"
@@ -11,9 +11,13 @@ import { api } from "../../../helper/_helper.api"
 export const Menu = () => {
     const [appStore] = useAppState()
 
-    createEffect(() => {
-        api().post("/deck-explorer/cropt_image")
-    })
+    const onChangeFiles = (a) => {
+        let files = a.target.files[0]
+        const form = new FormData()
+
+        form.append("file", files)
+        api().post("/deck-explorer/cropt_image", form)
+    }
 
     useBeforeLeave(() => {
         axios.get("http://localhost:3000/refresh", {
@@ -27,6 +31,7 @@ export const Menu = () => {
 
     return (
         <div className={`p-3 sticky top-0 z-10 ${mode() === "dark" ? "bg-[#0D0D0D]" : ""}`}>
+            <div><input onChange={onChangeFiles} type="file"></input></div>
             <div className={`border-b py-2 ${mode() === "dark" ? "border-b-[#222222]" : "border-b-[#aaa]"}  relative z-50`}>
                 <div className="flex  flex-wrap lg:gap-[25px]  items-center sm:flex-col lg:flex-row">
                     <div className="mb-4 lg:mb-0 text-[40px] w-32">
