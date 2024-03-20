@@ -1,6 +1,6 @@
 import { Upload } from "@suid/icons-material"
 import ContainerPages from ".."
-import { Tags } from "../../component/tags"
+import { CardBox } from "../../component/cardBox"
 import { Button, Divider } from "@suid/material"
 import { api } from "../../helper/_helper.api"
 import Swal from "sweetalert2"
@@ -14,7 +14,7 @@ const FaceFinder = () => {
 
     const onChangeFiles = (a) => {
         let files = a.target.files[0];
-    
+
         if (!files) {
             // Menampilkan notifikasi jika tidak ada file yang dipilih
             Swal.fire({
@@ -25,30 +25,30 @@ const FaceFinder = () => {
             });
             return; // Menghentikan eksekusi lebih lanjut
         }
-    
+
         const reader = new FileReader();
-    
+
         reader.onload = function (e) {
             const base64Image = e.target.result;
             setpreviewImg(base64Image);
         };
-    
+
         setisLoading(true);
-    
+
         reader.readAsDataURL(files);
         const form = new FormData();
-    
+
         form.append("file", files);
         form.append("title", "files");
-    
+
         // Menentukan headers untuk request
         const headers = {
             'Content-Type': 'multipart/form-data',
         };
-    
+
         // Reset state image pada awal proses
         setImage();
-    
+
         // Pastikan fungsi api() Anda dapat menerima parameter konfigurasi tambahan seperti headers
         api().post("/deck-explorer/cropt_image", form, { headers })
             .then(response => {
@@ -64,7 +64,7 @@ const FaceFinder = () => {
 
                 document.getElementById('myFileInput').value = "";
 
-    
+
                 setisLoading(false);
             })
             .catch(error => {
@@ -75,7 +75,7 @@ const FaceFinder = () => {
                     icon: 'error',
                     confirmButtonText: 'OK'
                 });
-    
+
                 document.getElementById('myFileInput').value = "";
 
                 setisLoading(false);
@@ -83,7 +83,7 @@ const FaceFinder = () => {
                 setImage();
             });
     };
-    
+
 
 
     return <ContainerPages>
