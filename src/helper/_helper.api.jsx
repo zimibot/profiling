@@ -7,7 +7,6 @@ export const api = (baseurl) => {
       process.env.NODE_ENV === "production"
       ? "https://k17tech.com/users"
       : "http://localhost:3000/users",
-    timeout: 30000,
   });
 
   // Alter defaults after instance has been created
