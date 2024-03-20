@@ -39,7 +39,6 @@ const FaceFinder = () => {
         const form = new FormData();
 
         form.append("file", files);
-        form.append("title", "files");
 
         // Menentukan headers untuk request
         const headers = {
@@ -50,7 +49,7 @@ const FaceFinder = () => {
         setImage();
 
         // Pastikan fungsi api() Anda dapat menerima parameter konfigurasi tambahan seperti headers
-        api().post("/deck-explorer/cropt_image", form, { headers })
+        api().post("/deck-explorer/cropt_image?dir=image-ori&dircropt=result-cropt", form, { headers })
             .then(response => {
                 let data = response.data.items;
                 setImage(data);
