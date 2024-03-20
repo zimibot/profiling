@@ -1,11 +1,10 @@
 import { Upload } from "@suid/icons-material"
 import ContainerPages from ".."
-import { CardBox } from "../../component/cardBox"
 import { Tags } from "../../component/tags"
 import { Button, Divider } from "@suid/material"
 import { api } from "../../helper/_helper.api"
 import Swal from "sweetalert2"
-import { createSignal } from "solid-js"
+import { createEffect, createSignal } from "solid-js"
 import { Loading } from "../../component/loading"
 
 const FaceFinder = () => {
@@ -14,63 +13,78 @@ const FaceFinder = () => {
     const [previewImg, setpreviewImg] = createSignal()
 
     const onChangeFiles = (a) => {
-
+        let files = a.target.files[0];
+    
+        if (!files) {
+            // Menampilkan notifikasi jika tidak ada file yang dipilih
+            Swal.fire({
+                title: 'No File Selected',
+                text: 'Please select a file to proceed with the cropping process.',
+                icon: 'warning',
+                confirmButtonText: 'OK'
+            });
+            return; // Menghentikan eksekusi lebih lanjut
+        }
+    
         const reader = new FileReader();
-
-
+    
         reader.onload = function (e) {
             const base64Image = e.target.result;
-            setpreviewImg(base64Image)
-        }
-
-
-        setisLoading(true)
-
-
-
-        let files = a.target.files[0];
-
+            setpreviewImg(base64Image);
+        };
+    
+        setisLoading(true);
+    
         reader.readAsDataURL(files);
         const form = new FormData();
-
+    
         form.append("file", files);
         form.append("title", "files");
-
+    
         // Menentukan headers untuk request
         const headers = {
             'Content-Type': 'multipart/form-data',
         };
-
-        setImage()
-
+    
+        // Reset state image pada awal proses
+        setImage();
+    
         // Pastikan fungsi api() Anda dapat menerima parameter konfigurasi tambahan seperti headers
         api().post("/deck-explorer/cropt_image", form, { headers })
             .then(response => {
-                let data = response.data.items
-
-                setImage(data)
-
+                let data = response.data.items;
+                setImage(data);
                 // Jika berhasil, tampilkan notifikasi sukses
                 Swal.fire({
                     title: 'Success!',
-                    text: 'Your file has been successfully uploaded.',
+                    text: 'The image has been successfully cropped.',
                     icon: 'success',
                     confirmButtonText: 'OK'
                 });
 
-                isLoading(false)
+                document.getElementById('myFileInput').value = "";
 
+    
+                setisLoading(false);
             })
             .catch(error => {
                 // Jika gagal, tampilkan notifikasi error
                 Swal.fire({
-                    title: 'Failed!',
-                    text: 'Your file failed to upload.',
+                    title: 'Processing Failed',
+                    text: 'We could not find a face in the selected file. Please try with a different image.',
                     icon: 'error',
                     confirmButtonText: 'OK'
                 });
+    
+                document.getElementById('myFileInput').value = "";
+
+                setisLoading(false);
+                // Reset state image jika terjadi error
+                setImage();
             });
     };
+    
+
 
     return <ContainerPages>
         <div className="flex flex-1 pt-4 gap-4">
@@ -82,7 +96,7 @@ const FaceFinder = () => {
                             <div> UPLOAD YOUR IMAGE</div>
                         </div>}
 
-                        <input onChange={onChangeFiles} className="absolute w-full h-full opacity-0" type="file"></input>
+                        <input id="myFileInput" onChange={onChangeFiles} className="absolute w-full h-full opacity-0" type="file"></input>
                     </Button>
 
                 </div>
