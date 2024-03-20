@@ -78,6 +78,13 @@ export default function MenuTabs() {
             >
               CONNECTION
             </Link>
+            <Link
+              href="/deck-explorer/face-finder"
+              activeClass="border-b-2 border-gray-300 text-white"
+              className="inline-block px-8 no-underline py-5 my-[-8px]  rounded-t-lg text-gray-400 hover:text-white "
+            >
+              FACE FINDER
+            </Link>
           </li>
           <li
             className={`${mode() === "dark" ? " bg-primarry-1" : "bg-gray-200"

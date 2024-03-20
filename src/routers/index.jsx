@@ -47,6 +47,10 @@ export const route = [
         component: lazy(() => import("../pages/Direct Tracking")),
       },
       {
+        path: "/face-finder",
+        component: lazy(() => import("../pages/Face Finder")),
+      },
+      {
         path: "/connection",
        
         children: [
