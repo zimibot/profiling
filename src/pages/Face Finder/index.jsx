@@ -84,11 +84,12 @@ const FaceFinder = () => {
 
 
     const onSelectimg = (id) => {
+
         console.log(id)
 
         setImage(d => d.map(s => ({
             ...s,
-            active: id === s.baseTitle
+            active: id === s.currentDir
         })))
     }
 
@@ -118,7 +119,7 @@ const FaceFinder = () => {
                     <Divider sx={{ borderColor: "#333" }}></Divider>
                     <div className=" grid grid-cols-3 gap-3 absolute w-full h-full top-0 left-0 p-2">
                         {image() ? image().length === 0 ? <div className="absolute w-full h-full flex items-center justify-center">We could not find a face!</div> : image().map(a => {
-                            return <Button onClick={() => onSelectimg(a.baseTitle)} variant="contained" color={a?.active ? "info" : "secondary"} class=" h-[180px]  !p-2  w-full border-solid !border-b !border-blue-500">
+                            return <Button onClick={() => onSelectimg(a.currentDir)} variant="contained" color={a?.active ? "info" : "secondary"} class=" h-[180px]  !p-2  w-full border-solid !border-b !border-blue-500">
                                 <img className="object-contain w-full h-full" src={a.baseurl}></img>
                             </Button>
                         }) : isLoading() ? <Loading></Loading> : <div className="col-span-full flex justify-center items-center">
