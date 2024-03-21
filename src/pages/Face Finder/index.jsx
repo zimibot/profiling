@@ -203,7 +203,7 @@ const FaceFinder = () => {
                                                     transform={rotateCircle(-90)} // Memutar 90 derajat ke kiri
                                                 />
                                             </svg>
-                                            <span class="absolute text-xl font-semibold text-[15px]">{percentage()}%</span>
+                                            <span class="absolute  font-semibold text-[15px]">{percentage()}%</span>
                                         </div>
                                     </div>
                                     <div>
@@ -242,7 +242,7 @@ const FaceFinder = () => {
                                                     transform={rotateCircle(-90)} // Memutar 90 derajat ke kiri
                                                 />
                                             </svg>
-                                            <span class="absolute text-xl font-semibold text-[15px]">{percentage()}%</span>
+                                            <span class="absolute  font-semibold !text-[15px]">{percentage()}%</span>
                                         </div>
                                     </div>
                                     <div>
