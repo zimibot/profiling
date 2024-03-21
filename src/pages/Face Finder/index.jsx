@@ -1,7 +1,7 @@
 import { Upload } from "@suid/icons-material"
 import ContainerPages from ".."
 import { CardBox } from "../../component/cardBox"
-import { Button, Divider } from "@suid/material"
+import { Button, CircularProgress, Divider, LinearProgress } from "@suid/material"
 import { api } from "../../helper/_helper.api"
 import Swal from "sweetalert2"
 import { createSignal } from "solid-js"
@@ -46,8 +46,6 @@ const FaceFinder = () => {
         };
 
         // Reset state image pada awal proses
-        setImage();
-
         // Pastikan fungsi api() Anda dapat menerima parameter konfigurasi tambahan seperti headers
         api().post("/deck-explorer/cropt_image?dir=image-ori&dircropt=result-cropt", form, { headers })
             .then(response => {
@@ -84,18 +82,34 @@ const FaceFinder = () => {
     };
 
 
+    const onSelectimg = (id) => {
+        console.log(id)
+
+        setImage(d => d.map(s => ({
+            ...s,
+            active: id === s.baseTitle
+        })))
+    }
+
 
     return <ContainerPages>
         <div className="flex flex-1 pt-4 gap-4">
             <div className="w-[500px] flex flex-col gap-4">
                 <div className="h-72 relative p-4 w-full bg-primarry-1">
-                    <Button class="w-full h-full !border-[2px] !border-dotted flex items-center justify-center relative">
+                    <Button disabled={isLoading()} class="w-full h-full !border-[2px] !border-dotted flex items-center justify-center relative">
                         {previewImg() ? <img className=" h-full w-full object-contain" src={previewImg()}></img> : <div className="flex gap-2">
                             <Upload></Upload>
                             <div> UPLOAD YOUR IMAGE</div>
                         </div>}
+                        {isLoading() && <div className="w-full h-full absolute bg-primarry-1 bg-opacity-75 flex items-center justify-center gap-2">
+                            <div className="flex gap-2 items-center flex-col">
+                                <span>Processing faces in the image</span>
+                                <div className="w-full"><LinearProgress color="warning" size={20}></LinearProgress></div>
+                            </div>
+                        </div>}
 
-                        <input id="myFileInput" onChange={onChangeFiles} className="absolute w-full h-full opacity-0" type="file"></input>
+
+                        <input disabled={isLoading()} id="myFileInput" onChange={onChangeFiles} className="absolute w-full h-full opacity-0" type="file"></input>
                     </Button>
 
                 </div>
@@ -104,7 +118,7 @@ const FaceFinder = () => {
                     <Divider sx={{ borderColor: "#333" }}></Divider>
                     <div className=" grid grid-cols-3 gap-3 absolute w-full h-full top-0 left-0 p-2">
                         {image() ? image().length === 0 ? <div className="absolute w-full h-full flex items-center justify-center">We could not find a face!</div> : image().map(a => {
-                            return <Button variant="contained" color="secondary" class=" h-[180px]  !p-2  w-full border-solid !border-b !border-blue-500">
+                            return <Button onClick={() => onSelectimg(a.baseTitle)} variant="contained" color={a?.active ? "info" : "secondary"} class=" h-[180px]  !p-2  w-full border-solid !border-b !border-blue-500">
                                 <img className="object-contain w-full h-full" src={a.baseurl}></img>
                             </Button>
                         }) : isLoading() ? <Loading></Loading> : <div className="col-span-full flex justify-center items-center">
