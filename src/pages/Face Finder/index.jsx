@@ -4,7 +4,7 @@ import { CardBox } from "../../component/cardBox"
 import { Button, Divider } from "@suid/material"
 import { api } from "../../helper/_helper.api"
 import Swal from "sweetalert2"
-import { createEffect, createSignal } from "solid-js"
+import { createSignal } from "solid-js"
 import { Loading } from "../../component/loading"
 
 const FaceFinder = () => {
@@ -103,20 +103,14 @@ const FaceFinder = () => {
                 <div className="flex-1 overflow-auto relative">
                     <Divider sx={{ borderColor: "#333" }}></Divider>
                     <div className=" grid grid-cols-3 gap-3 absolute w-full h-full top-0 left-0 p-2">
-                        {image() ? image().map(a => {
-                            return <Button variant="contained" color="secondary" class=" h-[180px]  !p-2  w-full !border-b-2 !border-blue-500">
-                                <img className="object-contain w-full h-full" src={a}></img>
+                        {image() ? image().length === 0 ? <div className="absolute w-full h-full flex items-center justify-center">We could not find a face!</div> : image().map(a => {
+                            return <Button variant="contained" color="secondary" class=" h-[180px]  !p-2  w-full border-solid !border-b !border-blue-500">
+                                <img className="object-contain w-full h-full" src={a.baseurl}></img>
                             </Button>
                         }) : isLoading() ? <Loading></Loading> : <div className="col-span-full flex justify-center items-center">
                             PLEASE UPLOAD YOUR IMAGE
                         </div>}
 
-                        {/* <Button variant="contained" color="secondary" class=" h-[180px] bg-primarry-1 !p-2  w-full">
-                            <img className="object-contain w-full h-full" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJORE4AsMDV2U8US_ZFGe6R7xh8biBqqk8erQTmu11lXcHz7Qq-zDVBprgUfvS7mq5k7U&usqp=CAU"></img>
-                        </Button>
-                        <Button variant="contained" color="secondary" class=" h-[180px] bg-primarry-1 !p-2  w-full">
-                            <img className="object-contain w-full h-full" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJORE4AsMDV2U8US_ZFGe6R7xh8biBqqk8erQTmu11lXcHz7Qq-zDVBprgUfvS7mq5k7U&usqp=CAU"></img>
-                        </Button> */}
                     </div>
 
                 </div>
