@@ -4,7 +4,7 @@ import { CardBox } from "../../component/cardBox"
 import { Button, CircularProgress, Divider, LinearProgress } from "@suid/material"
 import { api } from "../../helper/_helper.api"
 import Swal from "sweetalert2"
-import { createSignal } from "solid-js"
+import { createSignal, onCleanup } from "solid-js"
 import { Loading } from "../../component/loading"
 
 const FaceFinder = () => {
@@ -81,6 +81,9 @@ const FaceFinder = () => {
             });
     };
 
+    onCleanup(() => {
+        setImage()
+    })
 
     const onSelectimg = (id) => {
         console.log(id)
