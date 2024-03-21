@@ -210,6 +210,8 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 .animated-element {
   animation: slideAndFade 0.6s ease-in-out forwards;
 }
+
+
 @media (prefers-color-scheme: light) {
   div:where(.swal2-container) div:where(.swal2-popup) {
     background: #fff !important;

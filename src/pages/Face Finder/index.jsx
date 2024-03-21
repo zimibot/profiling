@@ -4,7 +4,7 @@ import { CardBox } from "../../component/cardBox"
 import { Button, CircularProgress, Divider, LinearProgress } from "@suid/material"
 import { api } from "../../helper/_helper.api"
 import Swal from "sweetalert2"
-import { createSignal, onCleanup } from "solid-js"
+import { createSignal, onCleanup, onMount } from "solid-js"
 import { Loading } from "../../component/loading"
 
 const FaceFinder = () => {
@@ -12,6 +12,18 @@ const FaceFinder = () => {
     const [isLoading, setisLoading] = createSignal()
     const [previewImg, setpreviewImg] = createSignal()
     const [previewImgConvert, setpreviewImgConvert] = createSignal()
+    const [percentage, setPercentage] = createSignal(80); // Misalnya persentase awal
+    const radius = 70;
+    const circumference = 2 * Math.PI * radius;
+
+    const calculateColor = (percentage) => {
+        const hue = percentage * 1.4;
+        return `hsl(${hue}, 100%, 50%)`;
+    };
+
+    // Fungsi untuk memutar lingkaran
+    const rotateCircle = (degrees) => `rotate(${degrees}, 80, 80)`;
+
 
 
     const onChangeFiles = (a) => {
@@ -86,15 +98,22 @@ const FaceFinder = () => {
     };
 
 
-    const onSelectimg = (id, url) => {
+    const onSelectimg = (id, url, linkCompare) => {
 
-        setpreviewImgConvert(url)
+        setpreviewImgConvert(() => ({
+            id,
+            url,
+            linkCompare
+        }))
         setImage(d => d.map(s => ({
             ...s,
             active: id === s.currentDir
         })))
     }
 
+    const onSearchTarget = () => {
+        api().get(`/deck-explorer/result-face?file=${previewImgConvert().id}`)
+    }
 
     return <ContainerPages>
         <div className="flex flex-1 pt-4 gap-4">
@@ -117,38 +136,128 @@ const FaceFinder = () => {
 
                 </div>
 
-                <div className="flex-1 overflow-auto relative">
-                    <Divider sx={{ borderColor: "#333" }}></Divider>
-                    <div className=" grid grid-cols-3 gap-3 absolute w-full h-full top-0 left-0 p-2">
-                        {image() ? image()?.length === 0 ? <div className="absolute w-full h-full flex items-center justify-center">We could not find a face!</div> : image().map(a => {
-                            return <Button onClick={() => onSelectimg(a.currentDir, a.baseurl)} variant="contained" color={a?.active ? "info" : "secondary"} class=" h-[180px]  !p-2  w-full border-solid !border-b !border-blue-500">
-                                <img className="object-contain w-full h-full" src={a.baseurl}></img>
-                            </Button>
-                        }) : isLoading() ? <Loading></Loading> : <div className="col-span-full flex justify-center items-center">
-                            PLEASE UPLOAD YOUR IMAGE
-                        </div>}
+                <div className="flex-1 overflow-auto relative flex flex-col">
+                    <div className="px-2">
+                        <div className="flex justify-between"><span>FACE{'(S)'} DETECTED</span> <span> {image() && `Total ${image()?.length || 0}`}</span></div>
+                        <Divider sx={{ borderColor: "#333" }}></Divider>
+                    </div>
+                    <div className="relative flex-1">
+                        <div className=" grid grid-cols-4 gap-3 absolute w-full h-full top-0 left-0 p-2 auto-rows-min"  >
+                            {image() ? image()?.length === 0 ? <div className="absolute w-full h-full flex items-center justify-center">We could not find a face!</div> : image().map(a => {
+                                return <Button onClick={() => onSelectimg(a.currentDir, a.baseurl, a.destCompareLink)} variant="contained" color={a?.active ? "info" : "secondary"} class=" h-[100px]  !p-2  w-full border-solid !border-b !border-blue-500">
+                                    <img className="object-contain w-full h-full" src={a.baseurl}></img>
+                                </Button>
+                            }) : isLoading() ? <Loading></Loading> : <div className="col-span-full flex justify-center items-center absolute w-full h-full">
+                                PLEASE UPLOAD YOUR IMAGE
+                            </div>}
+
+                        </div>
 
                     </div>
-
                 </div>
             </div>
             <CardBox title={"SELECTED FACE"} className=" flex-col relative flex gap-4 flex-1">
                 <div className="absolute w-full h-full left-0 top-0 p-4 flex gap-4 flex-1 flex-col">
-                    {previewImgConvert() && <>
-                        <Button variant="contained" color="secondary">SUBMIT TO FACE FINDER</Button>
+                    {previewImgConvert() ? <>
                         <div className="flex-1 relative">
-                            <div className="absolute w-full h-full left-0 top-0">
-                                <img className="object-contain w-full h-full" src={previewImgConvert()}></img>
+                            <div className="absolute w-full h-full left-0 top-0 space-y-4">
+                                <img className="object-contain w-full" src={previewImgConvert().linkCompare}></img>
+                                <Button onClick={onSearchTarget} variant="contained" color="info" fullWidth>SUBMIT TO FACE FINDER</Button>
                             </div>
                         </div>
-                    </>}
 
+                    </> : <div className="absolute w-full h-full flex items-center justify-center">
+                        FACE NOT SELECTED, PLEASE UPLOAD YOUT IMAGE FIRST
+                    </div>}
                 </div>
 
             </CardBox>
             <div className="w-[450px] flex flex-col">
-                <CardBox title={"RESULT "} className=" flex-col flex gap-4">
+                <CardBox title={"RESULT "} className=" flex-col flex gap-4 flex-1">
+                    <div className="relative flex-1">
+                        <div className="absolute w-full h-full top-0 left-0 overflow-auto space-y-4">
+                            <div className="flex justify-between gap-4 items-center bg-primarry-2 p-2 border-b-2 border-white">
+                                <div className="flex gap-2 items-center">
+                                    <div>
+                                        <div class="flex items-center justify-center">
+                                            <svg width="55" height="55" viewBox="0 0 160 160">
+                                                <circle
+                                                    cx="80"
+                                                    cy="80"
+                                                    r={radius}
+                                                    fill="none"
+                                                    stroke="#222"
+                                                    stroke-width="10"
+                                                    stroke-dasharray={circumference}
+                                                    transform={rotateCircle(-90)} // Memutar 90 derajat ke kiri
+                                                />
+                                                <circle
+                                                    cx="80"
+                                                    cy="80"
+                                                    r={radius}
+                                                    fill="none"
+                                                    stroke={calculateColor(percentage())}
+                                                    stroke-width="10"
+                                                    stroke-dasharray={circumference}
+                                                    stroke-dashoffset={circumference - (percentage() / 100) * circumference}
+                                                    transform={rotateCircle(-90)} // Memutar 90 derajat ke kiri
+                                                />
+                                            </svg>
+                                            <span class="absolute text-xl font-semibold text-[15px]">{percentage()}%</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div>Jaya Kusuma</div>
+                                        <div>Laki laki</div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <Button variant="contained" color="info">DETAIL</Button>
+                                </div>
+                            </div>
+                            <div className="flex justify-between gap-4 items-center bg-primarry-2 p-2 border-b-2 border-white">
+                                <div className="flex gap-2 items-center">
+                                    <div>
+                                        <div class="flex items-center justify-center">
+                                            <svg width="55" height="55" viewBox="0 0 160 160">
+                                                <circle
+                                                    cx="80"
+                                                    cy="80"
+                                                    r={radius}
+                                                    fill="none"
+                                                    stroke="#222"
+                                                    stroke-width="10"
+                                                    stroke-dasharray={circumference}
+                                                    transform={rotateCircle(-90)} // Memutar 90 derajat ke kiri
+                                                />
+                                                <circle
+                                                    cx="80"
+                                                    cy="80"
+                                                    r={radius}
+                                                    fill="none"
+                                                    stroke={calculateColor(percentage())}
+                                                    stroke-width="10"
+                                                    stroke-dasharray={circumference}
+                                                    stroke-dashoffset={circumference - (percentage() / 100) * circumference}
+                                                    transform={rotateCircle(-90)} // Memutar 90 derajat ke kiri
+                                                />
+                                            </svg>
+                                            <span class="absolute text-xl font-semibold text-[15px]">{percentage()}%</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div>Jaya Kusuma</div>
+                                        <div>Laki laki</div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <Button variant="contained" color="info">DETAIL</Button>
+                                </div>
+                            </div>
 
+
+                        </div>
+                    </div>
                 </CardBox>
             </div>
         </div>
