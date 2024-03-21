@@ -45,6 +45,7 @@ const FaceFinder = () => {
             'Content-Type': 'multipart/form-data',
         };
 
+        setImage()
         // Reset state image pada awal proses
         // Pastikan fungsi api() Anda dapat menerima parameter konfigurasi tambahan seperti headers
         api().post("/deck-explorer/cropt_image?dir=image-ori&dircropt=result-cropt", form, { headers })
@@ -81,9 +82,6 @@ const FaceFinder = () => {
             });
     };
 
-    onCleanup(() => {
-        setImage()
-    })
 
     const onSelectimg = (id) => {
         console.log(id)
@@ -110,7 +108,6 @@ const FaceFinder = () => {
                                 <div className="w-full"><LinearProgress color="warning" size={20}></LinearProgress></div>
                             </div>
                         </div>}
-
 
                         <input disabled={isLoading()} id="myFileInput" onChange={onChangeFiles} className="absolute w-full h-full opacity-0" type="file"></input>
                     </Button>
