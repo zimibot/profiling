@@ -120,10 +120,43 @@ const FaceFinder = () => {
     }
 
     const onSearchTarget = () => {
-        api().get(`/deck-explorer/result-face?file=${previewImgConvert().id}`).then(s => {
-            setResultData(s.data.items)
-        })
+        // Menampilkan notifikasi loading
+        Swal.fire({
+            title: 'Please wait...',
+            html: 'We are fetching the data.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading()
+            },
+        });
+
+        api().get(`/deck-explorer/result-face?file=${previewImgConvert().id}`)
+            .then(s => {
+                // Data berhasil diambil, menutup notifikasi loading
+                Swal.close();
+
+                // Menampilkan notifikasi sukses
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Data Retrieved Successfully',
+                    text: 'Your data has been successfully fetched.',
+                });
+
+                setResultData(s.data.items);
+            })
+            .catch(error => {
+                // Terjadi error, menutup notifikasi loading
+                Swal.close();
+
+                // Menampilkan notifikasi error
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Something went wrong! Unable to fetch the data.',
+                });
+            });
     }
+
 
     const onDetail = async (id) => {
         try {
@@ -133,7 +166,7 @@ const FaceFinder = () => {
             notify({ title: "Search Keyword", text: `${id} Success` })
             update(d => ({ ...d, dataSearch, terkait: dataSearch.terkait }))
             localStorage.setItem("dataSearch", JSON.stringify(dataSearch))
-            localStorage.setItem("typeSearch", d.category)
+            localStorage.setItem("typeSearch", "PERSONAL ID")
             navi(`/deck-explorer/search-result/database-information/${id}`)
 
         } catch (error) {
@@ -187,7 +220,7 @@ const FaceFinder = () => {
                 <div className="absolute w-full h-full left-0 top-0 p-4 flex gap-4 flex-1 flex-col">
                     {previewImgConvert() ? <>
                         <div className="flex-1 relative">
-                            <div className="absolute w-full h-full left-0 top-0 space-y-4">
+                            <div className="absolute w-full h-full left-0 top-0 space-y-4 flex flex-col items-center justify-center">
                                 <img className="object-contain w-full" src={previewImgConvert().linkCompare}></img>
                                 <Button onClick={onSearchTarget} variant="contained" color="info" fullWidth>SUBMIT TO FACE FINDER</Button>
                             </div>
