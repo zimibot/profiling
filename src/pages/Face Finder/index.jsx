@@ -11,6 +11,8 @@ const FaceFinder = () => {
     const [image, setImage] = createSignal()
     const [isLoading, setisLoading] = createSignal()
     const [previewImg, setpreviewImg] = createSignal()
+    const [previewImgConvert, setpreviewImgConvert] = createSignal()
+
 
     const onChangeFiles = (a) => {
         let files = a.target.files[0];
@@ -44,6 +46,7 @@ const FaceFinder = () => {
         const headers = {
             'Content-Type': 'multipart/form-data',
         };
+        setpreviewImgConvert()
 
         setImage()
         // Reset state image pada awal proses
@@ -83,10 +86,9 @@ const FaceFinder = () => {
     };
 
 
-    const onSelectimg = (id) => {
+    const onSelectimg = (id, url) => {
 
-        console.log(id)
-
+        setpreviewImgConvert(url)
         setImage(d => d.map(s => ({
             ...s,
             active: id === s.currentDir
@@ -119,7 +121,7 @@ const FaceFinder = () => {
                     <Divider sx={{ borderColor: "#333" }}></Divider>
                     <div className=" grid grid-cols-3 gap-3 absolute w-full h-full top-0 left-0 p-2">
                         {image() ? image()?.length === 0 ? <div className="absolute w-full h-full flex items-center justify-center">We could not find a face!</div> : image().map(a => {
-                            return <Button onClick={() => onSelectimg(a.currentDir)} variant="contained" color={a?.active ? "info" : "secondary"} class=" h-[180px]  !p-2  w-full border-solid !border-b !border-blue-500">
+                            return <Button onClick={() => onSelectimg(a.currentDir, a.baseurl)} variant="contained" color={a?.active ? "info" : "secondary"} class=" h-[180px]  !p-2  w-full border-solid !border-b !border-blue-500">
                                 <img className="object-contain w-full h-full" src={a.baseurl}></img>
                             </Button>
                         }) : isLoading() ? <Loading></Loading> : <div className="col-span-full flex justify-center items-center">
@@ -130,50 +132,24 @@ const FaceFinder = () => {
 
                 </div>
             </div>
-            <div className="flex flex-col flex-1 relative">
-                <div className="grid  grid-cols-2 lg:grid-cols-2  xl:grid-cols-3  flex-1 gap-4 absolute w-full h-full left-0 top-0 overflow-auto">
-                    <div>
-                        <CardBox title={"JAYANTO"} className=" flex-col flex gap-4">
-                            <div className="h-[250px] w-full">
-                                <img className="object-contain w-full h-full" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJORE4AsMDV2U8US_ZFGe6R7xh8biBqqk8erQTmu11lXcHz7Qq-zDVBprgUfvS7mq5k7U&usqp=CAU"></img>
+            <CardBox title={"SELECTED FACE"} className=" flex-col relative flex gap-4 flex-1">
+                <div className="absolute w-full h-full left-0 top-0 p-4 flex gap-4 flex-1 flex-col">
+                    {previewImgConvert() && <>
+                        <Button variant="contained" color="secondary">SUBMIT TO FACE FINDER</Button>
+                        <div className="flex-1 relative">
+                            <div className="absolute w-full h-full left-0 top-0">
+                                <img className="object-contain w-full h-full" src={previewImgConvert()}></img>
                             </div>
-                            <Button variant="contained" color="secondary" fullWidth>DETAIL</Button>
-                        </CardBox>
-                    </div>
-                    <div>
-                        <CardBox title={"JAYANTO"} className=" flex-col flex gap-4">
-                            <div className="h-[250px] w-full">
-                                <img className="object-contain w-full h-full" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJORE4AsMDV2U8US_ZFGe6R7xh8biBqqk8erQTmu11lXcHz7Qq-zDVBprgUfvS7mq5k7U&usqp=CAU"></img>
-                            </div>
-                            <Button variant="contained" color="secondary" fullWidth>DETAIL</Button>
-                        </CardBox>
-                    </div>
-                    <div>
-                        <CardBox title={"JAYANTO"} className=" flex-col flex gap-4">
-                            <div className="h-[250px] w-full">
-                                <img className="object-contain w-full h-full" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJORE4AsMDV2U8US_ZFGe6R7xh8biBqqk8erQTmu11lXcHz7Qq-zDVBprgUfvS7mq5k7U&usqp=CAU"></img>
-                            </div>
-                            <Button variant="contained" color="secondary" fullWidth>DETAIL</Button>
-                        </CardBox>
-                    </div>
-                    <div>
-                        <CardBox title={"JAYANTO"} className=" flex-col flex gap-4">
-                            <div className="h-[250px] w-full">
-                                <img className="object-contain w-full h-full" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJORE4AsMDV2U8US_ZFGe6R7xh8biBqqk8erQTmu11lXcHz7Qq-zDVBprgUfvS7mq5k7U&usqp=CAU"></img>
-                            </div>
-                            <Button variant="contained" color="secondary" fullWidth>DETAIL</Button>
-                        </CardBox>
-                    </div>
-                    <div>
-                        <CardBox title={"JAYANTO"} className=" flex-col flex gap-4">
-                            <div className="h-[250px] w-full">
-                                <img className="object-contain w-full h-full" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJORE4AsMDV2U8US_ZFGe6R7xh8biBqqk8erQTmu11lXcHz7Qq-zDVBprgUfvS7mq5k7U&usqp=CAU"></img>
-                            </div>
-                            <Button variant="contained" color="secondary" fullWidth>DETAIL</Button>
-                        </CardBox>
-                    </div>
+                        </div>
+                    </>}
 
                 </div>
+
+            </CardBox>
+            <div className="w-[450px] flex flex-col">
+                <CardBox title={"RESULT "} className=" flex-col flex gap-4">
+
+                </CardBox>
             </div>
         </div>
     </ContainerPages>
