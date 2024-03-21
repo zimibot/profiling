@@ -6,13 +6,21 @@ import { api } from "../../helper/_helper.api"
 import Swal from "sweetalert2"
 import { createSignal, onCleanup, onMount } from "solid-js"
 import { Loading } from "../../component/loading"
+import { notify } from "../../component/notify"
+import { useAppState } from "../../helper/_helper.context"
+import { OnSearch } from "../Deck Explorer/searchFrom"
+import { useNavigate } from "@solidjs/router"
 
 const FaceFinder = () => {
+    const navi = useNavigate()
+
+    const [items, { update }] = useAppState()
+
     const [image, setImage] = createSignal()
     const [isLoading, setisLoading] = createSignal()
     const [previewImg, setpreviewImg] = createSignal()
     const [previewImgConvert, setpreviewImgConvert] = createSignal()
-    const [percentage, setPercentage] = createSignal(80); // Misalnya persentase awal
+    const [resultData, setResultData] = createSignal()
     const radius = 70;
     const circumference = 2 * Math.PI * radius;
 
@@ -113,8 +121,25 @@ const FaceFinder = () => {
 
     const onSearchTarget = () => {
         api().get(`/deck-explorer/result-face?file=${previewImgConvert().id}`).then(s => {
-
+            setResultData(s.data.items)
         })
+    }
+
+    const onDetail = async (id) => {
+        try {
+            let data = { search: id, type: "id_data", path: `/deck-explorer/search-result/database-information/${id}` }
+            let postLogin = await OnSearch(data)
+            let dataSearch = postLogin.data.items
+            notify({ title: "Search Keyword", text: `${id} Success` })
+            update(d => ({ ...d, dataSearch, terkait: dataSearch.terkait }))
+            localStorage.setItem("dataSearch", JSON.stringify(dataSearch))
+            localStorage.setItem("typeSearch", d.category)
+            navi(`/deck-explorer/search-result/database-information/${id}`)
+
+        } catch (error) {
+            console.log(error)
+        }
+
     }
 
     return <ContainerPages>
@@ -178,85 +203,48 @@ const FaceFinder = () => {
                 <CardBox title={"RESULT "} className=" flex-col flex gap-4 flex-1">
                     <div className="relative flex-1">
                         <div className="absolute w-full h-full top-0 left-0 overflow-auto space-y-4">
-                            <div className="flex justify-between gap-4 items-center bg-primarry-2 p-2 border-b-2 border-white">
-                                <div className="flex gap-2 items-center">
-                                    <div>
-                                        <div class="flex items-center justify-center">
-                                            <svg width="55" height="55" viewBox="0 0 160 160">
-                                                <circle
-                                                    cx="80"
-                                                    cy="80"
-                                                    r={radius}
-                                                    fill="none"
-                                                    stroke="#222"
-                                                    stroke-width="10"
-                                                    stroke-dasharray={circumference}
-                                                    transform={rotateCircle(-90)} // Memutar 90 derajat ke kiri
-                                                />
-                                                <circle
-                                                    cx="80"
-                                                    cy="80"
-                                                    r={radius}
-                                                    fill="none"
-                                                    stroke={calculateColor(percentage())}
-                                                    stroke-width="10"
-                                                    stroke-dasharray={circumference}
-                                                    stroke-dashoffset={circumference - (percentage() / 100) * circumference}
-                                                    transform={rotateCircle(-90)} // Memutar 90 derajat ke kiri
-                                                />
-                                            </svg>
-                                            <span class="absolute  font-semibold text-[15px]">{percentage()}%</span>
+                            {resultData() ? resultData().result.map(a => {
+                                return <div className="flex justify-between gap-4 items-center bg-primarry-2 p-2 border-b-2 border-white">
+                                    <div className="flex gap-2 items-center">
+                                        <div>
+                                            <div class="flex items-center justify-center">
+                                                <svg width="55" height="55" viewBox="0 0 160 160">
+                                                    <circle
+                                                        cx="80"
+                                                        cy="80"
+                                                        r={radius}
+                                                        fill="none"
+                                                        stroke="#222"
+                                                        stroke-width="10"
+                                                        stroke-dasharray={circumference}
+                                                        transform={rotateCircle(-90)} // Memutar 90 derajat ke kiri
+                                                    />
+                                                    <circle
+                                                        cx="80"
+                                                        cy="80"
+                                                        r={radius}
+                                                        fill="none"
+                                                        stroke={calculateColor(a.score)}
+                                                        stroke-width="10"
+                                                        stroke-dasharray={circumference}
+                                                        stroke-dashoffset={circumference - (a.score / 100) * circumference}
+                                                        transform={rotateCircle(-90)} // Memutar 90 derajat ke kiri
+                                                    />
+                                                </svg>
+                                                <span class="absolute  font-semibold text-[15px]">{a.score}%</span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div>Jaya Kusuma</div>
+                                            <div>Laki laki</div>
                                         </div>
                                     </div>
                                     <div>
-                                        <div>Jaya Kusuma</div>
-                                        <div>Laki laki</div>
+                                        <Button onClick={() => onDetail(a.nik)} variant="contained" color="info">DETAIL</Button>
                                     </div>
                                 </div>
-                                <div>
-                                    <Button variant="contained" color="info">DETAIL</Button>
-                                </div>
-                            </div>
-                            <div className="flex justify-between gap-4 items-center bg-primarry-2 p-2 border-b-2 border-white">
-                                <div className="flex gap-2 items-center">
-                                    <div>
-                                        <div class="flex items-center justify-center">
-                                            <svg width="55" height="55" viewBox="0 0 160 160">
-                                                <circle
-                                                    cx="80"
-                                                    cy="80"
-                                                    r={radius}
-                                                    fill="none"
-                                                    stroke="#222"
-                                                    stroke-width="10"
-                                                    stroke-dasharray={circumference}
-                                                    transform={rotateCircle(-90)} // Memutar 90 derajat ke kiri
-                                                />
-                                                <circle
-                                                    cx="80"
-                                                    cy="80"
-                                                    r={radius}
-                                                    fill="none"
-                                                    stroke={calculateColor(percentage())}
-                                                    stroke-width="10"
-                                                    stroke-dasharray={circumference}
-                                                    stroke-dashoffset={circumference - (percentage() / 100) * circumference}
-                                                    transform={rotateCircle(-90)} // Memutar 90 derajat ke kiri
-                                                />
-                                            </svg>
-                                            <span class="absolute  font-semibold !text-[15px]">{percentage()}%</span>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div>Jaya Kusuma</div>
-                                        <div>Laki laki</div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <Button variant="contained" color="info">DETAIL</Button>
-                                </div>
-                            </div>
-
+                            }) : <div className="absolute w-full h-full top-0 left-0 flex items-center justify-center">
+                                NO RESULT</div>}
 
                         </div>
                     </div>
