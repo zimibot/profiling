@@ -112,7 +112,9 @@ const FaceFinder = () => {
     }
 
     const onSearchTarget = () => {
-        api().get(`/deck-explorer/result-face?file=${previewImgConvert().id}`)
+        api().get(`/deck-explorer/result-face?file=${previewImgConvert().id}`).then(s => {
+
+        })
     }
 
     return <ContainerPages>
