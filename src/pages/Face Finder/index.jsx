@@ -21,6 +21,7 @@ const FaceFinder = () => {
     const [previewImg, setpreviewImg] = createSignal()
     const [previewImgConvert, setpreviewImgConvert] = createSignal()
     const [resultData, setResultData] = createSignal()
+    const [resultLoading, setresultLoading] = createSignal()
     const radius = 70;
     const circumference = 2 * Math.PI * radius;
 
@@ -130,6 +131,9 @@ const FaceFinder = () => {
             },
         });
 
+        setResultData()
+        setresultLoading(true)
+
         api().get(`/deck-explorer/result-face?file=${previewImgConvert().id}`)
             .then(s => {
                 // Data berhasil diambil, menutup notifikasi loading
@@ -143,10 +147,13 @@ const FaceFinder = () => {
                 });
 
                 setResultData(s.data.items);
+                setresultLoading(false)
             })
             .catch(error => {
                 // Terjadi error, menutup notifikasi loading
                 Swal.close();
+
+                setResultData()
 
                 // Menampilkan notifikasi error
                 Swal.fire({
@@ -276,7 +283,7 @@ const FaceFinder = () => {
                                         <Button onClick={() => onDetail(a.nik)} variant="contained" color="info">DETAIL</Button>
                                     </div>
                                 </div>
-                            }) : <div className="absolute w-full h-full top-0 left-0 flex items-center justify-center">
+                            }) : resultLoading() ? <Loading></Loading> : <div className="absolute w-full h-full top-0 left-0 flex items-center justify-center">
                                 NO RESULT</div>}
 
                         </div>
