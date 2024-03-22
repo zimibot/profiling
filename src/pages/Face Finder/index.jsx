@@ -10,39 +10,37 @@ import { notify } from "../../component/notify"
 import { useAppState } from "../../helper/_helper.context"
 import { OnSearch } from "../Deck Explorer/searchFrom"
 import { useNavigate } from "@solidjs/router"
-function _parse(nomorNIK) {
-    nomorNIK = String(nomorNIK);
 
-    if (nomorNIK.length == 16) {
-        let thisYear = new Date().getFullYear().toString().substr(-2);
-        let thisCode = nomorNIK.substr(-4);
+function parseNIK(nik) {
+    nik = nik.toString();
+    let tahun = parseInt(nik.substring(10, 12), 10);
+    let bulan = parseInt(nik.substring(8, 10), 10) - 1; // JavaScript menghitung bulan mulai dari 0
+    let tanggal = parseInt(nik.substring(6, 8), 10);
 
-        let thisRegion = {
-            provinsi: nomorNIK.substr(0, 2),
-            kota: nomorNIK.substr(2, 2),
-            kabupaten: nomorNIK.substr(2, 2),
-            kecamatan: nomorNIK.substr(4, 2)
-        }
-        let thisDate = {
-            hari: (nomorNIK.substr(6, 2) > 40) ? nomorNIK.substr(6, 2) - 40 : nomorNIK.substr(6, 2),
-            bulan: nomorNIK.substr(8, 2),
-            tahun: (nomorNIK.substr(10, 2) > 1 && nomorNIK.substr(10, 2) < thisYear) ? "20" + nomorNIK.substr(10, 2) : "19" + nomorNIK.substr(10, 2)
-        }
-
-        thisDate.lahir = new Date(thisDate.hari + "/" + thisDate.bulan + "/" + thisDate.tahun).toLocaleDateString();
-        
-        return {
-            nik: nomorNIK,
-            wilayah: thisRegion,
-            tanggal: thisDate,
-            uniq: thisCode,
-            _link: {
-                _wilayah: 'http://www.kemendagri.go.id/pages/data-wilayah'
-            }
-        }   
-    } else {
-        throw new Error(`Nomor NIK harus 16 digit`);
+    // Menyesuaikan untuk individu yang lahir di tahun 2000-an dan perempuan
+    tahun += tahun < 40 ? 2000 : 1900;
+    if (tanggal > 40) {
+        tanggal -= 40;
     }
+
+    // Menentukan jenis kelamin
+    let jenisKelamin = tanggal > 40 ? 'Perempuan' : 'Laki-laki';
+
+    return {
+        tanggalLahir: new Date(tahun, bulan, tanggal),
+        jenisKelamin: jenisKelamin
+    };
+}
+
+
+function hitungUmur(tanggalLahir) {
+    const hariIni = new Date();
+    const tahun = hariIni.getFullYear() - tanggalLahir.getFullYear();
+    const bulan = hariIni.getMonth() - tanggalLahir.getMonth();
+    const hari = hariIni.getDate() - tanggalLahir.getDate();
+
+    // Mengurangi satu tahun jika ulang tahun belum lewat tahun ini
+    return tahun - (bulan < 0 || (bulan === 0 && hari < 0) ? 1 : 0);
 }
 
 
@@ -74,8 +72,6 @@ const FaceFinder = () => {
 
     const onChangeFiles = (a) => {
         let files = a.target.files[0];
-
-        setResultData()
 
         if (!files) {
             // Menampilkan notifikasi jika tidak ada file yang dipilih
@@ -210,11 +206,9 @@ const FaceFinder = () => {
                     result
                 }
 
-                console.log(data)
-
-
 
                 setResultData(a => ({ ...a, [previewImgConvert().baseTitle]: data }));
+
 
                 setresultLoading(false)
             })
@@ -417,7 +411,7 @@ const FaceFinder = () => {
                                         </div>
                                         <div>
                                             <div>Jaya Kusuma</div>
-                                            <div>{a.jenisKelamin}</div>
+                                            <div>Laki laki</div>
                                         </div>
                                     </div>
                                     <div>
