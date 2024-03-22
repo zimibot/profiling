@@ -22,6 +22,7 @@ const FaceFinder = () => {
     const [previewImgConvert, setpreviewImgConvert] = createSignal()
     const [resultData, setResultData] = createSignal()
     const [resultLoading, setresultLoading] = createSignal()
+    const [resultDetail, setResultDetail] = createSignal()
     const radius = 70;
     const circumference = 2 * Math.PI * radius;
 
@@ -182,11 +183,30 @@ const FaceFinder = () => {
 
     }
     createEffect(() => {
-        api().get(`/deck-explorer/sna-data-more?type=id_data&keyword=3578052305510002`).then(s => {
-            console.log(s)
+        api().get(`/deck-explorer/sna-data-more?type=id_data&keyword=3175031805670005`).then(s => {
+            console.log(s.data.items?.id_data)
+
+            let data = s.data.items?.id_data
+            const column = []
+            if (data) {
+                for (const key in data) {
+                    console.log(key)
+                    column.push(key)
+                }
+
+                setResultDetail({
+                    data,
+                    column
+                })
+            }
+
         })
     })
 
+
+    createEffect(() => {
+        console.log(resultDetail())
+    })
 
 
     return <ContainerPages>
