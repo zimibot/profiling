@@ -167,23 +167,8 @@ const FaceFinder = () => {
 
 
     const onDetail = async (id) => {
-        try {
-            let data = { search: id, type: "id_data", path: `/deck-explorer/search-result/database-information/${id}` }
-            let postLogin = await OnSearch(data)
-            let dataSearch = postLogin.data.items
-            notify({ title: "Search Keyword", text: `${id} Success` })
-            update(d => ({ ...d, dataSearch, terkait: dataSearch.terkait }))
-            localStorage.setItem("dataSearch", JSON.stringify(dataSearch))
-            localStorage.setItem("typeSearch", "PERSONAL ID")
-            navi(`/deck-explorer/search-result/database-information/${id}`)
 
-        } catch (error) {
-            console.log(error)
-        }
-
-    }
-    createEffect(() => {
-        api().get(`/deck-explorer/sna-data-more?type=id_data&keyword=3175031805670005`).then(s => {
+        api().get(`/deck-explorer/sna-data-more?type=id_data&keyword=${id}`).then(s => {
             console.log(s.data.items?.id_data)
 
             let data = s.data.items?.id_data
@@ -193,7 +178,6 @@ const FaceFinder = () => {
                     console.log(key)
                     column.push(key)
                 }
-
                 setResultDetail({
                     data,
                     column
@@ -201,8 +185,23 @@ const FaceFinder = () => {
             }
 
         })
-    })
 
+        // try {
+        //     let data = { search: id, type: "id_data", path: `/deck-explorer/search-result/database-information/${id}` }
+        //     let postLogin = await OnSearch(data)
+        //     let dataSearch = postLogin.data.items
+        //     notify({ title: "Search Keyword", text: `${id} Success` })
+        //     update(d => ({ ...d, dataSearch, terkait: dataSearch.terkait }))
+        //     localStorage.setItem("dataSearch", JSON.stringify(dataSearch))
+        //     localStorage.setItem("typeSearch", "PERSONAL ID")
+        //     navi(`/deck-explorer/search-result/database-information/${id}`)
+
+        // } catch (error) {
+        //     console.log(error)
+        // }
+
+    }
+    
 
     createEffect(() => {
         console.log(resultDetail())
@@ -264,19 +263,43 @@ const FaceFinder = () => {
                         FACE NOT SELECTED, PLEASE UPLOAD YOUT IMAGE FIRST
                     </div>}
                 </div>
-                <div className="absolute w-full h-full bg-black top-0 left-0 bg-opacity-50 backdrop-blur flex justify-end">
-                    <div className="w-[50%] h-full bg-primarry-1">
+                {resultDetail() && <div className="absolute w-full h-full bg-black top-0 left-0 bg-opacity-20 backdrop-blur flex justify-end">
+                    <div className="w-[450px] h-full bg-primarry-1 relative flex flex-col">
                         <div className="flex p-4 justify-between items-center">
                             <div className="text-lg">
-                                DETAIL RESULT
+                                <Button size="small" startIcon={<Close color="error"></Close>}>
+                                    <span className="text-lg">  DETAIL RESULT</span>
+                                </Button>
+
                             </div>
                             <div>
-                                <Button color="error"><Close fontSize="small"></Close></Button>
+                                <Button size="small" color="info" variant="contained">
+                                    ADD MARKED PROFILE
+                                </Button>
                             </div>
                         </div>
                         <Divider sx={{ borderColor: "#222" }}></Divider>
+
+                        <div className="flex flex-col gap-2 p-4 relative flex-1">
+                            <div className="absolute w-full h-full left-0 p-2 flex flex-col gap-2 overflow-auto top-0">
+                                {resultDetail().column.map(s => {
+                                    return <div className="bg-primarry-2 w-full p-2 grid gap-2 justify-between border-b-2 border-white">
+                                        <div>
+                                            {s}
+                                        </div>
+                                        <div className="text-blue-400">
+                                            {s === "FOTO" ? <img className="w-14 h-14 object-contain" src={"data:image/png;base64," + resultDetail().data[s]}></img> : resultDetail().data[s]}
+                                        </div>
+                                    </div>
+                                })}
+                            </div>
+
+
+                        </div>
+
                     </div>
-                </div>
+                </div>}
+
             </CardBox>
             <div className="w-[450px] flex flex-col">
                 <CardBox title={"RESULT "} className=" flex-col flex gap-4 flex-1">
