@@ -54,7 +54,12 @@ const FaceFinder = () => {
 
     const onChangeFiles = (a) => {
         let files = a.target.files[0];
-
+        setResultDetail()
+        setresultLoading()
+        setpreviewImg()
+        setisLoading()
+        setResultData()
+        setpreviewImgConvert()
         if (!files) {
             // Menampilkan notifikasi jika tidak ada file yang dipilih
             Swal.fire({
