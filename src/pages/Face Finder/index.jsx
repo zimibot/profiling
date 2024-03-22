@@ -131,7 +131,7 @@ const FaceFinder = () => {
 
 
     const onSelectimg = (id, url, linkCompare, baseTitle) => {
-
+        setResultDetail()
         setpreviewImgConvert(() => ({
             id,
             url,
@@ -198,7 +198,17 @@ const FaceFinder = () => {
 
     const onDetail = async (id) => {
 
+        Swal.fire({
+            title: 'Please wait...',
+            html: 'We are fetching the data.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading()
+            },
+        });
+
         api().get(`/deck-explorer/sna-data-more?type=id_data&keyword=${id}`).then(s => {
+            Swal.close();
 
             let data = s.data.items?.id_data
             const column = []
