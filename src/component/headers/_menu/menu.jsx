@@ -9,19 +9,19 @@ export default function MenuTabs() {
 
   const navi = useNavigate();
 
-  // createEffect(() => {
+  createEffect(() => {
 
-  //     setInterval(() => {
-  //         if (appStore().token) {
-  //             api().get("/deck-explorer/refreshToken").then(d => {
-  //                 localStorage.setItem("token", d.data.token_user)
-  //             })
-  //         } else {
-  //             navi("/")
-  //         }
-  //     }, 900 * 1000);
+    setInterval(() => {
+      if (appStore().token) {
+        api().get("/deck-explorer/refreshToken").then(d => {
+          localStorage.setItem("token", d.data.token_user)
+        })
+      } else {
+        navi("/")
+      }
+    }, 300 * 1000);
 
-  // })
+  })
 
   return (
     <div className="text-sm font-medium text-center sm:flex sm:justify-end lg:justify-start">

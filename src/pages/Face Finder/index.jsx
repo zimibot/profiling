@@ -154,7 +154,7 @@ const FaceFinder = () => {
                 Swal.close();
 
                 setResultData()
-
+                setresultLoading(false)
                 // Menampilkan notifikasi error
                 Swal.fire({
                     icon: 'error',
