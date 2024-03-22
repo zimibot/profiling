@@ -399,7 +399,7 @@ const FaceFinder = () => {
 
                                     <div className="px-2 py-1 gap-2 text-blue-300">
                                         <div className="flex gap-2 text-[13px]">
-                                            <div>LAHIR DI</div> : <div>{a.kabupaten_kota} {`(${a.tanggal_lahir})`}</div>
+                                            <div>{a.kabupaten_kota} {`(${a.tanggal_lahir})`}</div>
                                         </div>
                                     </div>
 
