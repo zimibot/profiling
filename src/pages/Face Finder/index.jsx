@@ -1,7 +1,7 @@
-import { Close, Upload } from "@suid/icons-material"
+import { Close, Home, Upload } from "@suid/icons-material"
 import ContainerPages from ".."
 import { CardBox } from "../../component/cardBox"
-import { Button, CircularProgress, Divider, LinearProgress } from "@suid/material"
+import { Button, Chip, CircularProgress, Divider, LinearProgress } from "@suid/material"
 import { api } from "../../helper/_helper.api"
 import Swal from "sweetalert2"
 import { createEffect, createSignal, onCleanup, onMount } from "solid-js"
@@ -10,21 +10,24 @@ import { notify } from "../../component/notify"
 import { useAppState } from "../../helper/_helper.context"
 import { OnSearch } from "../Deck Explorer/searchFrom"
 import { useNavigate } from "@solidjs/router"
-
-function hitungUmur(tanggalLahir) {
-    const lahir = new Date(tanggalLahir);
-    const hariIni = new Date();
-
-    let umur = hariIni.getFullYear() - lahir.getFullYear();
-    const m = hariIni.getMonth() - lahir.getMonth();
-    if (m < 0 || (m === 0 && hariIni.getDate() < lahir.getDate())) {
-        umur--;
+function calculateAge(birthDateString) {
+    // Mengubah format tanggal dari "DD-MM-YYYY" ke "YYYY-MM-DD"
+    const parts = birthDateString.split("-");
+    const formattedDateString = `${parts[2]}-${parts[1]}-${parts[0]}`;
+    
+    // Mengkonversi string tanggal yang sudah diformat ke objek Date
+    const birthDate = new Date(formattedDateString);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - (birthDate.getMonth() - 1);
+    
+    // Menyesuaikan penghitungan umur berdasarkan bulan dan tanggal
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
     }
-
-    return umur;
-}
-
-
+  
+    return age;
+  }
 
 
 const FaceFinder = () => {
@@ -309,7 +312,7 @@ const FaceFinder = () => {
                         </div>
 
                     </> : <div className="absolute w-full h-full flex items-center justify-center">
-                        FACE NOT SELECTED, PLEASE UPLOAD YOUT IMAGE FIRST
+                        FACE NOT SELECTED, PLEASE UPLOAD YOUR IMAGE FIRST
                     </div>}
                 </div>
 
@@ -356,8 +359,8 @@ const FaceFinder = () => {
                     <div className="relative flex-1">
                         <div className="absolute w-full h-full top-0 left-0 overflow-auto space-y-4">
 
-                            {/* {resultData() ? resultData()[previewImgConvert().baseTitle] ? resultData()[previewImgConvert().baseTitle].result.map(a => {
-                                return <div className="flex flex-col bg-primarry-2 p-2 border-b-2 border-white">
+                            {resultData() ? resultData()[previewImgConvert().baseTitle] ? resultData()[previewImgConvert().baseTitle].result.map(a => {
+                                return <div className="flex flex-col bg-primarry-2 p-2 border-b-2 border-white gap-2">
                                     <div className="flex  items-center justify-between w-full">
                                         <div className="flex gap-2 items-center">
                                             <div>
@@ -389,8 +392,9 @@ const FaceFinder = () => {
                                                 </div>
                                             </div>
                                             <div>
-                                                <div>{a?.name || "-"}</div>
-                                                <div>{a.jenis_kelamin} <span className="text-[13px]">{`(${hitungUmur(a.tanggal_lahir)} tahun)`}</span></div>
+                                                <div className="font-bold">{a.data.namaLgkp || "-"}</div>
+                                                <div className="text-[14px]">{a.data.jenisKlmin} <span className="text-[13px]">{`(${calculateAge(a.data.tglLhr)} tahun)`}</span></div>
+                                                <div className="text-[12px] flex gap-2 items-center"><span><Home sx={{ fontSize: "12px" }}></Home></span> {a.data.kabName}</div>
                                             </div>
                                         </div>
                                         <div>
@@ -398,16 +402,11 @@ const FaceFinder = () => {
                                         </div>
                                     </div>
 
-                                    <div className="px-2 py-1 gap-2 text-blue-300">
-                                        <div className="flex gap-2 text-[13px]">
-                                            <div>{a.kabupaten_kota} {`(${a.tanggal_lahir})`}</div>
-                                        </div>
-                                    </div>
 
                                 </div>
                             }) : <div className="absolute w-full h-full top-0 left-0 flex items-center justify-center">
                                 NO RESULT</div> : resultLoading() ? <Loading></Loading> : <div className="absolute w-full h-full top-0 left-0 flex items-center justify-center">
-                                    NO RESULT</div>} */}
+                                    NO RESULT</div>}
 
                         </div>
                     </div>
