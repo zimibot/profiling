@@ -11,6 +11,40 @@ import { useAppState } from "../../helper/_helper.context"
 import { OnSearch } from "../Deck Explorer/searchFrom"
 import { useNavigate } from "@solidjs/router"
 
+function parseNIK(nik) {
+    nik = nik.toString();
+    let tahun = parseInt(nik.substring(10, 12), 10);
+    let bulan = parseInt(nik.substring(8, 10), 10) - 1; // JavaScript menghitung bulan mulai dari 0
+    let tanggal = parseInt(nik.substring(6, 8), 10);
+
+    // Menyesuaikan untuk individu yang lahir di tahun 2000-an dan perempuan
+    tahun += tahun < 40 ? 2000 : 1900;
+    if (tanggal > 40) {
+        tanggal -= 40;
+    }
+
+    // Menentukan jenis kelamin
+    let jenisKelamin = tanggal > 40 ? 'Perempuan' : 'Laki-laki';
+
+    return {
+        tanggalLahir: new Date(tahun, bulan, tanggal),
+        jenisKelamin: jenisKelamin
+    };
+}
+
+
+function hitungUmur(tanggalLahir) {
+    const hariIni = new Date();
+    const tahun = hariIni.getFullYear() - tanggalLahir.getFullYear();
+    const bulan = hariIni.getMonth() - tanggalLahir.getMonth();
+    const hari = hariIni.getDate() - tanggalLahir.getDate();
+
+    // Mengurangi satu tahun jika ulang tahun belum lewat tahun ini
+    return tahun - (bulan < 0 || (bulan === 0 && hari < 0) ? 1 : 0);
+}
+
+
+
 const FaceFinder = () => {
     const navi = useNavigate()
 
@@ -38,6 +72,8 @@ const FaceFinder = () => {
 
     const onChangeFiles = (a) => {
         let files = a.target.files[0];
+
+        setResultData()
 
         if (!files) {
             // Menampilkan notifikasi jika tidak ada file yang dipilih
@@ -76,11 +112,12 @@ const FaceFinder = () => {
         api().post("/deck-explorer/cropt_image?dir=image-ori&dircropt=result-cropt", form, { headers })
             .then(response => {
                 let data = response.data.items;
+
                 setImage(data);
                 // Jika berhasil, tampilkan notifikasi sukses
                 Swal.fire({
                     title: 'Success!',
-                    text: 'The image has been successfully cropped.',
+                    text: 'The image has been successfully find face.',
                     icon: 'success',
                     confirmButtonText: 'OK'
                 });
@@ -108,12 +145,13 @@ const FaceFinder = () => {
     };
 
 
-    const onSelectimg = (id, url, linkCompare) => {
+    const onSelectimg = (id, url, linkCompare, baseTitle) => {
 
         setpreviewImgConvert(() => ({
             id,
             url,
-            linkCompare
+            linkCompare,
+            baseTitle
         }))
         setImage(d => d.map(s => ({
             ...s,
@@ -132,8 +170,9 @@ const FaceFinder = () => {
             },
         });
 
-        setResultData()
         setresultLoading(true)
+
+
 
         api().get(`/deck-explorer/result-face?file=${previewImgConvert().id}`)
             .then(s => {
@@ -147,7 +186,34 @@ const FaceFinder = () => {
                     text: 'Your data has been successfully fetched.',
                 });
 
-                setResultData(s.data.items);
+                let data = s.data.items
+
+                let result = data.result.map((a) => {
+
+                    const hasil = parseNIK(a.nik);
+                    const umur = hitungUmur(hasil.tanggalLahir);
+                    const jenisKelamin = hasil.jenisKelamin
+                    const tgl = hasil.tanggalLahir
+
+                    return ({
+                        ...a,
+                        umur,
+                        tgl,
+                        jenisKelamin
+                    })
+                })
+
+                data = {
+                    ...data,
+                    result
+                }
+
+                console.log(data)
+
+
+
+                setResultData(a => ({ ...a, [previewImgConvert().baseTitle]: data }));
+
                 setresultLoading(false)
             })
             .catch(error => {
@@ -180,32 +246,42 @@ const FaceFinder = () => {
                 }
                 setResultDetail({
                     data,
-                    column
+                    column,
+                    id
                 })
             }
 
         })
 
-        // try {
-        //     let data = { search: id, type: "id_data", path: `/deck-explorer/search-result/database-information/${id}` }
-        //     let postLogin = await OnSearch(data)
-        //     let dataSearch = postLogin.data.items
-        //     notify({ title: "Search Keyword", text: `${id} Success` })
-        //     update(d => ({ ...d, dataSearch, terkait: dataSearch.terkait }))
-        //     localStorage.setItem("dataSearch", JSON.stringify(dataSearch))
-        //     localStorage.setItem("typeSearch", "PERSONAL ID")
-        //     navi(`/deck-explorer/search-result/database-information/${id}`)
 
-        // } catch (error) {
-        //     console.log(error)
-        // }
 
     }
-    
+
+    const onAddMarkedProfile = async () => {
+        try {
+            let id = resultData().id
+            let data = { search: id, type: "id_data", path: `/deck-explorer/search-result/database-information/${id}` }
+            let postLogin = await OnSearch(data)
+            let dataSearch = postLogin.data.items
+            notify({ title: "Search Keyword", text: `${id} Success` })
+            update(d => ({ ...d, dataSearch, terkait: dataSearch.terkait }))
+            localStorage.setItem("dataSearch", JSON.stringify(dataSearch))
+            localStorage.setItem("typeSearch", "PERSONAL ID")
+            navi(`/deck-explorer/search-result/database-information/${id}`)
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const onClose = () => {
+        setResultDetail()
+    }
 
     createEffect(() => {
-        console.log(resultDetail())
+        console.log(resultData())
     })
+
 
 
     return <ContainerPages>
@@ -217,6 +293,7 @@ const FaceFinder = () => {
                             <Upload></Upload>
                             <div> UPLOAD YOUR IMAGE</div>
                         </div>}
+
                         {isLoading() && <div className="w-full h-full absolute bg-primarry-1 bg-opacity-75 flex items-center justify-center gap-2">
                             <div className="flex gap-2 items-center flex-col">
                                 <span>Processing faces in the image</span>
@@ -237,7 +314,7 @@ const FaceFinder = () => {
                     <div className="relative flex-1">
                         <div className=" grid grid-cols-4 gap-3 absolute w-full h-full top-0 left-0 p-2 auto-rows-min"  >
                             {image() ? image()?.length === 0 ? <div className="absolute w-full h-full flex items-center justify-center">We could not find a face!</div> : image().map(a => {
-                                return <Button onClick={() => onSelectimg(a.currentDir, a.baseurl, a.destCompareLink)} variant="contained" color={a?.active ? "info" : "secondary"} class=" h-[100px]  !p-2  w-full border-solid !border-b !border-blue-500">
+                                return <Button onClick={() => onSelectimg(a.currentDir, a.baseurl, a.destCompareLink, a.baseTitle)} variant="contained" color={a?.active ? "info" : "secondary"} class=" h-[100px]  !p-2  w-full border-solid !border-b !border-blue-500">
                                     <img className="object-contain w-full h-full" src={a.baseurl}></img>
                                 </Button>
                             }) : isLoading() ? <Loading></Loading> : <div className="col-span-full flex justify-center items-center absolute w-full h-full">
@@ -263,17 +340,17 @@ const FaceFinder = () => {
                         FACE NOT SELECTED, PLEASE UPLOAD YOUT IMAGE FIRST
                     </div>}
                 </div>
-                {resultDetail() && <div className="absolute w-full h-full bg-black top-0 left-0 bg-opacity-20 backdrop-blur flex justify-end">
+                {resultDetail() && <div className="absolute w-full h-full bg-black top-0 left-0 bg-opacity-20  flex justify-end">
                     <div className="w-[450px] h-full bg-primarry-1 relative flex flex-col">
                         <div className="flex p-4 justify-between items-center">
                             <div className="text-lg">
-                                <Button size="small" startIcon={<Close color="error"></Close>}>
+                                <Button onClick={onClose} size="small" startIcon={<Close color="error"></Close>}>
                                     <span className="text-lg">  DETAIL RESULT</span>
                                 </Button>
 
                             </div>
                             <div>
-                                <Button size="small" color="info" variant="contained">
+                                <Button onClick={onAddMarkedProfile} size="small" color="info" variant="contained">
                                     ADD MARKED PROFILE
                                 </Button>
                             </div>
@@ -288,7 +365,7 @@ const FaceFinder = () => {
                                             {s}
                                         </div>
                                         <div className="text-blue-400">
-                                            {s === "FOTO" ? <img className="w-14 h-14 object-contain" src={"data:image/png;base64," + resultDetail().data[s]}></img> : resultDetail().data[s]}
+                                            {s === "FOTO" ? <img className=" h-20 object-contain" src={"data:image/png;base64," + resultDetail().data[s]}></img> : resultDetail().data[s]}
                                         </div>
                                     </div>
                                 })}
@@ -305,7 +382,7 @@ const FaceFinder = () => {
                 <CardBox title={"RESULT "} className=" flex-col flex gap-4 flex-1">
                     <div className="relative flex-1">
                         <div className="absolute w-full h-full top-0 left-0 overflow-auto space-y-4">
-                            {resultData() ? resultData().result.map(a => {
+                            {resultData() ? resultData()[previewImgConvert().baseTitle] ? resultData()[previewImgConvert().baseTitle].result.map(a => {
                                 return <div className="flex justify-between gap-4 items-center bg-primarry-2 p-2 border-b-2 border-white">
                                     <div className="flex gap-2 items-center">
                                         <div>
@@ -338,15 +415,16 @@ const FaceFinder = () => {
                                         </div>
                                         <div>
                                             <div>Jaya Kusuma</div>
-                                            <div>Laki laki</div>
+                                            <div>{a.jenisKelamin}</div>
                                         </div>
                                     </div>
                                     <div>
                                         <Button onClick={() => onDetail(a.nik)} variant="contained" color="info">DETAIL</Button>
                                     </div>
                                 </div>
-                            }) : resultLoading() ? <Loading></Loading> : <div className="absolute w-full h-full top-0 left-0 flex items-center justify-center">
-                                NO RESULT</div>}
+                            }) : <div className="absolute w-full h-full top-0 left-0 flex items-center justify-center">
+                                NO RESULT</div> : resultLoading() ? <Loading></Loading> : <div className="absolute w-full h-full top-0 left-0 flex items-center justify-center">
+                                    NO RESULT</div>}
 
                         </div>
                     </div>
