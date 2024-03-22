@@ -4,7 +4,7 @@ import { CardBox } from "../../component/cardBox"
 import { Button, Chip, CircularProgress, Divider, LinearProgress } from "@suid/material"
 import { api } from "../../helper/_helper.api"
 import Swal from "sweetalert2"
-import { createEffect, createSignal, onCleanup, onMount } from "solid-js"
+import { createEffect, createSignal } from "solid-js"
 import { Loading } from "../../component/loading"
 import { notify } from "../../component/notify"
 import { useAppState } from "../../helper/_helper.context"
@@ -14,20 +14,20 @@ function calculateAge(birthDateString) {
     // Mengubah format tanggal dari "DD-MM-YYYY" ke "YYYY-MM-DD"
     const parts = birthDateString.split("-");
     const formattedDateString = `${parts[2]}-${parts[1]}-${parts[0]}`;
-    
+
     // Mengkonversi string tanggal yang sudah diformat ke objek Date
     const birthDate = new Date(formattedDateString);
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
     const m = today.getMonth() - (birthDate.getMonth() - 1);
-    
+
     // Menyesuaikan penghitungan umur berdasarkan bulan dan tanggal
     if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
+        age--;
     }
-  
+
     return age;
-  }
+}
 
 
 const FaceFinder = () => {
