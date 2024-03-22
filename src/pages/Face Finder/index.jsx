@@ -312,6 +312,7 @@ const FaceFinder = () => {
                         FACE NOT SELECTED, PLEASE UPLOAD YOUT IMAGE FIRST
                     </div>}
                 </div>
+
                 {resultDetail() && <div className="absolute w-full h-full bg-black top-0 left-0 bg-opacity-20  flex justify-end">
                     <div className="w-[450px] h-full bg-primarry-1 relative flex flex-col">
                         <div className="flex p-4 justify-between items-center">
@@ -355,7 +356,7 @@ const FaceFinder = () => {
                     <div className="relative flex-1">
                         <div className="absolute w-full h-full top-0 left-0 overflow-auto space-y-4">
 
-                            {resultData() ? resultData()[previewImgConvert().baseTitle] ? resultData()[previewImgConvert().baseTitle].result.map(a => {
+                            {/* {resultData() ? resultData()[previewImgConvert().baseTitle] ? resultData()[previewImgConvert().baseTitle].result.map(a => {
                                 return <div className="flex flex-col bg-primarry-2 p-2 border-b-2 border-white">
                                     <div className="flex  items-center justify-between w-full">
                                         <div className="flex gap-2 items-center">
@@ -406,7 +407,7 @@ const FaceFinder = () => {
                                 </div>
                             }) : <div className="absolute w-full h-full top-0 left-0 flex items-center justify-center">
                                 NO RESULT</div> : resultLoading() ? <Loading></Loading> : <div className="absolute w-full h-full top-0 left-0 flex items-center justify-center">
-                                    NO RESULT</div>}
+                                    NO RESULT</div>} */}
 
                         </div>
                     </div>
