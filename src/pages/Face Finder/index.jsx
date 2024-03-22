@@ -11,37 +11,19 @@ import { useAppState } from "../../helper/_helper.context"
 import { OnSearch } from "../Deck Explorer/searchFrom"
 import { useNavigate } from "@solidjs/router"
 
-function parseNIK(nik) {
-    nik = nik.toString();
-    let tahun = parseInt(nik.substring(10, 12), 10);
-    let bulan = parseInt(nik.substring(8, 10), 10) - 1; // JavaScript menghitung bulan mulai dari 0
-    let tanggal = parseInt(nik.substring(6, 8), 10);
+function hitungUmur(tanggalLahir) {
+    const lahir = new Date(tanggalLahir);
+    const hariIni = new Date();
 
-    // Menyesuaikan untuk individu yang lahir di tahun 2000-an dan perempuan
-    tahun += tahun < 40 ? 2000 : 1900;
-    if (tanggal > 40) {
-        tanggal -= 40;
+    let umur = hariIni.getFullYear() - lahir.getFullYear();
+    const m = hariIni.getMonth() - lahir.getMonth();
+    if (m < 0 || (m === 0 && hariIni.getDate() < lahir.getDate())) {
+        umur--;
     }
 
-    // Menentukan jenis kelamin
-    let jenisKelamin = tanggal > 40 ? 'Perempuan' : 'Laki-laki';
-
-    return {
-        tanggalLahir: new Date(tahun, bulan, tanggal),
-        jenisKelamin: jenisKelamin
-    };
+    return umur;
 }
 
-
-function hitungUmur(tanggalLahir) {
-    const hariIni = new Date();
-    const tahun = hariIni.getFullYear() - tanggalLahir.getFullYear();
-    const bulan = hariIni.getMonth() - tanggalLahir.getMonth();
-    const hari = hariIni.getDate() - tanggalLahir.getDate();
-
-    // Mengurangi satu tahun jika ulang tahun belum lewat tahun ini
-    return tahun - (bulan < 0 || (bulan === 0 && hari < 0) ? 1 : 0);
-}
 
 
 
@@ -186,26 +168,7 @@ const FaceFinder = () => {
 
                 let data = s.data.items
 
-                let result = data.result.map((a) => {
-
-                    const hasil = parseNIK(a.nik);
-                    const umur = hitungUmur(hasil.tanggalLahir);
-                    const jenisKelamin = hasil.jenisKelamin
-                    const tgl = hasil.tanggalLahir
-
-                    return ({
-                        ...a,
-                        umur,
-                        tgl,
-                        jenisKelamin
-                    })
-                })
-
-                data = {
-                    ...data,
-                    result
-                }
-
+          
 
                 setResultData(a => ({ ...a, [previewImgConvert().baseTitle]: data }));
 
@@ -378,45 +341,55 @@ const FaceFinder = () => {
                 <CardBox title={"RESULT "} className=" flex-col flex gap-4 flex-1">
                     <div className="relative flex-1">
                         <div className="absolute w-full h-full top-0 left-0 overflow-auto space-y-4">
+
                             {resultData() ? resultData()[previewImgConvert().baseTitle] ? resultData()[previewImgConvert().baseTitle].result.map(a => {
-                                return <div className="flex justify-between gap-4 items-center bg-primarry-2 p-2 border-b-2 border-white">
-                                    <div className="flex gap-2 items-center">
-                                        <div>
-                                            <div class="flex items-center justify-center">
-                                                <svg width="55" height="55" viewBox="0 0 160 160">
-                                                    <circle
-                                                        cx="80"
-                                                        cy="80"
-                                                        r={radius}
-                                                        fill="none"
-                                                        stroke="#222"
-                                                        stroke-width="10"
-                                                        stroke-dasharray={circumference}
-                                                        transform={rotateCircle(-90)} // Memutar 90 derajat ke kiri
-                                                    />
-                                                    <circle
-                                                        cx="80"
-                                                        cy="80"
-                                                        r={radius}
-                                                        fill="none"
-                                                        stroke={calculateColor(a.score)}
-                                                        stroke-width="10"
-                                                        stroke-dasharray={circumference}
-                                                        stroke-dashoffset={circumference - (a.score / 100) * circumference}
-                                                        transform={rotateCircle(-90)} // Memutar 90 derajat ke kiri
-                                                    />
-                                                </svg>
-                                                <span class="absolute  font-semibold text-[15px]">{a.score}%</span>
+                                return <div className="flex flex-col bg-primarry-2 p-2 border-b-2 border-white">
+                                    <div className="flex  items-center justify-between w-full">
+                                        <div className="flex gap-2 items-center">
+                                            <div>
+                                                <div class="flex items-center justify-center">
+                                                    <svg width="55" height="55" viewBox="0 0 160 160">
+                                                        <circle
+                                                            cx="80"
+                                                            cy="80"
+                                                            r={radius}
+                                                            fill="none"
+                                                            stroke="#222"
+                                                            stroke-width="10"
+                                                            stroke-dasharray={circumference}
+                                                            transform={rotateCircle(-90)} // Memutar 90 derajat ke kiri
+                                                        />
+                                                        <circle
+                                                            cx="80"
+                                                            cy="80"
+                                                            r={radius}
+                                                            fill="none"
+                                                            stroke={calculateColor(a.score)}
+                                                            stroke-width="10"
+                                                            stroke-dasharray={circumference}
+                                                            stroke-dashoffset={circumference - (a.score / 100) * circumference}
+                                                            transform={rotateCircle(-90)} // Memutar 90 derajat ke kiri
+                                                        />
+                                                    </svg>
+                                                    <span class="absolute  font-semibold text-[15px]">{a.score}%</span>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div>{a?.name || "-"}</div>
+                                                <div>{a.jenis_kelamin} <span className="text-[13px]">{`(${hitungUmur(a.tanggal_lahir)} tahun)`}</span></div>
                                             </div>
                                         </div>
                                         <div>
-                                            <div>Jaya Kusuma</div>
-                                            <div>Laki laki</div>
+                                            <Button onClick={() => onDetail(a.nik)} variant="contained" color="info">DETAIL</Button>
                                         </div>
                                     </div>
-                                    <div>
-                                        <Button onClick={() => onDetail(a.nik)} variant="contained" color="info">DETAIL</Button>
+
+                                    <div className="px-2 py-1 gap-2 text-blue-300">
+                                        <div className="flex gap-2 text-[13px]">
+                                            <div>LAHIR DI</div> : <div>{a.kabupaten_kota} {`(${a.tanggal_lahir})`}</div>
+                                        </div>
                                     </div>
+
                                 </div>
                             }) : <div className="absolute w-full h-full top-0 left-0 flex items-center justify-center">
                                 NO RESULT</div> : resultLoading() ? <Loading></Loading> : <div className="absolute w-full h-full top-0 left-0 flex items-center justify-center">
