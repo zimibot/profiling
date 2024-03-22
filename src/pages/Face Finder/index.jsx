@@ -168,7 +168,7 @@ const FaceFinder = () => {
 
                 let data = s.data.items
 
-          
+
 
                 setResultData(a => ({ ...a, [previewImgConvert().baseTitle]: data }));
 
@@ -194,7 +194,6 @@ const FaceFinder = () => {
     const onDetail = async (id) => {
 
         api().get(`/deck-explorer/sna-data-more?type=id_data&keyword=${id}`).then(s => {
-            console.log(s.data.items?.id_data)
 
             let data = s.data.items?.id_data
             const column = []
@@ -216,9 +215,8 @@ const FaceFinder = () => {
 
     }
 
-    const onAddMarkedProfile = async () => {
+    const onAddMarkedProfile = async (id) => {
         try {
-            let id = resultData().id
             let data = { search: id, type: "id_data", path: `/deck-explorer/search-result/database-information/${id}` }
             let postLogin = await OnSearch(data)
             let dataSearch = postLogin.data.items
@@ -309,7 +307,7 @@ const FaceFinder = () => {
 
                             </div>
                             <div>
-                                <Button onClick={onAddMarkedProfile} size="small" color="info" variant="contained">
+                                <Button onClick={() => onAddMarkedProfile(resultDetail().data["NIK"])} size="small" color="info" variant="contained">
                                     ADD MARKED PROFILE
                                 </Button>
                             </div>
