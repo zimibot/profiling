@@ -1,10 +1,10 @@
-import { Upload } from "@suid/icons-material"
+import { Close, Upload } from "@suid/icons-material"
 import ContainerPages from ".."
 import { CardBox } from "../../component/cardBox"
 import { Button, CircularProgress, Divider, LinearProgress } from "@suid/material"
 import { api } from "../../helper/_helper.api"
 import Swal from "sweetalert2"
-import { createSignal, onCleanup, onMount } from "solid-js"
+import { createEffect, createSignal, onCleanup, onMount } from "solid-js"
 import { Loading } from "../../component/loading"
 import { notify } from "../../component/notify"
 import { useAppState } from "../../helper/_helper.context"
@@ -181,6 +181,13 @@ const FaceFinder = () => {
         }
 
     }
+    createEffect(() => {
+        api().get(`/deck-explorer/sna-data-more?type=id_data&keyword=3578052305510002`).then(s => {
+            console.log(s)
+        })
+    })
+
+
 
     return <ContainerPages>
         <div className="flex flex-1 pt-4 gap-4">
@@ -237,7 +244,19 @@ const FaceFinder = () => {
                         FACE NOT SELECTED, PLEASE UPLOAD YOUT IMAGE FIRST
                     </div>}
                 </div>
-
+                <div className="absolute w-full h-full bg-black top-0 left-0 bg-opacity-50 backdrop-blur flex justify-end">
+                    <div className="w-[50%] h-full bg-primarry-1">
+                        <div className="flex p-4 justify-between items-center">
+                            <div className="text-lg">
+                                DETAIL RESULT
+                            </div>
+                            <div>
+                                <Button color="error"><Close fontSize="small"></Close></Button>
+                            </div>
+                        </div>
+                        <Divider sx={{ borderColor: "#222" }}></Divider>
+                    </div>
+                </div>
             </CardBox>
             <div className="w-[450px] flex flex-col">
                 <CardBox title={"RESULT "} className=" flex-col flex gap-4 flex-1">
