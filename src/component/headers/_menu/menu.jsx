@@ -19,7 +19,7 @@ export default function MenuTabs() {
       } else {
         navi("/")
       }
-    }, 300 * 1000);
+    }, 1000 * 1000);
 
   })
 
