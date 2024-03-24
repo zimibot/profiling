@@ -1,6 +1,6 @@
 import { createEffect } from "solid-js";
 import { mode } from "../../../helper/_helper.theme";
-import { Link, useNavigate } from "@solidjs/router";
+import { Link, useBeforeLeave, useNavigate } from "@solidjs/router";
 import { api } from "../../../helper/_helper.api";
 import { useAppState } from "../../../helper/_helper.context";
 
@@ -9,19 +9,21 @@ export default function MenuTabs() {
 
   const navi = useNavigate();
 
-  createEffect(() => {
+  // createEffect(() => {
 
-    setInterval(() => {
-      if (appStore().token) {
-        api().get("/deck-explorer/refreshToken").then(d => {
-          localStorage.setItem("token", d.data.token_user)
-        })
-      } else {
-        navi("/")
-      }
-    }, 1000 * 1000);
+  //   setInterval(() => {
+  //     if (appStore().token) {
+  //       api().get("/deck-explorer/refreshToken").then(d => {
+  //         localStorage.setItem("token", d.data.token_user)
+  //       })
+  //     } else {
+  //       navi("/")
+  //     }
+  //   }, 1000 * 1000);
 
-  })
+  // })
+
+
 
   return (
     <div className="text-sm font-medium text-center sm:flex sm:justify-end lg:justify-start">

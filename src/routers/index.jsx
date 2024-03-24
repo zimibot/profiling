@@ -1,9 +1,15 @@
 import { createEffect, lazy, Suspense } from "solid-js";
-import { Router, useRoutes, hashIntegration, Outlet,  } from "@solidjs/router";
+import { Router, useRoutes, hashIntegration, Outlet, useNavigate, Navigate, } from "@solidjs/router";
 import { Loading } from "../component/loading";
 import { Menu } from "../component/headers/_menu";
 
 import jQuery from "jquery";
+import ContainerPages from "../pages";
+import MenuTracking from "../pages/Direct Tracking/menuTracking";
+
+const redirect = ({  location }) => {
+  return location.pathname + "/single-target"
+}
 export const route = [
   {
     path: "/",
@@ -44,7 +50,38 @@ export const route = [
       },
       {
         path: "/direct-tracking",
-        component: lazy(() => import("../pages/Direct Tracking")),
+        children: [
+          {
+            path: "/",
+            component: () => <Navigate href={redirect}></Navigate>,
+          },
+          {
+            path: "geofencing",
+            children: [
+              {
+                path: "/",
+                component: lazy(() => import("../pages/Direct Tracking/geofencing")),
+              },
+              {
+                path: "/add/:id",
+                component: lazy(() => import("../pages/Direct Tracking/geofencing/add")),
+              }
+            ]
+          },
+          {
+            path: "single-target",
+            children: [
+              {
+                path: "/",
+                component: lazy(() => import("../pages/Direct Tracking/singleTarget")),
+              },
+              {
+                path: "/add/:id",
+                component: lazy(() => import("../pages/Direct Tracking/geofencing/add")),
+              }
+            ]
+          },
+        ]
       },
       {
         path: "/face-finder",
@@ -52,10 +89,10 @@ export const route = [
       },
       {
         path: "/connection",
-       
+
         children: [
           {
-            path:"/",
+            path: "/",
             component: lazy(() => import("../pages/SNA")),
           },
           {
@@ -364,6 +401,7 @@ const RoutersComponent = () => {
   });
 
   const Routes = useRoutes(route);
+
   return (
     <Suspense fallback={<Loading />}>
       <Router source={hashIntegration()}>

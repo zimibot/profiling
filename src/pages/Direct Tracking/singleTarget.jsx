@@ -26,12 +26,13 @@ import {
 } from "@suid/material";
 import axios from "axios";
 import { PinDrop } from "@suid/icons-material";
+import MenuTracking from "./menuTracking";
 
 // import io from "socket.io-client"
 
 let maps
 
-const DirectTracking = () => {
+const SingleTarget = () => {
     const [isLoad, setIsload] = createSignal(false)
 
     const [items, setData] = createSignal(null)
@@ -717,8 +718,9 @@ const DirectTracking = () => {
 
 
     return <ContainerPages>
-        <div className="flex flex-1 flex-col py-4">
-            <CardBox className="grid grid-cols-9 flex-1 gap-4">
+        <MenuTracking></MenuTracking>
+        <div className="flex flex-1 flex-col py-2">
+            <CardBox className="grid grid-cols-9 flex-1 gap-4" title={"Single Target"}>
                 <form onSubmit={onSubmit} className="col-span-3 border-r-2 pr-4 border-primarry-2 flex flex-1 flex-col">
                     <Tags label="CHECK POS MSISDN"></Tags>
                     <DefaultInput loading={load} type={"number"} placeholder={"MSISDN"} control={group.controls.search}></DefaultInput>
@@ -742,7 +744,7 @@ const DirectTracking = () => {
                                             </div>
                                             <div> {moment(d.timestamp).format("D/M/YY | HH:MM:SS")}</div>
                                         </div>
-                                     
+
                                     </div>
                                 }) : "Loading..."}
                             </div>
@@ -871,4 +873,4 @@ const DirectTracking = () => {
     </ContainerPages>
 }
 
-export default DirectTracking
+export default SingleTarget
