@@ -1,6 +1,6 @@
 import ContainerPages from "../.."
 import { CardBox } from "../../../component/cardBox"
-import { createEffect, createSignal, onMount } from "solid-js";
+import { createEffect, createSignal, onCleanup, onMount } from "solid-js";
 import L from 'leaflet';
 import 'leaflet-semicircle';
 import 'leaflet-control-geocoder';
@@ -29,6 +29,7 @@ import axios from "axios";
 import io from "socket.io-client"
 import MenuTracking from "../menuTracking";
 import { useLocation } from "@solidjs/router";
+import { Circle, CircleOutlined, Close, PolylineOutlined } from "@suid/icons-material";
 
 let maps
 
@@ -37,26 +38,14 @@ const GeoFecingAdd = () => {
 
     const [items, setData] = createSignal(null)
     const [polygonPoints, setPolygonPoints] = createSignal([]);
-
+    const [polygons, setPolygons] = createSignal([]);
+    const [isAddingPolygon, setIsAddingPolygon] = createSignal(false);
+    const [tempPolygon, setTempPolygon] = createSignal(null); // Menyimpan referensi polygon sementara
     const [open, setOpen] = createSignal({
         showSchedule: true,
         openPopup: false
     });
 
-
-    const handleClose = () => {
-        setOpen(a => ({
-            ...a,
-            openPopup: false
-        }));
-    };
-
-    const handleSchedule = (d) => {
-        setOpen(a => ({
-            ...a,
-            showSchedule: d
-        }))
-    }
 
     const location = useLocation()
     const group = createFormGroup({
@@ -151,6 +140,10 @@ const GeoFecingAdd = () => {
 
     })
 
+    createEffect(() => {
+        console.log(polygons())
+    })
+
     let greenIcon = new LeafIcon({ iconUrl: "./assets/marker.png" })
 
     function buildMap(div) {
@@ -170,6 +163,14 @@ const GeoFecingAdd = () => {
         L.control.scale({ maxWidth: 100, metric: true, imperial: false }).addTo(maps);
 
 
+
+        maps.on('click', (e) => {
+            if (isAddingPolygon()) {
+                addPointToPolygon(e.latlng);
+            }
+        });
+
+        onCleanup(() => maps.off('click'));
 
 
     }
@@ -297,76 +298,60 @@ const GeoFecingAdd = () => {
 
     onMount(() => buildMap(mapDiv));
 
-    let polygon;
-
-    // Fungsi untuk menambahkan titik ke poligon dan mengupdate state
     function addPointToPolygon(latlng) {
-        setPolygonPoints([...polygonPoints(), latlng]);
-        updatePolygon(maps, polygon, polygonPoints());
+        setPolygonPoints(points => [...points, latlng]);
+        updateTempPolygon([...polygonPoints(), latlng]);
     }
 
-    function updatePolygon(map, polygon, points) {
-        if (polygon) {
-            map.removeLayer(polygon);
+
+    function updateTempPolygon(points) {
+        if (tempPolygon()) {
+            maps.removeLayer(tempPolygon());
         }
-        polygon = L.polygon(points, {
+        const newPolygon = L.polygon(points, {
             color: '#3b82f6c4',
             fillColor: '#3b82f6c4',
             fillOpacity: 0.5,
-        }).addTo(map);
+        }).addTo(maps);
+        setTempPolygon(newPolygon);
     }
 
-    // Listener untuk menambahkan titik ke poligon ketika peta diklik
-    createEffect(() => {
-        maps.on('click', function (e) {
-            addPointToPolygon(e.latlng);
-        });
-    })
+    // Toggle mode penambahan polygon
+    const toggleAddPolygonMode = () => {
+        if (!isAddingPolygon()) {
+            setIsAddingPolygon(true);
+        } else {
+            setIsAddingPolygon(false);
+            if (polygonPoints().length > 2) {
+                savePolygon();
+                setPolygonPoints([]);
+                if (tempPolygon()) {
+                    maps.removeLayer(tempPolygon());
+                    setTempPolygon(null);
+                }
+            }
+        }
+    };
+    // Menyimpan polygon yang telah dibuat ke dalam state
+    function savePolygon() {
+        const newPolygon = L.polygon(polygonPoints(), {
+            color: '#3b82f6c4',
+            fillColor: '#3b82f6c4',
+            fillOpacity: 0.5,
+        }).addTo(maps);
+
+        setPolygons([...polygons(), { polygon: newPolygon, title: `Polygon ${polygons().length + 1}` }]);
+    }
+
+    // Fungsi untuk menghapus polygon
+    function deletePolygon(index) {
+        const updatedPolygons = polygons().filter((_, i) => i !== index);
+        maps.removeLayer(polygons()[index].polygon); // Hapus polygon dari map
+        setPolygons(updatedPolygons);
+    }
 
 
     const [load, setload] = createSignal(false)
-
-    const html = (keyword, res) => {
-        function myFunction() {
-            // Put whatever code you want to run when the div is clicked here.
-            window.api.invoke("new_browser", res.maps)
-        }
-
-
-        return <div class="grid gap-2 relative text-[14px] overflow-auto">
-            <div class="flex gap-2">
-                <div class="font-bold">MSIDN</div>
-                <div>{keyword}</div>
-            </div>
-            <div class="flex gap-2">
-                <div class="font-bold">ALAMAT</div>
-                <div>{res.address}</div>
-            </div>
-
-            <div class="flex gap-2">
-                <div class="font-bold">DEVICE:</div>
-                <div>{res.device}</div>
-            </div>
-            <div class="flex gap-2">
-                <div class="font-bold">PROVIDER:</div>
-                <div>{res.provider}</div>
-            </div>
-            <div class="flex gap-2">
-                <div class="font-bold">IMEI:</div>
-                <div>{res.imei}</div>
-            </div>
-            <div class="flex gap-2">
-                <div class="font-bold">IMSI:</div>
-                <div>{res.imsi}</div>
-            </div>
-            <div class="flex gap-2 cursor-pointer" onClick={myFunction}>
-                <div class="font-bold">MAPS:</div>
-                <div class=" text-blue-400">{res.maps}</div>
-            </div>
-        </div>
-    }
-
-
 
 
     const onSubmit = async (e) => {
@@ -431,36 +416,9 @@ const GeoFecingAdd = () => {
         load()
     })
 
-    function moveToLocation(latitude, longitude) {
-        var newCenter = L.latLng(latitude, longitude);
-        maps.panTo(newCenter);
-        setTimeout(() => {
-            maps.setView([latitude, longitude], 15);
-        }, 500);
-    }
 
 
-    const marker = (data, keyword) => {
-        let items = data[0]
-        let res = items.response[0]
-
-
-        L.marker([res.lat, res.long], { icon: greenIcon }).addTo(maps)
-            .bindPopup(html(keyword, res))
-            .openPopup();
-
-        moveToLocation(res.lat, res.long)
-
-        setTimeout(() => {
-            if (items.active) {
-                maps.eachLayer(function (layer) {
-                    if (!!layer.toGeoJSON) {
-                        maps.removeLayer(layer);
-                    }
-                });
-            }
-        }, 500);
-    }
+ 
 
     const onStartTracking = async (e) => {
         e.preventDefault();
@@ -516,8 +474,8 @@ const GeoFecingAdd = () => {
     return <ContainerPages>
         <MenuTracking></MenuTracking>
         <div className="flex flex-1 flex-col py-2">
-            <CardBox className="grid grid-cols-9 flex-1 gap-4" title={"Add Schedule Target Geofencing"}>
-                <form onSubmit={onStartTracking} className="col-span-2 border-r-2 pr-4 border-primarry-2 flex flex-1 flex-col">
+            <CardBox className="flex flex-1 gap-4" title={"Add Scheduled Tracking"}>
+                <form onSubmit={onStartTracking} className="w-[450px] border-r-2 pr-4 border-primarry-2 flex  flex-col">
                     <div className={`grid ${open().showSchedule ? "grid-cols-1" : ""}  gap-2`}>
                         <div className="flex flex-col gap-4">
                             <div>
@@ -565,38 +523,10 @@ const GeoFecingAdd = () => {
                                         20 Seconds
                                     </option>
                                 </select>
-                                <FormControl>
 
-                                    {/* <RadioGroup
-                                        aria-labelledby="demo-radio-buttons-group-label"
-                                        defaultValue={group.controls.interval.value}
-                                        onChange={(d) => group.controls.interval.setValue(d.target.value)}
-                                        name="radio-buttons-group"
-                                    >
-                                        <FormControlLabel
-                                            value="0"
-                                            control={() => <Radio />}
-                                            label="Disabled"
-                                        />
-
-                                        <FormControlLabel
-                                            value="5"
-                                            control={() => <Radio />}
-                                            label="5 Second"
-                                        />
-                                        <FormControlLabel
-                                            value="10"
-                                            control={() => <Radio />}
-                                            label="10 Second"
-                                        />
-                                        <FormControlLabel value="15" control={() => <Radio />} label="15 Second" />
-                                        <FormControlLabel
-                                            value="30"
-                                            control={() => <Radio />}
-                                            label="30 Second"
-                                        />
-                                    </RadioGroup> */}
-                                </FormControl>
+                            </div>
+                            <div>
+                                <Button fullWidth variant="contained" color="secondary">SUBMIT</Button>
                             </div>
 
                         </div>}
@@ -604,19 +534,52 @@ const GeoFecingAdd = () => {
                     </div>
                 </form>
                 <div className="flex flex-col flex-1 col-span-6">
-                    <Tags label="LOCATION SOURCE"></Tags>
+                    <div className="flex gap-2 justify-between py-1">
+                        <Tags label="LOCATION SOURCE"></Tags>
+                        <div className="flex gap-2 items-center">
+                            <span>Tools : </span>
+                            <div>
+                                <Button variant="contained" color="secondary" onClick={activateCircleDraw}>
+                                    <CircleOutlined></CircleOutlined>
+                                </Button>
+                            </div>
+                            <div>
+                                <Button variant="contained" color="secondary" onClick={toggleAddPolygonMode}>
+                                    {isAddingPolygon() ? 'Stop Adding Polygon' : 'Start Adding Polygon'}
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
                     <CardFrame isLoading={isLoad} title={"MAPS"} className="flex-1 !p-0 flex flex-col">
                         <div className="flex-1">
                             <div className="w-full h-full relative">
                                 {/* <iframe className="w-full h-full" src="http://localhost:5000/serve-html/0"></iframe> */}
                                 <div ref={mapDiv} className="w-full h-full"></div>
-                                <div className="absolute right-0 top-0 p-4 z-[1000]">
-                                    <div className="p-1">
-                                        <Button variant="contained" color="secondary" onClick={activateCircleDraw}>
-                                            <svg fill="white" stroke="white" xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M760-600v-160H600v-80h240v240h-80ZM120-120v-240h80v160h160v80H120Zm0-320v-80h80v80h-80Zm0-160v-80h80v80h-80Zm0-160v-80h80v80h-80Zm160 0v-80h80v80h-80Zm160 640v-80h80v80h-80Zm0-640v-80h80v80h-80Zm160 640v-80h80v80h-80Zm160 0v-80h80v80h-80Zm0-160v-80h80v80h-80Zm0-160v-80h80v80h-80Z" /></svg>
-                                        </Button>
-                                    </div>
+
+                            </div>
+                        </div>
+                    </CardFrame>
+                </div>
+                <div className="w-[300px] flex flex-col ">
+                    <Tags label="History "></Tags>
+                    <CardFrame className={"flex-1"}>
+                        <div>
+                            <div className="flex justify-between items-center border-b border-primarry-2">
+                                <div className="flex gap-2"><PolylineOutlined fontSize="small"></PolylineOutlined>
+                                    <span>Polygon Area 10Km</span>
                                 </div>
+                                <IconButton color="error">
+                                    <Close fontSize="small"></Close>
+                                </IconButton>
+                            </div>
+                            <div className="flex justify-between items-center border-b border-primarry-2">
+                                <div className="flex gap-2 items-center">
+                                    <Circle fontSize="small"></Circle>
+                                    <span>Circle Area 20Km</span>
+                                </div>
+                                <IconButton color="error">
+                                    <Close fontSize="small"></Close>
+                                </IconButton>
                             </div>
                         </div>
                     </CardFrame>

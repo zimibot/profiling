@@ -200,7 +200,7 @@ const DirectTracking = () => {
     return <ContainerPages>
         <MenuTracking></MenuTracking>
         <div className="flex flex-1 flex-col py-2">
-            <CardBox className="grid grid-cols-9 flex-1 gap-4" title={"Single Target"}>
+            <CardBox className="grid grid-cols-9 flex-1 gap-4" title={"Scheduled Tracking"}>
                 <form onSubmit={onSubmit} className="col-span-3 border-r-2 pr-4 border-primarry-2 flex flex-1 flex-col">
                     <Tags label="CHECK POS MSISDN"></Tags>
                     <DefaultInput loading={load} type={"number"} placeholder={"MSISDN"} control={group.controls.search}></DefaultInput>
