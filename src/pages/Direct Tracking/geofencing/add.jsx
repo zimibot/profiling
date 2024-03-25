@@ -28,6 +28,7 @@ import axios from "axios";
 
 import io from "socket.io-client"
 import MenuTracking from "../menuTracking";
+import { useLocation } from "@solidjs/router";
 
 let maps
 
@@ -38,7 +39,7 @@ const GeoFecingAdd = () => {
     const [polygonPoints, setPolygonPoints] = createSignal([]);
 
     const [open, setOpen] = createSignal({
-        showSchedule: false,
+        showSchedule: true,
         openPopup: false
     });
 
@@ -57,8 +58,9 @@ const GeoFecingAdd = () => {
         }))
     }
 
+    const location = useLocation()
     const group = createFormGroup({
-        search: createFormControl("", {
+        search: createFormControl(location.pathname.split("/").pop(), {
             required: true,
         }),
         title: createFormControl("", { required: true }),
@@ -66,7 +68,7 @@ const GeoFecingAdd = () => {
         startTime: createFormControl("", { required: true }),
         endDate: createFormControl("", { required: true }),
         endTime: createFormControl("", { required: true }),
-        interval: createFormControl(0)
+        interval: createFormControl("")
     });
 
     var LeafIcon = L.Icon.extend({
@@ -469,6 +471,20 @@ const GeoFecingAdd = () => {
             ...value,
             keyword: value.search
         };
+
+
+        if (/^62\d{10,15}$/.test(value.search)) {
+            // Handle invalid number format
+
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "Invalid number format. Please use the Indonesian country code format (e.g., 6287654321)."
+            });
+
+        }
+
         setload(true)
         try {
             let data = await api().post("/checkpos/position", value);
@@ -500,35 +516,91 @@ const GeoFecingAdd = () => {
     return <ContainerPages>
         <MenuTracking></MenuTracking>
         <div className="flex flex-1 flex-col py-2">
-            <CardBox className="grid grid-cols-9 flex-1 gap-4" title={"Single Target"}>
-                <form onSubmit={onSubmit} className="col-span-3 border-r-2 pr-4 border-primarry-2 flex flex-1 flex-col">
-                    <Tags label="CHECK POS MSISDN"></Tags>
-                    <DefaultInput loading={load} type={"number"} placeholder={"MSISDN"} control={group.controls.search}></DefaultInput>
-                    <div className="relative flex flex-col flex-1">
-                        <Tags label="HISTORY CHECK POST "></Tags>
-                        <div className='flex flex-col relative flex-1'>
-                            <div className="px-4 space-y-4 absolute w-full h-full left-0 top-0 overflow-auto">
-                                {items() ? items().length === 0 ? "Data Not Found" : items()?.map((d, i) => {
-                                    return <div>
-                                        <div className="flex justify-between items-center bg-primarry-2 border-b pr-2 border-blue-400">
-                                            <div className="flex gap-2">
-                                                <div className="pl-2 py-2">
-                                                    <div>
-                                                        {d.title}
-                                                    </div>
-                                                    <div>
-                                                        {d.keyword}
-                                                    </div>
-
-                                                </div>
-                                            </div>
-                                            <div> {moment(d.timestamp).format("D/M/YY | HH:MM:SS")}</div>
-                                        </div>
-
-                                    </div>
-                                }) : "Loading..."}
+            <CardBox className="grid grid-cols-9 flex-1 gap-4" title={"Add Schedule Target Geofencing"}>
+                <form onSubmit={onStartTracking} className="col-span-2 border-r-2 pr-4 border-primarry-2 flex flex-1 flex-col">
+                    <div className={`grid ${open().showSchedule ? "grid-cols-1" : ""}  gap-2`}>
+                        <div className="flex flex-col gap-4">
+                            <div>
+                                <Tags label="TITLE TARGET"></Tags>
+                                <Input value={group.controls.title.value} required={group.controls.title.isRequired} onChange={a => group.controls.title.setValue(a.target.value)} class="bg-primarry-2 p-1" fullWidth sx={{ color: "white" }}></Input>
                             </div>
+                            <div>
+                                <Tags label="MSISDN"></Tags>
+                                <Input value={group.controls.search.value} required={group.controls.search.isRequired} onChange={a => group.controls.search.setValue(a.target.value)} class=" bg-primarry-2 p-1" fullWidth sx={{ color: "white" }}></Input>
+                            </div>
+                            {/* <div className="flex gap-4">
+                                <Button onClick={() => handleSchedule(false)} color={open().showSchedule ? "secondary" : "info"} variant={!open().showSchedule ? "contained" : "outlined"}>NOW</Button>
+                                <Button onClick={() => handleSchedule(true)} color={!open().showSchedule ? "secondary" : "info"} variant={open().showSchedule ? "contained" : "outlined"}>SCHEDULE</Button>
+                            </div> */}
                         </div>
+                        {open().showSchedule && <div className="flex flex-col gap-4">
+                            <div>
+                                <Tags label="START TIME DATE"></Tags>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <Input required={group.controls.startDate.isRequired} value={group.controls.startDate.value} onChange={(d) => group.controls.startDate.setValue(d.target.value)} fullWidth class="bg-primarry-2 p-1" sx={{ color: "white" }} type="date"></Input>
+                                    <Input required={group.controls.startTime.isRequired} value={group.controls.startTime.value} onChange={(d) => group.controls.startTime.setValue(d.target.value)} fullWidth class="bg-primarry-2 p-1" sx={{ color: "white" }} type="time"></Input>
+                                </div>
+                            </div>
+                            <div>
+                                <Tags label="END TIME DATE"></Tags>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <Input required={group.controls.endDate.isRequired} value={group.controls.endDate.value} onChange={(d) => group.controls.endDate.setValue(d.target.value)} fullWidth class="bg-primarry-2 p-1" sx={{ color: "white" }} type="date"></Input>
+                                    <Input required={group.controls.endTime.isRequired} value={group.controls.endTime.value} onChange={(d) => group.controls.endTime.setValue(d.target.value)} fullWidth class="bg-primarry-2 p-1" sx={{ color: "white" }} type="time"></Input>
+                                </div>
+                            </div>
+                            <div>
+                                <Tags label="INTERVAL"></Tags>
+
+                                <select value={group.controls.interval.value} className="w-full p-2 bg-primarry-2" onChange={(d) => group.controls.interval.setValue(d.target.value)}>
+                                    <option value={""}>
+                                        Select interval
+                                    </option>
+                                    <option value={"5"}>
+                                        5 Seconds
+                                    </option>
+                                    <option value={"10"}>
+                                        10 Seconds
+                                    </option>
+                                    <option value={"20"}>
+                                        20 Seconds
+                                    </option>
+                                </select>
+                                <FormControl>
+
+                                    {/* <RadioGroup
+                                        aria-labelledby="demo-radio-buttons-group-label"
+                                        defaultValue={group.controls.interval.value}
+                                        onChange={(d) => group.controls.interval.setValue(d.target.value)}
+                                        name="radio-buttons-group"
+                                    >
+                                        <FormControlLabel
+                                            value="0"
+                                            control={() => <Radio />}
+                                            label="Disabled"
+                                        />
+
+                                        <FormControlLabel
+                                            value="5"
+                                            control={() => <Radio />}
+                                            label="5 Second"
+                                        />
+                                        <FormControlLabel
+                                            value="10"
+                                            control={() => <Radio />}
+                                            label="10 Second"
+                                        />
+                                        <FormControlLabel value="15" control={() => <Radio />} label="15 Second" />
+                                        <FormControlLabel
+                                            value="30"
+                                            control={() => <Radio />}
+                                            label="30 Second"
+                                        />
+                                    </RadioGroup> */}
+                                </FormControl>
+                            </div>
+
+                        </div>}
+
                     </div>
                 </form>
                 <div className="flex flex-col flex-1 col-span-6">
@@ -551,105 +623,7 @@ const GeoFecingAdd = () => {
                 </div>
             </CardBox>
         </div>
-        <Dialog
-            open={open().openPopup}
-            onClose={handleClose}
-            maxWidth={"md"}
-            fullWidth
-            aria-labelledby="alert-dialog-title"
-            aria-describedby="alert-dialog-description"
-            sx={{
-                ".MuiPaper-root": {
-                    bgcolor: "#111",
-                    color: "white"
-                }
-            }}
 
-        >
-            <form onSubmit={onStartTracking} >
-
-                <DialogTitle id="alert-dialog-title">
-                    {"SELECT SCHEDULE OR RUN NOW ?"}
-                </DialogTitle>
-                <DialogContent >
-                    <DialogContentText sx={{ color: "white" }} id="alert-dialog-description">
-                        <div className={`grid ${open().showSchedule ? "grid-cols-2" : ""}  gap-2`}>
-                            <div className="flex flex-col gap-4">
-                                <div>
-                                    <Tags label="TITLE TARGET"></Tags>
-                                    <Input value={group.controls.title.value} required={group.controls.title.isRequired} onChange={a => group.controls.title.setValue(a.target.value)} class="bg-primarry-2 p-1" fullWidth sx={{ color: "white" }}></Input>
-                                </div>
-                                <div>
-                                    <Tags label="MSISDN"></Tags>
-                                    <Input value={group.controls.search.value} required={group.controls.search.isRequired} onChange={a => group.controls.search.setValue(a.target.value)} class=" bg-primarry-2 p-1" fullWidth sx={{ color: "white" }}></Input>
-                                </div>
-                                <div className="flex gap-4">
-                                    <Button onClick={() => handleSchedule(false)} color={open().showSchedule ? "secondary" : "info"} variant={!open().showSchedule ? "contained" : "outlined"}>NOW</Button>
-                                    <Button onClick={() => handleSchedule(true)} color={!open().showSchedule ? "secondary" : "info"} variant={open().showSchedule ? "contained" : "outlined"}>SCHEDULE</Button>
-                                </div>
-                            </div>
-                            {open().showSchedule && <div className="flex flex-col gap-4">
-                                <div>
-                                    <Tags label="START TIME DATE"></Tags>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <Input required={group.controls.startDate.isRequired} value={group.controls.startDate.value} onChange={(d) => group.controls.startDate.setValue(d.target.value)} fullWidth class="bg-primarry-2 p-1" sx={{ color: "white" }} type="date"></Input>
-                                        <Input required={group.controls.startTime.isRequired} value={group.controls.startTime.value} onChange={(d) => group.controls.startTime.setValue(d.target.value)} fullWidth class="bg-primarry-2 p-1" sx={{ color: "white" }} type="time"></Input>
-                                    </div>
-                                </div>
-                                <div>
-                                    <Tags label="END TIME DATE"></Tags>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <Input required={group.controls.endDate.isRequired} value={group.controls.endDate.value} onChange={(d) => group.controls.endDate.setValue(d.target.value)} fullWidth class="bg-primarry-2 p-1" sx={{ color: "white" }} type="date"></Input>
-                                        <Input required={group.controls.endTime.isRequired} value={group.controls.endTime.value} onChange={(d) => group.controls.endTime.setValue(d.target.value)} fullWidth class="bg-primarry-2 p-1" sx={{ color: "white" }} type="time"></Input>
-                                    </div>
-                                </div>
-                                <div>
-                                    <FormControl>
-                                        <Tags label="INTERVAL"></Tags>
-                                        <RadioGroup
-                                            aria-labelledby="demo-radio-buttons-group-label"
-                                            defaultValue={group.controls.interval.value}
-                                            onChange={(d) => group.controls.interval.setValue(d.target.value)}
-                                            name="radio-buttons-group"
-                                        >
-                                            <FormControlLabel
-                                                value="0"
-                                                control={() => <Radio />}
-                                                label="Disabled"
-                                            />
-
-                                            <FormControlLabel
-                                                value="5"
-                                                control={() => <Radio />}
-                                                label="5 Second"
-                                            />
-                                            <FormControlLabel
-                                                value="10"
-                                                control={() => <Radio />}
-                                                label="10 Second"
-                                            />
-                                            <FormControlLabel value="15" control={() => <Radio />} label="15 Second" />
-                                            <FormControlLabel
-                                                value="30"
-                                                control={() => <Radio />}
-                                                label="30 Second"
-                                            />
-                                        </RadioGroup>
-                                    </FormControl>
-                                </div>
-
-                            </div>}
-
-                        </div>
-
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button color="error" onClick={handleClose}>CANCEL</Button>
-                    <Button type="submit">Submit</Button>
-                </DialogActions>
-            </form>
-        </Dialog>
     </ContainerPages >
 }
 
