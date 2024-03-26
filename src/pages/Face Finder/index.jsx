@@ -12,7 +12,7 @@ import { OnSearch } from "../Deck Explorer/searchFrom"
 import { useNavigate } from "@solidjs/router"
 function calculateAge(birthDateString) {
     // Mengubah format tanggal dari "DD-MM-YYYY" ke "YYYY-MM-DD"
-    const parts = birthDateString.split("-");
+    const parts = birthDateString?.split("-");
     const formattedDateString = `${parts[2]}-${parts[1]}-${parts[0]}`;
 
     // Mengkonversi string tanggal yang sudah diformat ke objek Date
@@ -393,7 +393,7 @@ const FaceFinder = () => {
                                             </div>
                                             <div>
                                                 <div className="font-bold">{a.data.namaLgkp || "-"}</div>
-                                                <div className="text-[14px]">{a.data.jenisKlmin} <span className="text-[13px]">{`(${calculateAge(a.data.tglLhr)} tahun)`}</span></div>
+                                                {/* <div className="text-[14px]">{a.data.jenisKlmin} <span className="text-[13px]">{`(${calculateAge(a.data.tglLhr)} tahun)`}</span></div> */}
                                                 <div className="text-[12px] flex gap-2 items-center"><span><Home sx={{ fontSize: "12px" }}></Home></span> {a.data.kabName}</div>
                                             </div>
                                         </div>
