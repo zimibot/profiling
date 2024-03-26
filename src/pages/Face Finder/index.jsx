@@ -263,6 +263,12 @@ const FaceFinder = () => {
         console.log(resultData())
     })
 
+    const onViewGambar = (e) => {
+
+        console.log(e)
+
+    }
+
 
 
     return <ContainerPages>
@@ -347,7 +353,7 @@ const FaceFinder = () => {
                                             {s}
                                         </div>
                                         <div className="text-blue-400">
-                                            {s === "PHOTO" ? <img className=" h-20 object-contain" src={"data:image/png;base64," + resultDetail().data[s]}></img> : resultDetail().data[s]}
+                                            {s === "ID CARD PHOTO" ? <img onClick={onViewGambar} className=" h-20 object-contain" src={"data:image/png;base64," + resultDetail().data[s]}></img> : resultDetail().data[s]}
                                         </div>
                                     </div>
                                 })}
