@@ -1,7 +1,7 @@
 import { Close, Home, Upload } from "@suid/icons-material"
 import ContainerPages from ".."
 import { CardBox } from "../../component/cardBox"
-import { Button, Chip, CircularProgress, Divider, LinearProgress } from "@suid/material"
+import { Button, Chip, CircularProgress, Dialog, DialogContent, Divider, LinearProgress } from "@suid/material"
 import { api } from "../../helper/_helper.api"
 import Swal from "sweetalert2"
 import { createEffect, createSignal } from "solid-js"
@@ -48,6 +48,7 @@ const FaceFinder = () => {
     const [resultData, setResultData] = createSignal()
     const [resultLoading, setresultLoading] = createSignal()
     const [resultDetail, setResultDetail] = createSignal()
+    const [showPopup, setShowPopup] = createSignal()
     const radius = 70;
     const circumference = 2 * Math.PI * radius;
 
@@ -264,14 +265,39 @@ const FaceFinder = () => {
     })
 
     const onViewGambar = (e) => {
+        setShowPopup({
+            status: true,
+            src: e.target.src
+        })
 
-        console.log(e)
+    }
 
+    const onClosePopup = () => {
+        setShowPopup()
     }
 
 
 
     return <ContainerPages>
+
+        <Dialog
+
+            open={showPopup()?.status}
+            onClose={onClosePopup}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+        >
+            <DialogContent sx={{
+                background: "#222"
+            }}>
+                <div className="absolute right-0 top-0 p-4">
+                    <Button onClick={onClosePopup} variant="contained" color="warning">
+                        <Close></Close>
+                    </Button>
+                </div>
+                <img className="w-full object-contain" src={showPopup()?.src}></img>
+            </DialogContent>
+        </Dialog>
         <div className="flex flex-1 pt-4 gap-4">
             <div className="w-[500px] flex flex-col gap-4">
                 <div className="h-72 relative p-4 w-full bg-primarry-1">
@@ -353,7 +379,11 @@ const FaceFinder = () => {
                                             {s}
                                         </div>
                                         <div className="text-blue-400">
-                                            {s === "ID CARD PHOTO" ? <img onClick={onViewGambar} className=" h-20 object-contain" src={"data:image/png;base64," + resultDetail().data[s]}></img> : resultDetail().data[s]}
+                                            {s === "ID CARD PHOTO" ?
+                                                <Button class="!p-0">
+                                                    <img onClick={onViewGambar} className=" h-[100px] object-contain" src={"data:image/png;base64," + resultDetail().data[s]}></img>
+                                                </Button>
+                                                : resultDetail().data[s]}
                                         </div>
                                     </div>
                                 })}
