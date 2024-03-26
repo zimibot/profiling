@@ -11,8 +11,13 @@ import { useAppState } from "../../helper/_helper.context"
 import { OnSearch } from "../Deck Explorer/searchFrom"
 import { useNavigate } from "@solidjs/router"
 function calculateAge(birthDateString) {
+    // Memeriksa apakah birthDateString tidak ada atau null
+    if (!birthDateString) {
+        return "-";
+    }
+
     // Mengubah format tanggal dari "DD-MM-YYYY" ke "YYYY-MM-DD"
-    const parts = birthDateString?.split("-");
+    const parts = birthDateString.split("-");
     const formattedDateString = `${parts[2]}-${parts[1]}-${parts[0]}`;
 
     // Mengkonversi string tanggal yang sudah diformat ke objek Date
@@ -28,6 +33,7 @@ function calculateAge(birthDateString) {
 
     return age;
 }
+
 
 
 const FaceFinder = () => {
@@ -341,7 +347,7 @@ const FaceFinder = () => {
                                             {s}
                                         </div>
                                         <div className="text-blue-400">
-                                            {s === "FOTO" ? <img className=" h-20 object-contain" src={"data:image/png;base64," + resultDetail().data[s]}></img> : resultDetail().data[s]}
+                                            {s === "PHOTO" ? <img className=" h-20 object-contain" src={"data:image/png;base64," + resultDetail().data[s]}></img> : resultDetail().data[s]}
                                         </div>
                                     </div>
                                 })}
@@ -393,7 +399,7 @@ const FaceFinder = () => {
                                             </div>
                                             <div>
                                                 <div className="font-bold">{a.data.namaLgkp || "-"}</div>
-                                                {/* <div className="text-[14px]">{a.data.jenisKlmin} <span className="text-[13px]">{`(${calculateAge(a.data.tglLhr)} tahun)`}</span></div> */}
+                                                <div className="text-[14px]">{a.data.jenisKlmin} <span className="text-[13px]">{`(${calculateAge(a.data.tglLhr)} tahun)`}</span></div>
                                                 <div className="text-[12px] flex gap-2 items-center"><span><Home sx={{ fontSize: "12px" }}></Home></span> {a.data.kabName}</div>
                                             </div>
                                         </div>
