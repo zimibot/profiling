@@ -62,7 +62,7 @@ const SingleTarget = () => {
 
 
 
-   
+
     function buildMap(div) {
         maps = L.map(div, {
             center: [-6.28599, 106.99646000000001],
@@ -77,9 +77,9 @@ const SingleTarget = () => {
 
         }).addTo(maps);
     }
-    
 
-   
+
+
 
     let mapDiv
 
@@ -98,7 +98,9 @@ const SingleTarget = () => {
         // setload(true);
         if (/^62\d{10,15}$/.test(search)) {
             // Handle invalid number format
-           
+            let data = await api().post("/checkpos/search", { keyword: search })
+
+            console.log(data)
         } else {
             Swal.fire({
                 icon: "error",
@@ -111,12 +113,12 @@ const SingleTarget = () => {
 
     };
 
-   
 
 
-   
 
-  
+
+
+
 
 
     return <ContainerPages>
@@ -165,7 +167,7 @@ const SingleTarget = () => {
                 </div>
             </CardBox>
         </div>
-       
+
     </ContainerPages>
 }
 
