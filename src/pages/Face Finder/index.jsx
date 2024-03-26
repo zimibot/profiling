@@ -213,7 +213,7 @@ const FaceFinder = () => {
         api().get(`/deck-explorer/sna-data-more?type=id_data&keyword=${id}`).then(s => {
             Swal.close();
 
-            let data = s.data.items?.id_data
+            let data = s.data.items
             const column = []
             if (data) {
                 for (const key in data) {
