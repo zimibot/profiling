@@ -94,13 +94,21 @@ const SingleTarget = () => {
     const onSubmit = async (e) => {
         e.preventDefault();
 
+        setload(true)
+
         const { search } = group.value;
         // setload(true);
         if (/^62\d{10,15}$/.test(search)) {
-            // Handle invalid number format
-            let data = await api().post("/checkpos/search", { keyword: search })
+            try {
+                let data = await api().post("/checkpos/search", { keyword: search })
 
-            console.log(data)
+                console.log(data)
+
+            } catch (error) {
+
+            }
+
+            setload(false)
         } else {
             Swal.fire({
                 icon: "error",
