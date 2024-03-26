@@ -89,6 +89,14 @@ const SingleTarget = () => {
     const [load, setload] = createSignal(false)
 
 
+    createEffect(() => {
+        api().get("/checkpos/search").then(s => {
+            console.log(s)
+
+            setData(s.data.items)
+
+        })
+    })
 
 
     const onSubmit = async (e) => {
@@ -139,15 +147,12 @@ const SingleTarget = () => {
                     <div className="relative flex flex-col flex-1">
                         <Tags label="HISTORY CHECK POST "></Tags>
                         <div className='flex flex-col relative flex-1'>
-                            <div className="px-4 space-y-4 absolute w-full h-full left-0 top-0 overflow-auto">
+                            <div className="space-y-4 absolute w-full h-full left-0 top-0 overflow-auto">
                                 {items() ? items().length === 0 ? "Data Not Found" : items()?.map((d, i) => {
                                     return <div>
                                         <div className="flex justify-between items-center bg-primarry-2 border-b pr-2 border-blue-400">
                                             <div className="flex gap-2">
                                                 <div className="pl-2 py-2">
-                                                    <div>
-                                                        {d.title}
-                                                    </div>
                                                     <div>
                                                         {d.keyword}
                                                     </div>
