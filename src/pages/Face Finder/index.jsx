@@ -379,7 +379,7 @@ const FaceFinder = () => {
                                             {s}
                                         </div>
                                         <div className="text-blue-400">
-                                            {s === "ID CARD PHOTO" ?
+                                            {s === "ID CARD PHOTO" || s === "FOTO" ?
                                                 <Button class="!p-0">
                                                     <img onClick={onViewGambar} className=" h-[100px] object-contain" src={"data:image/png;base64," + resultDetail().data[s]}></img>
                                                 </Button>
