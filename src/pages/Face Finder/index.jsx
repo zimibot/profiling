@@ -1,4 +1,4 @@
-import { Close, Home, Upload } from "@suid/icons-material"
+import { Close, Home, Photo, Upload } from "@suid/icons-material"
 import ContainerPages from ".."
 import { CardBox } from "../../component/cardBox"
 import { Button, Chip, CircularProgress, Dialog, DialogContent, Divider, LinearProgress } from "@suid/material"
@@ -10,6 +10,7 @@ import { notify } from "../../component/notify"
 import { useAppState } from "../../helper/_helper.context"
 import { OnSearch } from "../Deck Explorer/searchFrom"
 import { useNavigate } from "@solidjs/router"
+import { GalleryData } from "./gallery"
 function calculateAge(birthDateString) {
     // Memeriksa apakah birthDateString tidak ada atau null
     if (!birthDateString) {
@@ -49,6 +50,7 @@ const FaceFinder = () => {
     const [resultLoading, setresultLoading] = createSignal()
     const [resultDetail, setResultDetail] = createSignal()
     const [showPopup, setShowPopup] = createSignal()
+    const [showGallery, setshowGallery] = createSignal()
     const radius = 70;
     const circumference = 2 * Math.PI * radius;
 
@@ -275,6 +277,7 @@ const FaceFinder = () => {
 
 
 
+
     return <ContainerPages>
         <Dialog
 
@@ -297,46 +300,55 @@ const FaceFinder = () => {
 
         <div className="flex flex-1 pt-4 gap-4">
             <div className="w-[500px] flex flex-col gap-4">
-                <div className="h-72 relative p-4 w-full bg-primarry-1">
-                    <Button disabled={isLoading()} class="w-full h-full !border-[2px] !border-dotted flex items-center justify-center relative">
-                        {previewImg() ? <img className=" h-full w-full object-contain" src={previewImg()}></img> : <div className="flex gap-2">
-                            <Upload></Upload>
-                            <div> UPLOAD YOUR IMAGE</div>
-                        </div>}
-
-                        {isLoading() && <div className="w-full h-full absolute bg-primarry-1 bg-opacity-75 flex items-center justify-center gap-2">
-                            <div className="flex gap-2 items-center flex-col">
-                                <span>Processing faces in the image</span>
-                                <div className="w-full"><LinearProgress color="warning" size={20}></LinearProgress></div>
-                            </div>
-                        </div>}
-
-                        <input disabled={isLoading()} id="myFileInput" onChange={onChangeFiles} className="absolute w-full h-full opacity-0" type="file"></input>
-                    </Button>
-
+                <div className=" gap-2 flex">
+                    <Button onClick={() => setshowGallery(false)} variant="contained" color={!showGallery() ? "info" : "secondary"} startIcon={<Upload></Upload>}>UPLOAD FOTO</Button>
+                    <Button onClick={() => setshowGallery(true)} variant="contained" color={showGallery() ? "info" : "secondary"} startIcon={<Photo></Photo>}>Gallery Photo</Button>
                 </div>
-
-                <div className="flex-1 overflow-auto relative flex flex-col">
-                    <div className="px-2">
-                        <div className="flex justify-between"><span>FACE{'(S)'} DETECTED</span> <span> {image() && `Total ${image()?.length || 0}`}</span></div>
-                        <Divider sx={{ borderColor: "#333" }}></Divider>
-                    </div>
-                    <div className="relative flex-1">
-                        <div className=" grid grid-cols-4 gap-3 absolute w-full h-full top-0 left-0 p-2 auto-rows-min"  >
-                            {image() ? image()?.length === 0 ? <div className="absolute w-full h-full flex items-center justify-center">We could not find a face!</div> : image().map(a => {
-                                return <Button onClick={() => onSelectimg(a.currentDir, a.baseurl, a.destCompareLink, a.baseTitle)} variant="contained" color={a?.active ? "info" : "secondary"} class=" h-[100px]  !p-2  w-full border-solid !border-b !border-blue-500">
-                                    <img className="object-contain w-full h-full" src={a.baseurl}></img>
-                                </Button>
-                            }) : isLoading() ? <Loading></Loading> : <div className="col-span-full flex justify-center items-center absolute w-full h-full">
-                                PLEASE UPLOAD YOUR IMAGE
+                {showGallery() ? <div className="flex-1 flex flex-col bg-primarry-1">
+                    <div className="p-4 border-b border-primarry-2 uppercase font-bold">For images that have already been found:</div>
+                </div> : <>
+                    <div className="h-72 relative p-4 w-full bg-primarry-1">
+                        <Button disabled={isLoading()} class="w-full h-full !border-[2px] !border-dotted flex items-center justify-center relative">
+                            {previewImg() ? <img className=" h-full w-full object-contain" src={previewImg()}></img> : <div className="flex gap-2">
+                                <Upload></Upload>
+                                <div> UPLOAD YOUR IMAGE</div>
                             </div>}
 
-                        </div>
+                            {isLoading() && <div className="w-full h-full absolute bg-primarry-1 bg-opacity-75 flex items-center justify-center gap-2">
+                                <div className="flex gap-2 items-center flex-col">
+                                    <span>Processing faces in the image</span>
+                                    <div className="w-full"><LinearProgress color="warning" size={20}></LinearProgress></div>
+                                </div>
+                            </div>}
+
+                            <input disabled={isLoading()} id="myFileInput" onChange={onChangeFiles} className="absolute w-full h-full opacity-0" type="file"></input>
+                        </Button>
 
                     </div>
-                </div>
+
+                    <div className="flex-1 overflow-auto relative flex flex-col">
+                        <div className="px-2">
+                            <div className="flex justify-between"><span>FACE{'(S)'} DETECTED</span> <span> {image() && `Total ${image()?.length || 0}`}</span></div>
+                            <Divider sx={{ borderColor: "#333" }}></Divider>
+                        </div>
+                        <div className="relative flex-1">
+                            <div className=" grid grid-cols-4 gap-3 absolute w-full h-full top-0 left-0 p-2 auto-rows-min"  >
+                                {image() ? image()?.length === 0 ? <div className="absolute w-full h-full flex items-center justify-center">We could not find a face!</div> : image().map(a => {
+                                    return <Button onClick={() => onSelectimg(a.currentDir, a.baseurl, a.destCompareLink, a.baseTitle)} variant="contained" color={a?.active ? "info" : "secondary"} class=" h-[100px]  !p-2  w-full border-solid !border-b !border-blue-500">
+                                        <img className="object-contain w-full h-full" src={a.baseurl}></img>
+                                    </Button>
+                                }) : isLoading() ? <Loading></Loading> : <div className="col-span-full flex justify-center items-center absolute w-full h-full">
+                                    PLEASE UPLOAD YOUR IMAGE
+                                </div>}
+
+                            </div>
+
+                        </div>
+                    </div>
+                </>}
+
             </div>
-            <CardBox title={"SELECTED FACE"} className=" flex-col relative flex gap-4 flex-1">
+            {showGallery() ? <GalleryData></GalleryData> : <CardBox title={"SELECTED FACE"} className=" flex-col relative flex gap-4 flex-1">
                 <div className="absolute w-full h-full left-0 top-0 p-4 flex gap-4 flex-1 flex-col">
                     {previewImgConvert() ? <>
                         <div className="flex-1 relative">
@@ -392,7 +404,8 @@ const FaceFinder = () => {
                     </div>
                 </div>}
 
-            </CardBox>
+            </CardBox>}
+
             <div className="w-[450px] flex flex-col">
                 <CardBox title={"RESULT "} className=" flex-col flex gap-4 flex-1">
                     <div className="relative flex-1">
