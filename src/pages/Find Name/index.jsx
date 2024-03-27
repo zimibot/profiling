@@ -82,9 +82,9 @@ const FindName = () => {
                 </div>
             </div>
             <CardBox title="Result">
-                <div className="grid grid-cols-2">
+                <div className="grid grid-cols-2 gap-2">
                     {detail() ? detail().columns.map(a => (
-                        <div className="flex">
+                        <div className="fle bg-primarry-2 p-2">
                             <div className="w-36">{a}</div>
                             <div>{a === "ID CARD PHOTO" ? <img className="w-[100px]" src={`data:image/jpeg;base64,${detail().data[a]}`}></img> : detail().data[a]}</div>
                         </div>)) : ""}
