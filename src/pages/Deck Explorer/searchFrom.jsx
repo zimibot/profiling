@@ -35,8 +35,7 @@ let dataSearch = [
     {
         label: "NAME",
         type: "teks",
-        value: "marked_profile",
-        disabled: true
+        value: "nama",
     },
     // {
     //     label: "PROFILE",
@@ -86,6 +85,12 @@ export const SearchForm = () => {
 
         try {
             let type = items().chois.value;
+
+            if (type === "nama") {
+                navi(`/find-name/${search}`)
+                return
+            }
+
             let data = { search, type, path: `/deck-explorer/search-result/database-information/${search}` };
             let postLogin = await OnSearch(data);
             let dataSearch = postLogin.data.items;

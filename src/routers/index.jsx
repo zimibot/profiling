@@ -49,6 +49,10 @@ export const route = [
         component: lazy(() => import("../pages/System Settings")),
       },
       {
+        path: "/find-name/:id",
+        component: lazy(() => import("../pages/Find Name")),
+      },
+      {
         path: "/direct-tracking",
         children: [
           {
