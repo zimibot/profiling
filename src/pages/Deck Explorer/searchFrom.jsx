@@ -86,8 +86,12 @@ export const SearchForm = () => {
         try {
             let type = items().chois.value;
 
+            console.log(type)
+
             if (type === "nama") {
-                navi(`/find-name/${search}`)
+                navi(`/deck-explorer/find-name/`)
+                navi(`/deck-explorer/find-name/${search}`, { replace: true, resolve: true })
+                setLoading(false);
                 return
             }
 

@@ -1,8 +1,11 @@
-const { default: ContainerPages } = require("..")
+import ContainerPages from ".."
+import { SearchForm } from "../Deck Explorer/searchFrom"
 
 const FindName = () => {
     return <ContainerPages>
-        tetser
+        <div className="py-4">
+            <SearchForm></SearchForm>
+        </div>
     </ContainerPages>
 }
 
