@@ -11,10 +11,21 @@ import { Button } from "@suid/material"
 const FindName = () => {
     const [data, setData] = createSignal()
     const [isLoading, setIsloading] = createSignal()
+    const [detail, setDetail] = createSignal()
 
     const onDetail = (id) => {
         api().get(`/deck-explorer/sna-data-more?type=id_data&keyword=${id}`).then(s => {
-            console.log(s)
+            console.log(s.data.items)
+
+            let columnsDetail = []
+
+            for (const key in s.data.items) {
+                columnsDetail.push(key)
+            }
+
+            setDetail({
+                columns: columnsDetail, data: s.data.items
+            })
         })
     }
 
@@ -71,7 +82,13 @@ const FindName = () => {
                 </div>
             </div>
             <CardBox title="Result">
-
+                <div className="grid grid-cols-2">
+                    {detail() ? detail().columns.map(a => (
+                        <div className="flex">
+                            <div className="w-36">{a}</div>
+                            <div>{a === "ID CARD PHOTO" ? <img className="w-[100px]" src={`data:image/jpeg;base64,${detail().data[a]}`}></img> : detail().data[a]}</div>
+                        </div>)) : ""}
+                </div>
             </CardBox>
         </div>
     </ContainerPages>
