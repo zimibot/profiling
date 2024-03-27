@@ -6,10 +6,17 @@ import { SearchForm } from "../Deck Explorer/searchFrom"
 import { api } from "../../helper/_helper.api"
 import { useLocation } from "@solidjs/router"
 import { Loading } from "../../component/loading"
+import { Button } from "@suid/material"
 
 const FindName = () => {
     const [data, setData] = createSignal()
     const [isLoading, setIsloading] = createSignal()
+
+    const onDetail = (id) => {
+        api().get(`/deck-explorer/sna-data-more?type=id_data&keyword=${id}`).then(s => {
+            console.log(s)
+        })
+    }
 
     const columns = [
         {
@@ -29,8 +36,13 @@ const FindName = () => {
             name: "PEKERJAAN",
         },
         {
-            label: "Save",
-            name: "function",
+            label: "",
+            function: (data) => {
+                console.log(data)
+                return <Button onClick={() => onDetail(data.NIK)} variant="contained" color="info">
+                    Detail
+                </Button>
+            }
         },
     ]
 
