@@ -1,8 +1,10 @@
-import { createSignal } from "solid-js"
+import { createEffect, createSignal } from "solid-js"
 import ContainerPages from ".."
 import { CardBox } from "../../component/cardBox"
 import { Tables } from "../../component/tables"
 import { SearchForm } from "../Deck Explorer/searchFrom"
+import { api } from "../../helper/_helper.api"
+import { useLocation } from "@solidjs/router"
 
 const FindName = () => {
     const [data, setData] = createSignal({
@@ -11,6 +13,15 @@ const FindName = () => {
                 category: "test"
             }
         ]
+    })
+
+    const location = useLocation()
+
+    createEffect(() => {
+        const path = location.pathname.split("/").pop()
+        api().get(`/deck-explorer/search_name?keyword=${path}`).then(a => {
+            console.log(a)
+        })
     })
     return <ContainerPages>
         <div className="py-4 flex gap-2 flex-1">
