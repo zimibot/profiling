@@ -276,7 +276,6 @@ const FaceFinder = () => {
 
 
     return <ContainerPages>
-
         <Dialog
 
             open={showPopup()?.status}
@@ -295,6 +294,7 @@ const FaceFinder = () => {
                 <img className="w-full object-contain" src={showPopup()?.src}></img>
             </DialogContent>
         </Dialog>
+
         <div className="flex flex-1 pt-4 gap-4">
             <div className="w-[500px] flex flex-col gap-4">
                 <div className="h-72 relative p-4 w-full bg-primarry-1">
@@ -440,8 +440,6 @@ const FaceFinder = () => {
                                             <Button onClick={() => onDetail(a.nik)} variant="contained" color="info">DETAIL</Button>
                                         </div>
                                     </div>
-
-
                                 </div>
                             }) : <div className="absolute w-full h-full top-0 left-0 flex items-center justify-center">
                                 NO RESULT</div> : resultLoading() ? <Loading></Loading> : <div className="absolute w-full h-full top-0 left-0 flex items-center justify-center">
