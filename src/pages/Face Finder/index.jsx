@@ -189,7 +189,7 @@ const FaceFinder = () => {
 
                 setResultData(a => ({ ...a, [previewImgConvert().baseTitle]: data }));
 
-
+                setisLoading(false)
                 setresultLoading(false)
             })
             .catch(error => {
@@ -198,6 +198,7 @@ const FaceFinder = () => {
 
                 setResultData()
                 setresultLoading(false)
+                setisLoading(false)
                 // Menampilkan notifikasi error
                 Swal.fire({
                     icon: 'error',

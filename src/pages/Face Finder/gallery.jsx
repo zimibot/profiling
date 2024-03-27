@@ -4,75 +4,80 @@ import { CardBox } from "../../component/cardBox";
 import { Button, CircularProgress } from "@suid/material";
 
 export const GalleryData = () => {
-    const [data, setData] = createSignal({ items: [], page: 1, totalPages: 0 });
-    const [isLoading, setIsLoading] = createSignal(false);
-    const [isEndOfGallery, setIsEndOfGallery] = createSignal(false);
-    let scrollContainer;
+    const [data, setData] = createSignal([]);
+    const [page, setPage] = createSignal(1);
+    const [loading, setLoading] = createSignal(false);
+    const [hasMore, setHasMore] = createSignal(true);
+    const [isError, setIsError] = createSignal(false)
 
-    const fetchGallery = (page) => {
-        setIsLoading(true);
-        api()
-            .get(`/deck-explorer/gallery?page=${page}&limit=15`)
-            .then((a) => {
-                setData((prev) => ({
-                    ...a.data,
-                    items: [...prev.items, ...a.data.items],
-                    page: a.data.page,
-                }));
-                setIsLoading(false);
-                if (a.data.page === a.data.totalPages) {
-                    setIsEndOfGallery(true);
-                }
-            });
+    let container = null; // Ref untuk container
+    let sentinel = null; // Ref untuk sentinel
+
+    const fetchData = async () => {
+        try {
+            if (!hasMore() || loading()) return;
+            setLoading(true);
+            const response = await api().get(`/deck-explorer/gallery?page=${page()}&limit=15`);
+            const sortedData = [...response.data.items].sort((a, b) => a.baseTitle.localeCompare(b.baseTitle));
+
+
+            setData(prevData => [...prevData, ...sortedData]);
+            setPage(page => page + 1);
+            setHasMore(response.data.nextPage !== null);
+            setLoading(false);
+        } catch (error) {
+            setIsError(true)
+        }
+
     };
 
+    createEffect(() => console.log(data()))
     createEffect(() => {
-        fetchGallery(data().page);
-    });
+        if (!container) return; // Pastikan container sudah di-ref sebelum membuat observer
 
-    createEffect(() => {
-        const handleScroll = () => {
-            if (scrollContainer) {
-                const bottom =
-                    scrollContainer.scrollHeight - scrollContainer.scrollTop ===
-                    scrollContainer.clientHeight;
-                if (bottom && !isLoading() && !isEndOfGallery()) {
-                    fetchGallery(data().page + 1);
+        const observer = new IntersectionObserver(
+            entries => {
+                if (entries[0].isIntersecting) {
+                    fetchData();
                 }
+            },
+            {
+                root: container, // Gunakan container sebagai root
+                threshold: 0.1
             }
-        };
+        );
 
-        scrollContainer.addEventListener("scroll", handleScroll);
+        if (sentinel) {
+            observer.observe(sentinel);
+        }
 
-        onCleanup(() => {
-            scrollContainer.removeEventListener("scroll", handleScroll);
-        });
+        onCleanup(() => observer.disconnect());
     });
 
+    const onActive = (id) => {
+        setData(w => w.map(s => ({
+            ...s,
+            active: s._id === id
+        })))
+    }
     return (
         <CardBox title="GALLERY" className="flex flex-col flex-1">
-            <div
-                className="relative flex-1 overflow-auto"
-                ref={scrollContainer}
-            >
-                <div className="w-full h-full absolute top-0">
-                    <div className="grid grid-cols-4 gap-4 p-4">
-                        {data().items.map((a) => (
-                            <Button key={a.id}>
-                                <img src={a.baseurl} alt="" />
+            <div className="relative flex-1">
+                {!isError() ? <div ref={el => container = el} className="flex flex-1 flex-col absolute w-full h-full left-0 top-0 overflow-auto">
+                    <div className="grid grid-cols-4 gap-4">
+                        {data().map((item) => (
+                            <Button variant={item.active ? "contained" : "text"} color="info" onClick={() => onActive(item._id)}>
+                                <img src={item.baseurl} alt="" />
                             </Button>
                         ))}
                     </div>
-                    {isEndOfGallery() ? (
-                        <div className="text-center p-2">No more galleries found.</div>
-                    ) : isLoading() ? (
-                        <div className="flex justify-center p-2">
-                            <CircularProgress title="Loading" size="20px" />
+                    {hasMore() && (
+                        <div ref={el => sentinel = el} className="flex justify-center p-2">
+                            {loading() && <CircularProgress title="Loading" size="20px" />}
                         </div>
-                    ) : (
-                        ""
                     )}
-                </div>
+                </div> : <div className="flex items-center justify-center absolute w-full h-full">Data Not Found</div>}
+
             </div>
         </CardBox>
     );
