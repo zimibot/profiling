@@ -235,9 +235,6 @@ const FaceFinder = () => {
             }
 
         })
-
-
-
     }
 
     const onAddMarkedProfile = async (id) => {
