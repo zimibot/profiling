@@ -15,7 +15,7 @@ import { createFormControl, createFormGroup } from "solid-forms";
 import { api } from "../../helper/_helper.api";
 import moment from "moment";
 import Swal from "sweetalert2";
-import { PinDrop } from "@suid/icons-material";
+import { ArrowRight, PinDrop } from "@suid/icons-material";
 import MenuTracking from "./menuTracking";
 import { Button } from "@suid/material";
 
@@ -26,7 +26,7 @@ let maps
 const SingleTarget = () => {
     const [isLoad, setIsload] = createSignal(false)
 
-    const [items, setData] = createSignal(null)
+    const [items, setItmes] = createSignal(null)
     const [iframeMaps, setIframeMaps] = createSignal(null)
 
     const [open, setOpen] = createSignal({
@@ -56,7 +56,7 @@ const SingleTarget = () => {
     });
 
 
-
+    let allMarkers
 
     function buildMap(div) {
         maps = L.map(div, {
@@ -71,6 +71,9 @@ const SingleTarget = () => {
             attribution: '',
 
         }).addTo(maps);
+
+        allMarkers = L.layerGroup().addTo(maps);
+
     }
 
 
@@ -87,7 +90,7 @@ const SingleTarget = () => {
         api().get("/checkpos/search").then(s => {
             console.log(s)
 
-            setData(s.data.items)
+            setItmes(s.data.items)
 
         })
         load()
@@ -150,7 +153,8 @@ const SingleTarget = () => {
 
     const Onmarker = (d) => {
 
-        console.log(d)
+        allMarkers.clearLayers();
+        
         var marker = L.marker([d.lat, d.long]).addTo(maps); // Menambahkan marker ke peta
 
         var popupText = `<b>MSISDN:</b> ${d.msisdn}<br>
@@ -166,11 +170,13 @@ const SingleTarget = () => {
 
         marker.bindPopup(popupText).openPopup();
 
+
         // Bergerak ke lokasi marker dan mengatur zoom level
         // Angka 13 adalah zoom level, bisa disesuaikan sesuai kebutuhan
         maps.setView([d.lat, d.long], 13);
+        allMarkers.addLayer(marker);
     }
-    const onSetMarker = (d) => {
+    const onSetMarker = (d, id) => {
         if (d.length === 0) {
             // Tampilkan notifikasi bahwa lokasi tidak ditemukan
             Swal.fire({
@@ -180,7 +186,12 @@ const SingleTarget = () => {
             });
         } else {
             d = d[0]; // Mengambil data pertama dari array jika ada
-            console.log(d)
+
+            setItmes(d => d.map(a => ({
+                ...a,
+                active: a._id === id
+            })))
+
             Onmarker(d); // Asumsikan Onmarker adalah fungsi yang sudah Anda definisikan sebelumnya
         }
     }
@@ -200,8 +211,8 @@ const SingleTarget = () => {
                         <div className='flex flex-col relative flex-1'>
                             <div className="space-y-4 absolute w-full h-full left-0 top-0 overflow-auto">
                                 {items() ? items().length === 0 ? "Data Not Found" : items()?.map((d, i) => {
-                                    return <div className="flex justify-between items-center bg-primarry-2 border-b  border-blue-400">
-                                        <Button onClick={() => onSetMarker(d.response)} fullWidth>
+                                    return <div className="flex justify-between items-center  border-b  border-blue-400">
+                                        <Button endIcon={<ArrowRight></ArrowRight>} color={d.active ? "info" : "secondary"} variant="contained" onClick={() => onSetMarker(d.response, d._id)} fullWidth>
                                             <div className="flex justify-between w-full items-center">
                                                 <div className="flex gap-2">
                                                     <div className="pl-2 py-2">
