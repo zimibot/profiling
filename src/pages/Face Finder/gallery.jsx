@@ -5,6 +5,7 @@ import { Button, CircularProgress } from "@suid/material";
 
 export const GalleryData = () => {
     const [data, setData] = createSignal([]);
+    const [uniq, setuniq] = createSignal([]);
     const [page, setPage] = createSignal(1);
     const [loading, setLoading] = createSignal(false);
     const [hasMore, setHasMore] = createSignal(true);
@@ -19,8 +20,6 @@ export const GalleryData = () => {
             setLoading(true);
             const response = await api().get(`/deck-explorer/gallery?page=${page()}&limit=15`);
             const sortedData = [...response.data.items].sort((a, b) => a.baseTitle.localeCompare(b.baseTitle));
-
-
             setData(prevData => [...prevData, ...sortedData]);
             setPage(page => page + 1);
             setHasMore(response.data.nextPage !== null);
@@ -31,7 +30,12 @@ export const GalleryData = () => {
 
     };
 
-    createEffect(() => console.log(data()))
+
+
+    createEffect(() => {
+        const unique = [...new Map(data().map(item => [item._id, item])).values()]
+        setuniq(unique)
+    })
     createEffect(() => {
         if (!container) return; // Pastikan container sudah di-ref sebelum membuat observer
 
@@ -65,7 +69,7 @@ export const GalleryData = () => {
             <div className="relative flex-1">
                 {!isError() ? <div ref={el => container = el} className="flex flex-1 flex-col absolute w-full h-full left-0 top-0 overflow-auto">
                     <div className="grid grid-cols-4 gap-4">
-                        {data().map((item) => (
+                        {uniq().map((item) => (
                             <Button variant={item.active ? "contained" : "text"} color="info" onClick={() => onActive(item._id)}>
                                 <img src={item.baseurl} alt="" />
                             </Button>
