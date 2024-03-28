@@ -70,8 +70,11 @@ export const GalleryData = () => {
                 {!isError() ? <div ref={el => container = el} className="flex flex-1 flex-col absolute w-full h-full left-0 top-0 overflow-auto">
                     <div className="grid grid-cols-4 gap-4">
                         {uniq().map((item) => (
-                            <Button variant={item.active ? "contained" : "text"} color="info" onClick={() => onActive(item._id)}>
+                            <Button class="relative !p-2" variant={item.active ? "contained" : "text"} color={item.active ? "warning" : "info"} onClick={() => onActive(item._id)}>
                                 <img src={item.baseurl} alt="" />
+                                <div className="absolute w-full bottom-0 px-2 py-2 bg-primarry-2">
+                                    <div className=" overflow-hidden text-ellipsis text-nowrap text-[12px]">{item.baseTitle}</div>
+                                </div>
                             </Button>
                         ))}
                     </div>
