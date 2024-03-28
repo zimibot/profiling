@@ -3,10 +3,10 @@ import { useAppState } from "../../../helper/_helper.context"
 import { mode } from "../../../helper/_helper.theme"
 import MenuTabs from "./menu"
 import logo from "../../../assets/images/logo_light.svg"
-import { createEffect, createSignal } from "solid-js"
-import axios from "axios";
-import { useBeforeLeave } from "@solidjs/router"
-import { api } from "../../../helper/_helper.api"
+// import { createEffect, createSignal } from "solid-js"
+// import axios from "axios";
+// import { useBeforeLeave } from "@solidjs/router"
+// import { api } from "../../../helper/_helper.api"
 
 export const Menu = () => {
     const [appStore] = useAppState()
@@ -26,7 +26,8 @@ export const Menu = () => {
             <div className={`border-b py-2 ${mode() === "dark" ? "border-b-[#222222]" : "border-b-[#aaa]"}  relative z-50`}>
                 <div className="flex  flex-wrap lg:gap-[25px]  items-center sm:flex-col lg:flex-row">
                     <div className="mb-4 lg:mb-0 text-[40px] w-48">
-                        <img className="w-full" src={logo}></img>
+                        {/* <img className="w-full" src={logo}></img> */}
+                        {/* BHARATA */}
                     </div>
                     {appStore().token ? <>
                         <MenuTabs></MenuTabs>

@@ -103,35 +103,21 @@ const SingleTarget = () => {
         if (/^62\d{10,15}$/.test(search)) {
             try {
                 let data = await api().post("/checkpos/search", { keyword: search });
-
-                // Success notification with location found message
-
-
-                let result = data.data.items.response[0]
-                console.log(result)
-                // Onmarker(result)
-
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Location Found!',
-                    text: 'The location details have been successfully retrieved.'
-                });
-
+                let result = data.data.items.response.pop()[0]
+                console.log(data.data.items)
+                if (result) {
+                    Onmarker(result);
+                }
             } catch (error) {
-                console.error(error);
-
-                // Notification for API or network error
+                console.log(error);
                 Swal.fire({
                     icon: 'error',
                     title: 'Data Retrieval Failed',
                     text: 'An error occurred while fetching the data. Please try again later.'
                 });
-
             }
-
             setload(false);
         } else {
-            // Notification for invalid number format
             Swal.fire({
                 icon: "error",
                 title: "Invalid Number Format",
@@ -139,6 +125,7 @@ const SingleTarget = () => {
             });
             setload(false);
         }
+
     };
 
 
@@ -193,11 +180,11 @@ const SingleTarget = () => {
             });
         } else {
             d = d[0]; // Mengambil data pertama dari array jika ada
-    
+            console.log(d)
             Onmarker(d); // Asumsikan Onmarker adalah fungsi yang sudah Anda definisikan sebelumnya
         }
     }
-    
+
 
 
 
